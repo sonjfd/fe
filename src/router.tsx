@@ -17,28 +17,70 @@ import Register from "./pages/auth/Register";
 import Attribute from "./components/admin/product/Attribute";
 import VariantList from "./pages/admin/VariantList";
 import AdminContactsPage from "./pages/admin/ContactList";
-
+import AccountPage from "./pages/users/AccountPage";
+import ProfilePage from "./pages/users/ProfilePage";
+import AddressPage from "./pages/users/AddressPage";
+import ChangePasswordPage from "./pages/users/ChangePasswordPage";
+import AddProductPage from "./components/admin/product/AddProduct";
+import ImagesList from "./pages/admin/ImagesList";
+import { NotFoundPage } from "./components/EcommerceErrorPages";
+import ProtectedRoute from "./ProtectedRoute";
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
-    element: <LayoutClient />,
+    element: (
+      <ProtectedRoute requireAuth={false}>
+        <LayoutClient />
+      </ProtectedRoute>
+    ),
     children: [
-      { index: true, element: <DSHStoreHome /> },
-      { path: "lien-he", element: <ContactPage /> },
+      {
+        index: true,
+        element: <DSHStoreHome />,
+      },
+      {
+        path: "lien-he",
+        element: <ContactPage />,
+      },
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
     ],
   },
   {
+    path: "/",
+    element: (
+      <ProtectedRoute>
+        <LayoutClient />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        path: "tai-khoan",
+        element: <AccountPage />,
+        children: [
+          { path: "ho-so", element: <ProfilePage /> },
+          { path: "dia-chi", element: <AddressPage /> },
+          { path: "doi-mat-khau", element: <ChangePasswordPage /> },
+        ],
+      },
+    ],
+  },
+  {
     path: "/admin",
-    element: <LayoutAdmin />,
+    element: (
+      <ProtectedRoute>
+        <LayoutAdmin />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <Dashboard /> },
 
       { path: "users", element: <UserList /> },
 
       { path: "products", element: <ProductList /> },
+      { path: "/admin/products/create", element: <AddProductPage /> },
       { path: "/admin/products/:id/attributes", element: <Attribute /> },
+      { path: "/admin/products/:id/images", element: <ImagesList /> },
 
       { path: "/admin/products/:id/variants/", element: <VariantList /> },
 
@@ -59,6 +101,7 @@ export const ROUTER = createBrowserRouter([
       // { path: "sliders/:id", element: <SliderDetail /> },     // active only
     ],
   },
+  { path: "*", element: <NotFoundPage traceId="ROUTE-404" showBack /> },
 ]);
 
 export default ROUTER;

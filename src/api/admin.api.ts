@@ -6,9 +6,15 @@ export const fetchChildCategories = async (): Promise<IChildCategory[]> => {
     return res.data!;
 };
 
-export const createProduct = (code: string, name: string, category: { id: string }) => {
+export const createProduct = (payload: {
+    code: string;
+    name: string;
+    description: string;
+    imgURL: string[];
+    category: { id: number };
+}) => {
     const backEndUrl = 'api/v1/admin/products';
-    return axios.post<IBackendRes<ICreateProduct>>(backEndUrl, { code, name, category })
+    return axios.post<IBackendRes<ICreateProduct>>(backEndUrl, payload)
 }
 
 export const fetchProducts = async (query: string): Promise<IProductTable[]> => {

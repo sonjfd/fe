@@ -95,7 +95,11 @@ export default function EditProductModal({
             Mã sản phẩm <span className="text-red-500">*</span>
           </label>
           <input
-            {...register("code", { required: "Không được bỏ trống" })}
+            {...register("code", {
+              required: "Không được bỏ trống",
+              validate: (value) =>
+                value.trim().length > 0 || "Không được chỉ nhập khoảng trắng",
+            })}
             className="w-full border rounded px-3 py-2"
             disabled={submitting}
           />
@@ -109,7 +113,11 @@ export default function EditProductModal({
             Tên sản phẩm <span className="text-red-500">*</span>
           </label>
           <input
-            {...register("name", { required: "Không được bỏ trống" })}
+            {...register("name", {
+              required: "Không được bỏ trống",
+              validate: (value) =>
+                value.trim().length > 0 || "Không được chỉ nhập khoảng trắng",
+            })}
             className="w-full border rounded px-3 py-2"
             disabled={submitting}
           />

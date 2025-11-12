@@ -22,7 +22,7 @@ export default function TableCategory() {
   const [size, setSize] = useState(10);
   const [name, setName] = useState("");
   const [parentOptions, setParentOptions] = useState<ICategoryRow[]>([]);
-  const [parentFilter, setParentFilter] = useState<string>(""); // "" = tất cả, "0" = chỉ cha, "<id>" = theo cha
+  const [parentFilter, setParentFilter] = useState<string>("");
 
   useEffect(() => {
     (async () => {
@@ -34,7 +34,6 @@ export default function TableCategory() {
   const query = useMemo(() => {
     let q = `page=${page}&size=${size}&sortField=createdAt&sortDirection=desc`;
     if (name) q += `&name=${encodeURIComponent(name)}`;
-    // backend của bạn có thể không nhận parentFilter, nên chỉ dùng client side filter nếu cần
     return q;
   }, [page, size, name]);
 
@@ -71,7 +70,7 @@ export default function TableCategory() {
     toast(
       ({ closeToast }) => (
         <div className="space-y-2">
-          <p>Bạn có chắc muốn xóa sản phẩm này?</p>
+          <p>Bạn có chắc muốn xóa danh mục này?</p>
           <div className="flex gap-2">
             <button
               className="px-3 py-1 rounded bg-red-600 text-white"
@@ -101,7 +100,7 @@ export default function TableCategory() {
   return (
     <div className="rounded-lg border border-neutral-200 bg-white">
       <div className="flex items-center justify-between border-b border-neutral-200 p-4">
-        <h2 className="text-lg font-semibold">Categories</h2>
+        <h2 className="text-lg font-semibold">Danh mục</h2>
         <button
           className="rounded-md border border-neutral-300 px-3 py-2 text-sm"
           onClick={() => setOpenCreate(true)}
@@ -173,7 +172,7 @@ export default function TableCategory() {
             }}
             className="h-[38px] rounded-md border border-neutral-300 px-3 py-2"
           >
-            Reset
+            Đặt lại
           </button>
         </div>
       </div>
@@ -253,14 +252,14 @@ export default function TableCategory() {
             disabled={meta.page <= 1 || loading}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
           >
-            Prev
+            Trước
           </button>
           <button
             className="rounded-md border border-neutral-300 px-3 py-1.5 disabled:opacity-50"
             disabled={rows.length < meta.size || loading}
             onClick={() => setPage((p) => p + 1)}
           >
-            Next
+            Sau
           </button>
         </div>
       </div>

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import AddProduct from "./AddProduct";
 import { deleteProduct, fetchProducts } from "@/api/admin.api";
 import { fetchChildCategories } from "@/api/admin.api";
 import { toast } from "react-toastify";
@@ -14,7 +13,6 @@ interface IChildCategory {
 export default function TableProduct() {
   const [rows, setRows] = useState<IProductTable[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [openModalAdd, setOpenModalAdd] = useState<boolean>(false);
   const [selectedProduct, serSelectedProduct] = useState<IProductTable | null>(
     null
   );
@@ -122,13 +120,12 @@ export default function TableProduct() {
   return (
     <div className="rounded-lg border border-neutral-200 bg-white">
       <div className="flex items-center justify-between border-b border-neutral-200 p-4">
-        <h2 className="text-lg font-semibold">Products</h2>
-        <button
-          className="rounded-md border border-neutral-300 px-3 py-2 text-sm"
-          onClick={() => setOpenModalAdd(true)}
-        >
-          + Thêm sản phẩm
-        </button>
+        <h2 className="text-lg font-semibold">Danh sách sản phẩm</h2>
+        <Link to={"/admin/products/create"}>
+          <button className="rounded-md border border-neutral-300 px-3 py-2 text-sm">
+            + Thêm sản phẩm
+          </button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-3 p-4 md:grid-cols-4">
@@ -187,7 +184,7 @@ export default function TableProduct() {
             onClick={resetFilter}
             className="rounded-md border border-neutral-300 px-3 py-2"
           >
-            Reset
+            Đặt lại
           </button>
         </div>
       </div>
@@ -239,6 +236,13 @@ export default function TableProduct() {
                       >
                         Biến thể
                       </Link>
+                      <Link
+                        to={`/admin/products/${p.id}/images`}
+                        className="rounded-md border border-neutral-300 px-3 py-1.5"
+                      >
+                        Ảnh
+                      </Link>
+
                       <button
                         className="rounded-md border border-neutral-300 px-3 py-1.5"
                         onClick={() => {
@@ -295,14 +299,14 @@ export default function TableProduct() {
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1 || loading}
           >
-            Prev
+            Trước
           </button>
           <button
             className="rounded-md border border-neutral-300 px-3 py-1.5 disabled:opacity-50"
             onClick={() => setPage((p) => p + 1)}
             disabled={!hasNext || loading}
           >
-            Next
+            Sau
           </button>
         </div>
       </div>
@@ -312,13 +316,6 @@ export default function TableProduct() {
           onClose={() => setOpenEditModal(false)}
           onSuccess={loadData}
           selectedProduct={selectedProduct}
-        />
-      )}
-
-      {openModalAdd && (
-        <AddProduct
-          onClose={() => setOpenModalAdd(false)}
-          onSuccess={loadData}
         />
       )}
     </div>

@@ -1,9 +1,9 @@
-import TableVariant from "@/components/admin/variant/TableVariant";
+import CreateVariants from "@/components/admin/variant/CreateVariant";
 
 const VariantList = () => {
   return (
     <>
-      <TableVariant />
+      <CreateVariants />
     </>
   );
 };

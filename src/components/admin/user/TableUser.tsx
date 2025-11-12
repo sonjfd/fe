@@ -57,11 +57,13 @@ export default function TableUser() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
+  const filtered = rows.filter((r) => +r.role.id !== 1);
+
   const handleDelete = (id: number) => {
     toast(
       ({ closeToast }) => (
         <div className="space-y-2">
-          <p>Bạn có chắc muốn xóa sản phẩm này?</p>
+          <p>Bạn có chắc muốn xóa người dùng này?</p>
           <div className="flex gap-2">
             <button
               className="px-3 py-1 rounded bg-red-600 text-white"
@@ -99,7 +101,7 @@ export default function TableUser() {
     <div className="rounded-lg border border-neutral-200 bg-white">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-neutral-200 p-4">
-        <h2 className="text-lg font-semibold">Users</h2>
+        <h2 className="text-lg font-semibold">Danh sách khách hàng</h2>
         <button
           onClick={() => setOpenCreate(true)}
           className="rounded-md border border-neutral-300 px-3 py-2 text-sm"
@@ -154,7 +156,7 @@ export default function TableUser() {
             onClick={resetFilter}
             className="h-[38px] rounded-md border border-neutral-300 px-3 py-2"
           >
-            Reset
+            Đặt lại
           </button>
         </div>
       </div>
@@ -176,14 +178,14 @@ export default function TableUser() {
 
           <tbody>
             {!loading &&
-              rows.map((u, idx) => (
+              filtered.map((u, idx) => (
                 <tr key={u.id} className="border-t">
                   <td className="px-4 py-3">{(page - 1) * size + idx + 1}</td>
                   <td className="px-4 py-3 font-medium">{u.fullName}</td>
                   <td className="px-4 py-3">{u.email}</td>
                   <td className="px-4 py-3">{u.phone}</td>
                   <td className="px-4 py-3">
-                    {u.role?.id === 1 ? "ADMIN" : "USER"}
+                    {u.role?.id === 1 ? "Admin" : "Khách hàng"}
                   </td>
                   <td className="px-4 py-3">
                     <span
@@ -259,14 +261,14 @@ export default function TableUser() {
             disabled={page === 1 || loading}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
           >
-            Prev
+            Trước
           </button>
           <button
             className="rounded-md border border-neutral-300 px-3 py-1.5 disabled:opacity-50"
             disabled={rows.length < meta.size || loading}
             onClick={() => setPage((p) => p + 1)}
           >
-            Next
+            Sau
           </button>
         </div>
       </div>

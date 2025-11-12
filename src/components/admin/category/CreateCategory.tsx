@@ -61,7 +61,12 @@ export default function CreateCategory({ onClose, onSuccess }: Props) {
             Tên <span className="text-red-500">*</span>
           </label>
           <input
-            {...register("name", { required: "Không được bỏ trống" })}
+            {...register("name", {
+              required: "Không được bỏ trống",
+              minLength: { value: 3, message: "Lớn hơn 3 kí tự" },
+              validate: (value) =>
+                value.trim().length > 0 || "Không được chỉ nhập khoảng trắng",
+            })}
             className="w-full border rounded px-3 py-2"
             placeholder="VD: Điện thoại"
           />

@@ -13,6 +13,7 @@ interface FormData {
 const Login = () => {
   const { setIsAuthenticated, setUser } = useCurrentApp();
   const [showPassword, setShowPassword] = useState<boolean>(false);
+
   const navigate = useNavigate();
   const {
     register,
@@ -28,10 +29,10 @@ const Login = () => {
       if (res.data) {
         const user = res.data.user;
         setIsAuthenticated(true);
-        setUser(user);
+        setUser(user as any);
         localStorage.setItem("access_token", res.data.access_token);
         console.log(user);
-        if (+user.role === 1) {
+        if (user.role === "ADMIN") {
           navigate("/admin");
         } else {
           navigate("/");

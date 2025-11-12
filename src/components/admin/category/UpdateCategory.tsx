@@ -78,7 +78,12 @@ export default function UpdateCategory({
             Tên <span className="text-red-500">*</span>
           </label>
           <input
-            {...register("name", { required: "Không được bỏ trống" })}
+            {...register("name", {
+              required: "Không được bỏ trống",
+              minLength: { value: 3, message: "Nhập lớn hơn 3 kí tự" },
+              validate: (value) =>
+                value.trim().length > 0 || "Không được chỉ nhập khoảng trắng",
+            })}
             className="w-full border rounded px-3 py-2"
           />
           {errors.name && (

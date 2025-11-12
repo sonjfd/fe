@@ -50,7 +50,12 @@ export default function CreateUser({ onClose, onSuccess }: Props) {
             Họ tên <span className="text-red-500">*</span>
           </label>
           <input
-            {...register("fullName", { required: "Bắt buộc" })}
+            {...register("fullName", {
+              required: "Vui lòng nhập tên",
+              minLength: { value: 3, message: "Tên lớn 3 kí tự" },
+              validate: (value) =>
+                value.trim().length > 0 || "Không được chỉ nhập khoảng trắng",
+            })}
             className="mt-1 w-full rounded border px-3 py-2"
           />
           {errors.fullName && (
@@ -63,7 +68,15 @@ export default function CreateUser({ onClose, onSuccess }: Props) {
             Email <span className="text-red-500">*</span>
           </label>
           <input
-            {...register("email", { required: "Bắt buộc" })}
+            {...register("email", {
+              required: "Bắt buộc",
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: "Email không hợp lệ",
+              },
+              validate: (value) =>
+                value.trim().length > 0 || "Không được chỉ nhập khoảng trắng",
+            })}
             className="mt-1 w-full rounded border px-3 py-2"
           />
           {errors.email && (
@@ -77,7 +90,14 @@ export default function CreateUser({ onClose, onSuccess }: Props) {
           </label>
           <input
             type="password"
-            {...register("password", { required: "Bắt buộc" })}
+            {...register("password", {
+              required: "Bắt buộc",
+              pattern: {
+                value: /^(?=.*[a-z])(?=.*[A-Z]).{6,}$/,
+                message:
+                  "Mật khẩu phải có tối thiểu 6 ký tự, gồm ít nhất 1 chữ thường và 1 chữ hoa",
+              },
+            })}
             className="mt-1 w-full rounded border px-3 py-2"
           />
           {errors.password && (
@@ -89,7 +109,13 @@ export default function CreateUser({ onClose, onSuccess }: Props) {
           <div>
             <label className="text-sm font-medium">SĐT</label>
             <input
-              {...register("phone")}
+              {...register("phone", {
+                required: "Vui long nhập số điện thoại",
+                pattern: {
+                  value: /^0\d{9,10}$/,
+                  message: "Số điện thoại bắt đầu bằng 0,đủ 10 kí tự",
+                },
+              })}
               className="mt-1 w-full rounded border px-3 py-2"
             />
           </div>
@@ -101,30 +127,7 @@ export default function CreateUser({ onClose, onSuccess }: Props) {
             >
               <option value="MALE">Nam</option>
               <option value="FEMALE">Nữ</option>
-              <option value="OTHER">Khác</option>
             </select>
-          </div>
-        </div>
-
-        <div className="grid gap-3 md:grid-cols-2">
-          <div>
-            <label className="text-sm font-medium">Trạng thái</label>
-            <select
-              {...register("status")}
-              className="mt-1 w-full rounded border px-3 py-2"
-            >
-              <option value="ACTIVE">ACTIVE</option>
-              <option value="NOT_ACTIVE">NOT_ACTIVE</option>
-              <option value="BAN">BAN</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-sm font-medium">Role ID</label>
-            <input
-              type="number"
-              {...register("role.id", { valueAsNumber: true })}
-              className="mt-1 w-full rounded border px-3 py-2"
-            />
           </div>
         </div>
 
