@@ -12,7 +12,7 @@ export const registerApi = (fullName: string, email: string, password: string, p
 
 export const fetchAccountAPI = () => {
     const urlBackend = "/api/v1/auth/account";
-    return axios.get<IBackendRes<IContext>>(urlBackend)
+    return axios.get<IBackendRes<IAccount>>(urlBackend)
 }
 
 export const logoutApi = () => {

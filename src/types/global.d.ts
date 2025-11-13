@@ -32,6 +32,18 @@ declare global {
 
 
   export interface IContext {
+    id: number;
+    fullName: string;
+    email: string;
+    phone: string;
+    avatar: string;
+    status: IUserStatus;
+    gender: IGender;
+    role: string
+
+  }
+
+  export interface IAccount {
     user: {
       id: number;
       fullName: string;

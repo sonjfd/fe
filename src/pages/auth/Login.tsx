@@ -28,11 +28,12 @@ const Login = () => {
 
       if (res.data) {
         const user = res.data.user;
+        console.log(user);
         setIsAuthenticated(true);
         setUser(user as any);
         localStorage.setItem("access_token", res.data.access_token);
-        console.log(user);
         if (user.role === "ADMIN") {
+          console.log(user.role);
           navigate("/admin");
         } else {
           navigate("/");

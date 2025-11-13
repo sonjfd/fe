@@ -195,11 +195,13 @@ export const AppHeader: React.FC = () => {
     useCurrentApp();
   const navigate = useNavigate(); // Next.js: const router = useRouter()
 
+  console.log(user);
+
   // Map dữ liệu IUser của bạn -> UserView hiển thị
   const userView: UserView | null =
     isAuthenticated && user
       ? {
-          name: user.fullName ?? user.fullName ?? "User",
+          name: user.fullName,
           avatarUrl: user.avatar ?? avatarDefault,
         }
       : null;

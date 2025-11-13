@@ -94,8 +94,6 @@ const ProtectedRoute = ({ children, requireAuth = true }: IProps) => {
 
   const path = location.pathname;
   const isAdminPath = path.startsWith("/admin");
-  console.log(isAdminPath);
-  console.log(12312312321);
 
   // Tạm coi "đang tải user" nếu: có token nhưng chưa có user
   const isLoading = isAppLoading ?? (isAuthenticated && !user);
@@ -122,7 +120,7 @@ const ProtectedRoute = ({ children, requireAuth = true }: IProps) => {
   }
 
   // Chuẩn hoá role string
-  const rawRole = (user?.user?.role as Role | undefined) ?? "";
+  const rawRole = (user?.role as Role | undefined) ?? "";
   const role = rawRole.trim().toLowerCase(); // "admin" | "customer" | ""
   const isAdminRole = role === "admin";
 
