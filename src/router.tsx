@@ -26,6 +26,7 @@ import ImagesList from "./pages/admin/ImagesList";
 import { NotFoundPage } from "./components/EcommerceErrorPages";
 import ProtectedRoute from "./ProtectedRoute";
 import GoogleOAuthHandler from "./pages/auth/GoogleOAuthHandler";
+import UpdatePasswordPage from "./pages/auth/UpdatePasswordPage";
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
@@ -44,6 +45,7 @@ export const ROUTER = createBrowserRouter([
         element: <ContactPage />,
       },
       { path: "/oauth2/callback", element: <GoogleOAuthHandler /> },
+      { path: "/update-password", element: <UpdatePasswordPage /> },
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
     ],

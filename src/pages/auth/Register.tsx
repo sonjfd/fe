@@ -107,8 +107,9 @@ const Register = () => {
             {...register("phone", {
               required: "Vui lòng nhập số điện thoại",
               pattern: {
-                value: /^0\d{9,10}$/,
-                message: "Số điện thoại bắt đầu bằng 0 và đủ 10-11 kí tự",
+                value: /^(0\d{9,10}|(\+84)\d{8,9})$/,
+                message:
+                  "Số điện thoại phải bắt đầu bằng 0 hoặc +84 và có độ dài hợp lệ",
               },
             })}
           />

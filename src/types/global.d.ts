@@ -53,6 +53,7 @@ declare global {
       status: IUserStatus;
       gender: IGender;
       role: string
+      provider: string
     }
   }
 

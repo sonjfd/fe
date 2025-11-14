@@ -45,9 +45,9 @@ export default function UpdateUser({ user, onClose, onSuccess }: Props) {
             {...register("status")}
             className="mt-1 w-full rounded border px-3 py-2"
           >
-            <option value="ACTIVE">ACTIVE</option>
-            <option value="NOT_ACTIVE">NOT_ACTIVE</option>
-            <option value="BAN">BAN</option>
+            <option value="ACTIVE">Đang hoạt động</option>
+            <option value="NOT_ACTIVE">Chưa kích hoạt</option>
+            <option value="BAN">Bị khoá</option>
           </select>
         </div>
 
