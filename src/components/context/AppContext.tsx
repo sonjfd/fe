@@ -19,6 +19,7 @@ export const AppProvider = (props: TProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<IContext | null>(null);
   const [isAppLoading, setIsAppLoading] = useState<boolean>(true);
+  // const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAccount = async () => {
@@ -26,6 +27,9 @@ export const AppProvider = (props: TProps) => {
       if (res.data) {
         setUser(res.data.user);
         setIsAuthenticated(true);
+        // if (res.data.user.role === "ADMIN") {
+        //   navigate("/admin");
+        // }
       }
       setIsAppLoading(false);
     };

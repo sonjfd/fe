@@ -136,10 +136,10 @@ export default function UploadImagesModal({
           <button
             disabled={uploading}
             onClick={handleUpload}
-            className={`px-5 py-2 rounded-md font-medium text-white ${
+            className={`px-5 py-2 rounded-md font-medium text-black ${
               uploading
                 ? "bg-white cursor-not-allowed"
-                : "bg-white rounded  border border-neutral-300 text-black px-4 py-2  hover:bg-neutral-50"
+                : "bg-white rounded  border border-neutral-300  px-4 py-2  hover:bg-neutral-50"
             }`}
           >
             {uploading ? "Đang tải..." : "Tải ảnh lên"}
