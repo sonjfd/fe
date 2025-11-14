@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import axios from "services/axios.customize";
 import UpdateVariantModal from "./UpdateVariant";
@@ -37,6 +37,8 @@ export default function VariantTable({
   }>({ page: 1, size: 10, total: 0 });
 
   const [editing, setEditing] = useState<ListItemRes | null>(null);
+  const [inputValue, setInputValue] = useState(page);
+  const inputRef = useRef<number | null>(null);
 
   const query = useMemo(() => {
     return `page=${page}&size=${size}`;
@@ -219,6 +221,35 @@ export default function VariantTable({
           >
             Trước
           </button>
+
+          <input
+            type="number"
+            value={inputValue}
+            min={1}
+            max={meta.total}
+            onChange={(e) => {
+              const raw = e.target.value;
+
+              if (raw === "") {
+                setInputValue(NaN);
+                return;
+              }
+
+              const num = Number(raw);
+              setInputValue(num);
+
+              if (inputRef.current) clearTimeout(inputRef.current);
+
+              inputRef.current = window.setTimeout(() => {
+                if (!isNaN(num) && num >= 1) {
+                  setPage(num);
+                }
+              }, 500);
+            }}
+            className="w-16 rounded-md border border-neutral-300 px-2 
+            py-1.5 text-center outline-none focus:border-blue-600 
+            focus:ring-2 focus:ring-blue-600/20"
+          />
           <button
             className="rounded-md border border-neutral-300 px-3 py-1.5 disabled:opacity-50"
             disabled={page >= totalPages || loading}

@@ -244,8 +244,8 @@ export const AppHeader: React.FC = () => {
               <path d="M4 6H20M4 12H20M4 18H20" />
             </svg>
           </button>
-          <a
-            href="/"
+          <Link
+            to="/"
             className="flex items-center gap-3 font-extrabold text-xl tracking-tight"
           >
             <img
@@ -256,7 +256,7 @@ export const AppHeader: React.FC = () => {
             <span className="text-slate-900 font-black leading-none tracking-wide">
               DSH <span className="font-semibold text-slate-600">STORE</span>
             </span>
-          </a>
+          </Link>
         </div>
 
         <div className="hidden md:flex flex-1 max-w-2xl">
