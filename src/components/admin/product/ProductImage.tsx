@@ -73,12 +73,6 @@ export default function ProductImage() {
     }
   };
 
-  const onPickReplace = (img: IProductImage) => {
-    const ref = fileRefMap.current[img.id];
-    if (!ref) return;
-    ref.click();
-  };
-
   const onDelete = async (id: number) => {
     toast(
       ({ closeToast }) => (
@@ -156,14 +150,6 @@ export default function ProductImage() {
               </div>
 
               <div className="space-y-2 p-3">
-                <div className="text-sm font-semibold">ID: {img.id}</div>
-
-                <input
-                  className="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
-                  value={img.url}
-                  readOnly
-                />
-
                 <div className="flex flex-wrap gap-2 pt-1">
                   <a
                     href={img.url}
@@ -173,13 +159,6 @@ export default function ProductImage() {
                   >
                     Xem
                   </a>
-
-                  <button
-                    onClick={() => onPickReplace(img)}
-                    className="rounded-md border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-50"
-                  >
-                    Đổi ảnh
-                  </button>
 
                   <button
                     onClick={() => onDelete(img.id)}
