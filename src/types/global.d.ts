@@ -175,12 +175,12 @@ declare global {
     newPassword: string;        // * bắt buộc (≥8, có hoa/thường/ký tự đặc biệt)
   }
 
-  
-  
+
+
 
 
   // HOME CATEGORY
-    interface IHomeCategory {
+  interface IHomeCategory {
     id: number;
     name: string;
     description?: string | null;
@@ -195,18 +195,18 @@ declare global {
   }
 
   interface ISlider {
-  id: number;
-  title: string;
-  description: string;
-  imageUrl: string;
-  redirectUrl: string;
-  position: number;
-  active: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+    id: number;
+    title: string;
+    description: string;
+    imageUrl: string;
+    redirectUrl: string;
+    position: number;
+    active: boolean;
+    createdAt: string;
+    updatedAt: string;
+  }
 
-interface IWishlistItem {
+  interface IWishlistItem {
     wishlistId: number;
     productId: number;
     productName: string;
@@ -219,47 +219,59 @@ interface IWishlistItem {
   }
 
   interface IHomeProductVariant {
-  variantId: number;
-  variantName: string;
-  productName: string;
-  price: number;
-  stock: number;
-  sold: number;
-  thumbnailUrl: string | null;
-}
+    variantId: number;
+    variantName: string;
+    productName: string;
+    price: number;
+    stock: number;
+    sold: number;
+    thumbnailUrl: string | null;
+  }
 
-interface IHomeCategorySection {
-  categoryId: number;
-  categoryName: string;
-  variants: IHomeProductVariant[];
-}
+  interface IHomeCategorySection {
+    categoryId: number;
+    categoryName: string;
+    variants: IHomeProductVariant[];
+  }
 
 
 
-interface IWishlistProductVariant extends IHomeProductVariant {
-  wishlistId: number;
-}
+  interface IWishlistProductVariant extends IHomeProductVariant {
+    wishlistId: number;
+  }
 
-    interface IAddress {
-        id: number;
-        fullName: string;
-        phone: string;
-        province: string;
-        district: string;
-        ward: string;
-        addressDetail: string;
-        isDefault: boolean;
-        createdAt: string;
-    }
+  interface VariantFilter {
+    id: number;
+    name: string;
+    sku: string;
+    price: number;
+    sold: number
+    stock: number;
+    thumbnail: string;
+  }
 
-    interface IUpsertAddressReq {
-        fullName: string;
-        phone: string;
-        province: string;
-        district: string;
-        ward: string;
-        addressDetail: string;
-        isDefault?: boolean;
-    }
+
+
+  interface IAddress {
+    id: number;
+    fullName: string;
+    phone: string;
+    province: string;
+    district: string;
+    ward: string;
+    addressDetail: string;
+    isDefault: boolean;
+    createdAt: string;
+  }
+
+  interface IUpsertAddressReq {
+    fullName: string;
+    phone: string;
+    province: string;
+    district: string;
+    ward: string;
+    addressDetail: string;
+    isDefault?: boolean;
+  }
 
 }
