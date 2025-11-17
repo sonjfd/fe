@@ -54,12 +54,7 @@ export const removeFromWishlistApi = async (
   return res;
 };
 
-export const fetchHomeSections = async (): Promise<IHomeCategorySection[]> => {
-  const res = await axios.get<IBackendRes<IHomeCategorySection[]>>(
-    "/api/v1/home/sections"
-  );
-  return res.data ?? [];
-};
+
 
 
 

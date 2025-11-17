@@ -5,6 +5,7 @@ import { useCurrentApp } from "../context/AppContext";
 import { logoutApi } from "@/api/auth.api";
 import { toSlug } from "@/utils/slug";
 import avatarDefault from "@/assets/img/avatar-default.png";
+import { NavLink } from "react-router-dom";
 
 // ---------- util ----------
 type ClassValue = string | false | null | undefined;
@@ -38,6 +39,11 @@ export const TopStrip: React.FC = () => (
 );
 
 // ---------- Category nav ----------
+const menu = [
+  { label: "TRANG CHỦ", path: "/" },
+  { label: "GIỚI THIỆU", path: "/gioi-thieu" },
+  { label: "LIÊN HỆ", path: "/lien-he" },
+];
 export const CategoryNavBar: React.FC = () => (
   <div className="border-t border-slate-200">
     <Container>
