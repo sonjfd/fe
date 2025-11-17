@@ -9,12 +9,15 @@ interface VariantAttributes {
   name: string;
   value: string;
 }
+
 interface ListItemRes {
   id: number;
+  name: string;
   sku: string;
   price: number;
   stock: number;
   sold: number;
+  thumbnail: string;
   attributes: VariantAttributes[];
 }
 
@@ -104,19 +107,13 @@ export default function VariantTable({
     );
   };
 
-  const renderCombination = (atts: VariantAttributes[]) =>
-    atts?.map((x) => x.value).join(" / ");
-
-  // tính tổng số trang để disable nút Next hợp lý
   const totalPages = Math.max(1, Math.ceil(meta.total / meta.size));
 
   return (
     <div className="rounded-lg border border-neutral-200 bg-white">
-      {/* Header */}
       <div className="flex items-center justify-between border-b border-neutral-200 p-4">
         <h3 className="text-base font-semibold">Danh sách biến thể hiện có</h3>
 
-        {/* Chọn số bản ghi mỗi trang */}
         <div className="flex items-center gap-2 text-sm">
           <span>Kích thước trang:</span>
           <select
@@ -136,13 +133,13 @@ export default function VariantTable({
         </div>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto p-2">
         <table className="w-full text-sm">
           <thead className="bg-neutral-50 text-neutral-700 font-semibold">
             <tr>
               <th className="px-4 py-2 text-left">Stt</th>
-              <th className="px-4 py-2 text-left">Combination</th>
+              <th className="px-4 py-2 text-left">Ảnh</th>
+              <th className="px-4 py-2 text-left">Tên</th>
               <th className="px-4 py-2 text-left">SKU</th>
               <th className="px-4 py-2 text-left">Giá</th>
               <th className="px-4 py-2 text-left">Tồn kho</th>
@@ -156,9 +153,21 @@ export default function VariantTable({
                 <tr key={v.id} className="border-t">
                   <td className="px-4 py-3">{(page - 1) * size + idx + 1}</td>
 
-                  <td className="px-4 py-3 font-medium">
-                    {renderCombination(v.attributes)}
+                  <td className="px-4 py-3">
+                    {v.thumbnail ? (
+                      <img
+                        src={v.thumbnail}
+                        alt={v.name}
+                        className="h-12 w-12 rounded object-cover border border-neutral-200"
+                      />
+                    ) : (
+                      <span className="text-xs text-neutral-400">
+                        Không có ảnh
+                      </span>
+                    )}
                   </td>
+
+                  <td className="px-4 py-3">{v.name}</td>
                   <td className="px-4 py-3">{v.sku}</td>
                   <td className="px-4 py-3">{v.price}</td>
                   <td className="px-4 py-3">{v.stock}</td>
@@ -186,7 +195,7 @@ export default function VariantTable({
               <tr>
                 <td
                   className="px-4 py-6 text-center text-neutral-500"
-                  colSpan={7}
+                  colSpan={8}
                 >
                   Đang tải…
                 </td>
@@ -197,7 +206,7 @@ export default function VariantTable({
               <tr>
                 <td
                   className="px-4 py-6 text-center text-neutral-500"
-                  colSpan={7}
+                  colSpan={8}
                 >
                   Chưa có biến thể
                 </td>
@@ -207,7 +216,6 @@ export default function VariantTable({
         </table>
       </div>
 
-      {/* Pagination */}
       <div className="flex items-center justify-between p-4 text-sm">
         <div>
           Trang <b>{meta.page}</b> / <b>{totalPages}</b> • Tổng{" "}
@@ -226,7 +234,7 @@ export default function VariantTable({
             type="number"
             value={inputValue}
             min={1}
-            max={meta.total}
+            max={totalPages}
             onChange={(e) => {
               const raw = e.target.value;
 
@@ -241,7 +249,7 @@ export default function VariantTable({
               if (inputRef.current) clearTimeout(inputRef.current);
 
               inputRef.current = window.setTimeout(() => {
-                if (!isNaN(num) && num >= 1) {
+                if (!isNaN(num) && num >= 1 && num <= totalPages) {
                   setPage(num);
                 }
               }, 500);
@@ -260,7 +268,6 @@ export default function VariantTable({
         </div>
       </div>
 
-      {/* Modal update */}
       {editing && (
         <UpdateVariantModal
           value={editing}

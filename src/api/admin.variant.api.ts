@@ -8,6 +8,7 @@ interface Item {
     values: Value[];
     price: number;
     stock: number;
+    name: string;
 
 }
 
@@ -17,10 +18,13 @@ interface PlayLoadVariant {
 
 interface ListItemRes {
     id: number;
+
+    name: string
     sku: string;
     price: number;
     stock: number;
     sold: number;
+    thumbnail: string
     attributes: VariantAttributes[]
 
 }

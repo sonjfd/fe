@@ -60,3 +60,30 @@ export const fetchHomeSections = async (): Promise<IHomeCategorySection[]> => {
   );
   return res.data ?? [];
 };
+
+
+
+export const fetchHomeProducts = async (
+  page = 1,
+  size = 50
+): Promise<IModelPaginate<IHomeProductVariant>> => {
+  const res = await axios.get<
+    IBackendRes<IModelPaginate<IHomeProductVariant>>
+  >("/api/v1/home/products", {
+    params: { page, size },
+  });
+
+  return (
+    res.data ?? {
+      page,
+      size,
+      total: 0,
+      items: [],
+    }
+  );
+};
+
+
+export const fetchVariantByCategory = (id: number) => {
+  return axios.get<IBackendRes<IModelPaginate<VariantFilter>>>(`api/v1/category/${id}`)
+}
