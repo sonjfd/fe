@@ -112,8 +112,9 @@ export default function CreateUser({ onClose, onSuccess }: Props) {
               {...register("phone", {
                 required: "Vui long nhập số điện thoại",
                 pattern: {
-                  value: /^0\d{9,10}$/,
-                  message: "Số điện thoại bắt đầu bằng 0,đủ 10 kí tự",
+                  value: /^(0\d{9,10}|(\+84)\d{8,9})$/,
+                  message:
+                    "Số điện thoại phải bắt đầu bằng 0 hoặc +84 và có độ dài hợp lệ",
                 },
               })}
               className="mt-1 w-full rounded border px-3 py-2"

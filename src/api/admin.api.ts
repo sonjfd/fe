@@ -17,10 +17,10 @@ export const createProduct = (payload: {
     return axios.post<IBackendRes<ICreateProduct>>(backEndUrl, payload)
 }
 
-export const fetchProducts = async (query: string): Promise<IProductTable[]> => {
+export const fetchProducts = async (query: string) => {
     const backEndUrl = `api/v1/admin/products?${query}`
     const res = await axios.get<IBackendRes<IModelPaginate<IProductTable>>>(backEndUrl);
-    return res.data?.items ?? [];
+    return res.data;
 };
 
 export const updateProduct = async (id: number, code: string, name: string, category: { id: string }) => {

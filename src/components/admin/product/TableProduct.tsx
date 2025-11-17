@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { deleteProduct, fetchProducts } from "@/api/admin.api";
 import { fetchChildCategories } from "@/api/admin.api";
@@ -18,6 +18,8 @@ export default function TableProduct() {
   );
   const [openEditModal, setOpenEditModal] = useState<boolean>(false);
 
+  const [meta, setMeta] = useState({ page: 1, size: 10, total: 0 });
+
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
   const [name, setName] = useState<string>("");
@@ -28,6 +30,11 @@ export default function TableProduct() {
   const [hasNext, setHasNext] = useState<boolean>(false);
 
   const [childCategories, setChildCategories] = useState<IChildCategory[]>([]);
+  const [inputValue, setInputValue] = useState(page);
+  const inputRef = useRef<number | null>(null);
+
+  const searchRef = useRef<number | null>(null);
+  const [searchValue, setSearchValue] = useState("");
 
   const query = useMemo(() => {
     let q = `page=${page}&size=${size}&sortField=${encodeURIComponent(
@@ -46,8 +53,13 @@ export default function TableProduct() {
     try {
       setLoading(true);
       const data = await fetchProducts(query);
-      setRows(data);
-      setHasNext(data.length === size);
+      setRows(data?.items ?? []);
+      setHasNext(data?.items.length === size);
+      setMeta({
+        page: data?.page as number,
+        size: data?.size as number,
+        total: data?.total as number,
+      });
     } finally {
       setLoading(false);
     }
@@ -101,6 +113,7 @@ export default function TableProduct() {
   const resetFilter = () => {
     setName("");
     setCateId("");
+    setSearchValue("");
     setPage(1);
     setSize(10);
     setSortField("createdAt");
@@ -132,9 +145,14 @@ export default function TableProduct() {
         <div className="col-span-1">
           <label className="block text-sm mb-1">Tìm theo tên</label>
           <input
-            value={name}
+            type="text"
+            value={searchValue}
             onChange={(e) => {
-              setName(e.target.value);
+              setSearchValue(e.target.value);
+              if (searchRef.current) clearTimeout(searchRef.current);
+              searchRef.current = window.setTimeout(() => {
+                setName(e.target.value);
+              }, 300);
               setPage(1);
             }}
             className="w-full rounded border px-3 py-2"
@@ -291,7 +309,7 @@ export default function TableProduct() {
       {/* Pagination */}
       <div className="flex items-center justify-between p-4">
         <div className="text-sm text-neutral-600">
-          Trang <b>{page}</b>
+          Trang <b>{meta.page}</b>/<b>{meta.total}</b>
         </div>
         <div className="flex gap-2">
           <button
@@ -301,6 +319,31 @@ export default function TableProduct() {
           >
             Trước
           </button>
+          <input
+            type="number"
+            value={inputValue}
+            min={1}
+            max={meta.total}
+            onChange={(e) => {
+              const raw = e.target.value;
+              if (raw === "") {
+                setInputValue(NaN);
+                return;
+              }
+              const num = +raw;
+              setInputValue(num);
+
+              if (inputRef.current) {
+                clearTimeout(inputRef.current);
+              }
+              inputRef.current = window.setTimeout(() => {
+                if (!isNaN(num) && num >= 1) {
+                  setPage(num);
+                }
+              }, 500);
+            }}
+            className="w-16 rounded-md border border-neutral-300 px-2 py-1.5 text-center outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
+          />
           <button
             className="rounded-md border border-neutral-300 px-3 py-1.5 disabled:opacity-50"
             onClick={() => setPage((p) => p + 1)}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { deleteUser, fetchUsers } from "@/api/admin.api";
 import CreateUser from "./CreateUser";
@@ -21,6 +21,11 @@ export default function TableUser() {
   const [openCreate, setOpenCreate] = useState(false);
   const [editing, setEditing] = useState<IUser | null>(null);
   const [viewing, setViewing] = useState<IUser | null>(null);
+  const [inputValue, setInputValue] = useState(page);
+  const inputRef = useRef<number | null>(null);
+
+  const searchRef = useRef<number | null>(null);
+  const [searchValue, setSearchValue] = useState("");
 
   const toIsoStart = (d: string) =>
     d ? new Date(`${d}T00:00:00Z`).toISOString() : "";
@@ -29,7 +34,7 @@ export default function TableUser() {
 
   const query = useMemo(() => {
     let s = `page=${page}&size=${size}`;
-    if (name) s += `&name=${encodeURIComponent(name)}`;
+    if (name) s += `&email=${encodeURIComponent(name)}`;
     if (from) s += `&fromDate=${encodeURIComponent(toIsoStart(from))}`;
     if (to) s += `&toDate=${encodeURIComponent(toIsoEnd(to))}`;
     return s;
@@ -93,6 +98,7 @@ export default function TableUser() {
     setName("");
     setFrom("");
     setTo("");
+    setSearchValue("");
     setPage(1);
     setSize(10);
   };
@@ -112,18 +118,22 @@ export default function TableUser() {
 
       {/* Filters */}
       <div className="grid gap-3 p-4 md:grid-cols-4">
-        {/* <div className="col-span-1">
+        <div className="col-span-1">
           <label className="mb-1 block text-sm">Tìm theo tên</label>
           <input
-            value={name}
+            value={searchValue}
             onChange={(e) => {
-              setName(e.target.value);
+              setSearchValue(e.target.value);
+              if (searchRef.current) clearTimeout(searchRef.current);
+              searchRef.current = window.setTimeout(() => {
+                setName(e.target.value);
+              }, 500);
               setPage(1);
             }}
             className="w-full rounded border px-3 py-2"
             placeholder="Nhập tên người dùng"
           />
-        </div> */}
+        </div>
 
         <div className="col-span-1">
           <label className="mb-1 block text-sm">Từ ngày</label>
@@ -170,7 +180,7 @@ export default function TableUser() {
               <th className="px-4 py-2 text-left">Họ tên</th>
               <th className="px-4 py-2 text-left">Email</th>
               <th className="px-4 py-2 text-left">SĐT</th>
-              <th className="px-4 py-2 text-left">Role</th>
+              <th className="px-4 py-2 text-left">Vai trò</th>
               <th className="px-4 py-2 text-left">Trạng thái</th>
               <th className="px-4 py-2 text-left">Thao tác</th>
             </tr>
@@ -197,7 +207,11 @@ export default function TableUser() {
                           : "bg-neutral-100 text-neutral-700"
                       }`}
                     >
-                      {u.status}
+                      {u.status === "ACTIVE"
+                        ? "Đang hoạt động"
+                        : u.status === "NOT_ACTIVE"
+                        ? "Chưa kích hoạt"
+                        : "Đã bị khoá"}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -253,9 +267,11 @@ export default function TableUser() {
       {/* Pagination */}
       <div className="flex items-center justify-between p-4 text-sm">
         <div>
-          Trang <b>{meta.page}</b> • Tổng <b>{meta.total}</b>
+          Trang <b>{meta.page}</b>/<b>{meta.total}</b>
         </div>
-        <div className="flex gap-2">
+
+        <div className="flex items-center gap-2">
+          {/* Nút trước */}
           <button
             className="rounded-md border border-neutral-300 px-3 py-1.5 disabled:opacity-50"
             disabled={page === 1 || loading}
@@ -263,6 +279,37 @@ export default function TableUser() {
           >
             Trước
           </button>
+
+          <input
+            type="number"
+            value={inputValue}
+            min={1}
+            max={meta.total}
+            onChange={(e) => {
+              const raw = e.target.value;
+
+              if (raw === "") {
+                setInputValue(NaN);
+                return;
+              }
+
+              const num = Number(raw);
+              setInputValue(num);
+
+              if (inputRef.current) clearTimeout(inputRef.current);
+
+              inputRef.current = window.setTimeout(() => {
+                if (!isNaN(num) && num >= 1) {
+                  setPage(num);
+                }
+              }, 500);
+            }}
+            className="w-16 rounded-md border border-neutral-300 px-2 
+            py-1.5 text-center outline-none focus:border-blue-600 
+            focus:ring-2 focus:ring-blue-600/20"
+          />
+
+          {/* Nút sau */}
           <button
             className="rounded-md border border-neutral-300 px-3 py-1.5 disabled:opacity-50"
             disabled={rows.length < meta.size || loading}

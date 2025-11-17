@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import CreateCategory from "./CreateCategory";
 import UpdateCategory from "./UpdateCategory";
@@ -23,6 +23,11 @@ export default function TableCategory() {
   const [name, setName] = useState("");
   const [parentOptions, setParentOptions] = useState<ICategoryRow[]>([]);
   const [parentFilter, setParentFilter] = useState<string>("");
+  const [inputValue, setInputValue] = useState(page);
+  const inputRef = useRef<number | null>(null);
+
+  const searchRef = useRef<number | null>(null);
+  const [searchValue, setSearchValue] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -114,9 +119,13 @@ export default function TableCategory() {
         <div>
           <label className="mb-1 block text-sm">Tìm theo tên</label>
           <input
-            value={name}
+            value={searchValue}
             onChange={(e) => {
-              setName(e.target.value);
+              setSearchValue(e.target.value);
+              if (searchRef.current) clearTimeout(searchRef.current);
+              searchRef.current = window.setTimeout(() => {
+                setName(e.target.value);
+              }, 300);
               setPage(1);
             }}
             className="w-full rounded border px-3 py-2"
@@ -167,6 +176,7 @@ export default function TableCategory() {
             onClick={() => {
               setName("");
               setParentFilter("");
+              setSearchValue("");
               setPage(1);
               setSize(10);
             }}
@@ -244,7 +254,7 @@ export default function TableCategory() {
       {/* Pagination */}
       <div className="flex items-center justify-between p-4 text-sm">
         <div>
-          Trang <b>{meta.page}</b> • Tổng <b>{meta.total}</b>
+          Trang <b>{meta.page}</b> / <b>{meta.total}</b>
         </div>
         <div className="flex gap-2">
           <button
@@ -254,6 +264,35 @@ export default function TableCategory() {
           >
             Trước
           </button>
+
+          <input
+            type="number"
+            value={inputValue}
+            min={1}
+            max={meta.total}
+            onChange={(e) => {
+              const raw = e.target.value;
+
+              if (raw === "") {
+                setInputValue(NaN);
+                return;
+              }
+
+              const num = Number(raw);
+              setInputValue(num);
+
+              if (inputRef.current) clearTimeout(inputRef.current);
+
+              inputRef.current = window.setTimeout(() => {
+                if (!isNaN(num) && num >= 1) {
+                  setPage(num);
+                }
+              }, 500);
+            }}
+            className="w-16 rounded-md border border-neutral-300 px-2 
+            py-1.5 text-center outline-none focus:border-blue-600 
+            focus:ring-2 focus:ring-blue-600/20"
+          />
           <button
             className="rounded-md border border-neutral-300 px-3 py-1.5 disabled:opacity-50"
             disabled={rows.length < meta.size || loading}
