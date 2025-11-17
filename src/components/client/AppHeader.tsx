@@ -105,7 +105,7 @@ const AccountMenu: React.FC<{
             className="h-8 w-8 rounded-full object-cover border border-slate-200"
           />
           <span className="hidden sm:block text-sm text-slate-700">
-            {userView.name.split(" ")[0]}
+            {userView.name}
           </span>
           <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden>
             <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" />
@@ -191,7 +191,7 @@ const AccountMenu: React.FC<{
 
 // ---------- Header ----------
 export const AppHeader: React.FC = () => {
-  const { user, isAuthenticated, setUser, setIsAuthenticated } =
+  const { user, isAuthenticated, setUser, setIsAuthenticated, wishlistCount, setWishlistCount } =
     useCurrentApp();
   const navigate = useNavigate(); // Next.js: const router = useRouter()
 
@@ -220,6 +220,7 @@ export const AppHeader: React.FC = () => {
     } finally {
       setUser(null);
       setIsAuthenticated(false);
+      setWishlistCount(0);   
       navigate("/"); // optional
     }
   };
@@ -287,7 +288,27 @@ export const AppHeader: React.FC = () => {
             onLogin={handleLogin}
             onLogout={handleLogout}
           />
-
+          <Link
+            to="/wishlist" // tạm, sau này bạn làm route riêng
+            aria-label="Sản phẩm yêu thích"
+            className="relative text-slate-700 hover:text-indigo-700"
+          >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            aria-hidden
+          >
+            <path d="M12 21s-6.716-4.438-9-8.25C1.32 10.12 2.5 6 6.5 6c2 0 3.5 1.5 3.5 1.5S11.5 6 13.5 6C17.5 6 18.68 10.12 21 12.75 18.716 16.562 12 21 12 21z" />
+          </svg>
+          {wishlistCount > 0 && (
+            <span className="absolute -right-2 -top-2 rounded-full bg-rose-600 text-white text-[10px] px-1.5">
+              {wishlistCount}
+            </span>
+          )}
+        </Link>
           <a
             href="#"
             aria-label="Giỏ hàng"

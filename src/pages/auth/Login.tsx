@@ -1,4 +1,4 @@
-import { loginApi } from "@/api/auth.api";
+import { fetchAccountAPI, loginApi } from "@/api/auth.api";
 import { useCurrentApp } from "@/components/context/AppContext";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -11,7 +11,7 @@ interface FormData {
   password: string;
 }
 const Login = () => {
-  const { setIsAuthenticated, setUser } = useCurrentApp();
+  const { setIsAuthenticated, setUser, reloadWishlistCount} = useCurrentApp();
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const navigate = useNavigate();
@@ -27,13 +27,13 @@ const Login = () => {
       const res = await loginApi(email, password);
 
       if (res.data) {
-        const user = res.data.user;
-        console.log(user);
-        setIsAuthenticated(true);
-        setUser(user as any);
         localStorage.setItem("access_token", res.data.access_token);
-        if (user.role === "ADMIN") {
-          console.log(user.role);
+        const acc = await fetchAccountAPI();
+        setUser(acc.data?.user as any);
+        setIsAuthenticated(true);
+        await reloadWishlistCount();
+
+        if (acc.data?.user?.role === "ADMIN") {
           navigate("/admin");
         } else {
           navigate("/");

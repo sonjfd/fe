@@ -1,0 +1,62 @@
+import axios from "services/axios.customize";
+
+const BASE_URL = "api/v1"
+
+export const fetchHomeCategories = async (): Promise<IHomeCategory[]> => {
+  const url = `${BASE_URL}/categories`;
+  const res = await axios.get<IBackendRes<IHomeCategory[]>>(url);
+  return res.data ?? [];
+};
+
+export const fetchSliders = async (): Promise<ISlider[]> => {
+  const res = await axios.get<IBackendRes<ISlider[]>>("/api/v1/sliders");
+  return res.data ?? [];
+};
+
+export const fetchMyWishlist = async (
+  page = 1,
+  size = 10,
+  sortBy = "createdAt",
+  sortDir: "asc" | "desc" = "desc"
+): Promise<IModelPaginate<IWishlistItem>> => {
+  const res = await axios.get<IBackendRes<IModelPaginate<IWishlistItem>>>(
+    `${BASE_URL}/wishlists`,
+    {
+      params: { page, size, sortBy, sortDir },
+    }
+  );
+  // axios.customize đã trả về .data
+  return (res.data as IModelPaginate<IWishlistItem>) ?? {
+    page,
+    size,
+    total: 0,
+    items: [],
+  };
+};
+
+export const addToWishlistApi = async (
+  productVariantId: number
+): Promise<IBackendRes<null>> => {
+  const res = await axios.post<IBackendRes<null>>(
+    `${BASE_URL}/wishlists`,
+    { productVariantId }
+  );
+  return res;
+};
+
+
+export const removeFromWishlistApi = async (
+  productVariantId: number
+): Promise<IBackendRes<null>> => {
+  const res = await axios.delete<IBackendRes<null>>(
+    `${BASE_URL}/wishlists/${productVariantId}`
+  );
+  return res;
+};
+
+export const fetchHomeSections = async (): Promise<IHomeCategorySection[]> => {
+  const res = await axios.get<IBackendRes<IHomeCategorySection[]>>(
+    "/api/v1/home/sections"
+  );
+  return res.data ?? [];
+};

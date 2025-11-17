@@ -10,8 +10,8 @@ import { AppProvider } from "./components/context/AppContext";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AppProvider>
-      <RouterProvider router={ROUTER} />
-      <ToastContainer position="top-right" autoClose={2500} />
+        <RouterProvider router={ROUTER} />
+        <ToastContainer position="top-right" autoClose={2500} />
     </AppProvider>
   </StrictMode>
 );

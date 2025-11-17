@@ -23,8 +23,11 @@ import AddressPage from "./pages/users/AddressPage";
 import ChangePasswordPage from "./pages/users/ChangePasswordPage";
 import AddProductPage from "./components/admin/product/AddProduct";
 import ImagesList from "./pages/admin/ImagesList";
-import { NotFoundPage } from "./components/EcommerceErrorPages";
+
 import ProtectedRoute from "./ProtectedRoute";
+import NotFoundPage from "./components/NotFoundPage";
+import AdminSlidersPage from "./pages/admin/SliderList";
+import { WishlistPage } from "./pages/users/WishlistPage";
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
@@ -54,6 +57,7 @@ export const ROUTER = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
+      { path: "wishlist", element: <WishlistPage /> },
       {
         path: "tai-khoan",
         element: <AccountPage />,
@@ -97,11 +101,11 @@ export const ROUTER = createBrowserRouter([
       // { path: "purchase-orders", element: <PurchaseOrderList /> },
       // { path: "purchase-orders/:id", element: <PurchaseOrderDetail /> }, // active only
 
-      // { path: "sliders", element: <SliderList /> },
+      { path: "sliders", element: <AdminSlidersPage /> },
       // { path: "sliders/:id", element: <SliderDetail /> },     // active only
     ],
   },
-  { path: "*", element: <NotFoundPage traceId="ROUTE-404" showBack /> },
+  { path: "*", element: <NotFoundPage /> },
 ]);
 
 export default ROUTER;
