@@ -130,7 +130,7 @@ declare global {
     parentId: number | null;
   }
 
-  //CONTACT 
+  //CONTACT
   type ContactStatus = 'PENDING' | 'READ' | 'RESOLVED';
 
 
@@ -227,4 +227,67 @@ declare global {
     gender: IGender;
     role: { id: number };
   }
+
+  // HOME CATEGORY
+    interface IHomeCategory {
+    id: number;
+    name: string;
+    description?: string | null;
+    deleted: boolean;
+    parentId: number | null;
+    children: IChildCategory[];
+
+    createdAt: string;
+    updatedAt: string | null;
+    createdBy: string;
+    updatedBy: string | null;
+  }
+
+  interface ISlider {
+  id: number;
+  title: string;
+  description: string;
+  imageUrl: string;
+  redirectUrl: string;
+  position: number;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface IWishlistItem {
+    wishlistId: number;
+    productId: number;
+    productName: string;
+    productSlug: string;
+    productVariantId: number;
+    sku: string;
+    price: number;
+    promotionPrice: number | null;
+    thumbnail: string | null;
+  }
+
+  interface IHomeProductVariant {
+  variantId: number;
+  variantName: string;
+  productName: string;
+  price: number;
+  stock: number;
+  sold: number;
+  thumbnailUrl: string | null;
+}
+
+interface IHomeCategorySection {
+  categoryId: number;
+  categoryName: string;
+  variants: IHomeProductVariant[];
+}
+
+
+
+interface IWishlistProductVariant extends IHomeProductVariant {
+  wishlistId: number;
+}
+
+
 }

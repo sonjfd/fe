@@ -112,14 +112,7 @@ const MENU: MenuNode[] = [
     key: "sliders",
     icon: <Icon d={I.images} />,
     label: "Trình chiếu",
-    children: [
-      { key: "slider-list", label: "Danh sách", to: "/admin/sliders" },
-      {
-        key: "slider-detail",
-        label: "Chi tiết (đang xem)",
-        pattern: "/admin/sliders/:id",
-      },
-    ],
+    to: "/admin/sliders"
   },
   {
     key: "contacts",
