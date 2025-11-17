@@ -47,7 +47,7 @@ export default function UpdateUser({ user, onClose, onSuccess }: Props) {
           >
             <option value="ACTIVE">Đang hoạt động</option>
             <option value="NOT_ACTIVE">Chưa kích hoạt</option>
-            <option value="BAN">Bị khoá</option>
+            <option value="BAN">Khoá</option>
           </select>
         </div>
 

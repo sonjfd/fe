@@ -31,6 +31,7 @@ import { WishlistPage } from "./pages/users/WishlistPage";
 import GoogleOAuthHandler from "./pages/auth/GoogleOAuthHandler";
 import UpdatePasswordPage from "./pages/auth/UpdatePasswordPage";
 import AboutPage from "./pages/users/AboutPage";
+import CategoryPage from "./pages/users/FilterPage";
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
@@ -50,6 +51,7 @@ export const ROUTER = createBrowserRouter([
       },
       { path: "/oauth2/callback", element: <GoogleOAuthHandler /> },
       { path: "/update-password", element: <UpdatePasswordPage /> },
+      { path: "/category/:id", element: <CategoryPage /> },
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
       { path: "gioi-thieu", element: <AboutPage /> },

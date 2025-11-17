@@ -54,6 +54,10 @@ export const removeFromWishlistApi = async (
   return res;
 };
 
+
+
+
+
 export const fetchHomeProducts = async (
   page = 1,
   size = 50
@@ -73,3 +77,8 @@ export const fetchHomeProducts = async (
     }
   );
 };
+
+
+export const fetchVariantByCategory = (id: number) => {
+  return axios.get<IBackendRes<IModelPaginate<VariantFilter>>>(`api/v1/category/${id}`)
+}

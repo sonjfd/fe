@@ -7,15 +7,18 @@ import {
   type AttributeValue,
 } from "@/api/admin.product.attributes.api";
 import { addVariantsApi } from "@/api/admin.variant.api";
+import { uploadFiles } from "@/api/upload.api";
 import VariantTable from "./VariantTable.";
 
 type Row = {
   id: string;
   values: AttributeValue[];
   combination: string;
+  name: string;
   price: string | number;
   stock: string | number;
   checked: boolean;
+  thumbnail: string | null;
 };
 
 function cartesian<T>(lists: T[][]): T[][] {
@@ -32,9 +35,7 @@ export default function CreateVariants() {
 
   const [attrs, setAttrs] = useState<AttributeName[]>([]);
   const [loadingAttrs, setLoadingAttrs] = useState(false);
-
   const [picked, setPicked] = useState<Record<number, number[]>>({});
-
   const [refreshFlag, setRefreshFlag] = useState(0);
 
   const loadAttrs = async () => {
@@ -61,7 +62,6 @@ export default function CreateVariants() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pid]);
 
-  // toggle pick 1 value
   const togglePick = (attrId: number, valId: number) => {
     setPicked((s) => {
       const cur = s[attrId] || [];
@@ -72,21 +72,20 @@ export default function CreateVariants() {
     });
   };
 
-  // tính các hàng combination dựa vào selections
   const rows: Row[] = useMemo(() => {
-    // nếu attr nào chưa chọn thì không tạo được combination
-    const valueGroups: AttributeValue[][] = [];
+    const groups: AttributeValue[][] = [];
 
     for (const a of attrs) {
-      const selected = (picked[a.id] || [])
-        .map((vid) => a.values.find((v) => v.id === vid))
+      const sel = (picked[a.id] || [])
+        .map((id) => a.values.find((v) => v.id === id))
         .filter(Boolean) as AttributeValue[];
-      if (!selected.length) return []; // thiếu chọn → rỗng
-      valueGroups.push(selected);
+
+      if (!sel.length) return [];
+      groups.push(sel);
     }
 
-    // sinh combinations
-    const combos = cartesian<AttributeValue>(valueGroups);
+    const combos = cartesian(groups);
+
     return combos.map((vals) => {
       const label = vals.map((v) => v.value).join(" / ");
       const uid = vals.map((v) => v.id).join("-");
@@ -94,14 +93,15 @@ export default function CreateVariants() {
         id: uid,
         values: vals,
         combination: label,
+        name: "",
         price: 0,
         stock: 0,
         checked: true,
+        thumbnail: null,
       };
     });
   }, [attrs, picked]);
 
-  // local edits
   const [edits, setEdits] = useState<Record<string, Partial<Row>>>({});
   const viewRows: Row[] = rows.map((r) =>
     edits[r.id] ? { ...r, ...edits[r.id] } : r
@@ -112,6 +112,30 @@ export default function CreateVariants() {
 
   const removeRow = (id: string) => updateRow(id, { checked: false });
 
+  const handleUploadThumbnail = async (
+    rowId: string,
+    fileList: FileList | null
+  ) => {
+    const file = fileList?.[0];
+    if (!file) return;
+
+    try {
+      const res = await uploadFiles([file]); // res: UploadMultiRes
+      const urls = res.data ?? []; // lấy mảng string[]
+      const first = urls[0];
+
+      if (!first) {
+        toast.error("Upload ảnh thất bại");
+        return;
+      }
+
+      updateRow(rowId, { thumbnail: first });
+      toast.success("Đã upload ảnh");
+    } catch (e: any) {
+      toast.error(e?.message || "Upload ảnh thất bại");
+    }
+  };
+
   const onSave = async () => {
     const selected = viewRows.filter((r) => r.checked);
     if (!selected.length) {
@@ -121,8 +145,11 @@ export default function CreateVariants() {
 
     const items = selected.map((r) => ({
       values: r.values.map((v) => ({ id: v.id })),
+      combination: r.combination,
+      name: r.name.trim(),
       price: Number(r.price) || 0,
       stock: Number(r.stock) || 0,
+      thumbnail: r.thumbnail,
     }));
 
     try {
@@ -132,7 +159,7 @@ export default function CreateVariants() {
         setEdits({});
         setRefreshFlag((x) => x + 1);
       } else {
-        toast.error(res.message);
+        toast.error(res.message || "Tạo biến thể thất bại");
       }
     } catch (e: any) {
       toast.error(e?.message || "Tạo biến thể thất bại");
@@ -141,7 +168,6 @@ export default function CreateVariants() {
 
   return (
     <div className="rounded-lg border border-neutral-200 bg-white">
-      {/* Header */}
       <div className="flex items-center justify-between border-b border-neutral-200 p-4">
         <div className="flex items-center gap-3">
           <button
@@ -154,17 +180,14 @@ export default function CreateVariants() {
             Tạo biến thể — Product #{pid}
           </h2>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={onSave}
-            className="rounded-md bg-neutral-900 px-3 py-2 text-sm text-white"
-          >
-            Lưu các biến thể đã chọn
-          </button>
-        </div>
+        <button
+          onClick={onSave}
+          className="rounded-md bg-neutral-900 px-3 py-2 text-sm text-white"
+        >
+          Lưu các biến thể đã chọn
+        </button>
       </div>
 
-      {/* Pickers */}
       <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
         {loadingAttrs && (
           <div className="col-span-2 text-sm text-neutral-500">
@@ -177,7 +200,7 @@ export default function CreateVariants() {
             <div key={a.id} className="rounded-lg border p-4">
               <div className="mb-2 font-semibold">
                 {a.name}{" "}
-                <span className="text-neutral-500 text-xs">({a.code})</span>
+                <span className="text-xs text-neutral-500">({a.code})</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {a.values.map((v) => {
@@ -200,8 +223,9 @@ export default function CreateVariants() {
             </div>
           ))}
       </div>
+
       {attrs.length === 0 ? (
-        <p className="text-center text-neutral-500 py-4">
+        <p className="py-4 text-center text-neutral-500">
           Vui lòng tạo thuộc tính
         </p>
       ) : (
@@ -210,8 +234,10 @@ export default function CreateVariants() {
             <thead className="bg-neutral-50 text-neutral-700 font-semibold">
               <tr>
                 <th className="px-4 py-2 text-left">Combination</th>
+                <th className="px-4 py-2 text-left">Tên biến thể</th>
                 <th className="px-4 py-2 text-left">Giá</th>
                 <th className="px-4 py-2 text-left">Tồn kho</th>
+                <th className="px-4 py-2 text-left">Ảnh</th>
                 <th className="px-4 py-2 text-left">Chọn</th>
                 <th className="px-4 py-2 text-left">Xoá</th>
               </tr>
@@ -219,7 +245,20 @@ export default function CreateVariants() {
             <tbody>
               {viewRows.map((r) => (
                 <tr key={r.id} className="border-t">
-                  <td className="px-4 py-3 font-medium">{r.combination}</td>
+                  <td className="px-4 py-3 font-medium text-neutral-700">
+                    {r.combination}
+                  </td>
+                  <td className="px-4 py-3">
+                    <input
+                      type="text"
+                      className="w-full rounded border border-neutral-300 px-3 py-1.5"
+                      value={r.name}
+                      placeholder="Nhập tên biến thể"
+                      onChange={(e) =>
+                        updateRow(r.id, { name: e.target.value })
+                      }
+                    />
+                  </td>
                   <td className="px-4 py-3">
                     <input
                       type="number"
@@ -241,6 +280,24 @@ export default function CreateVariants() {
                         updateRow(r.id, { stock: e.target.value })
                       }
                     />
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                          handleUploadThumbnail(r.id, e.target.files)
+                        }
+                      />
+                      {r.thumbnail && (
+                        <img
+                          src={r.thumbnail}
+                          alt={r.name || r.combination}
+                          className="h-10 w-10 rounded object-cover"
+                        />
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <input
@@ -266,7 +323,7 @@ export default function CreateVariants() {
                 <tr>
                   <td
                     className="px-4 py-6 text-center text-neutral-500"
-                    colSpan={5}
+                    colSpan={7}
                   >
                     Hãy chọn ít nhất 1 giá trị ở mỗi thuộc tính để tạo biến thể.
                   </td>

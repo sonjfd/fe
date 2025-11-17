@@ -1,4 +1,8 @@
-import { fetchHomeCategories, fetchHomeProducts, fetchSliders } from "@/api/home.api";
+import {
+  fetchHomeCategories,
+  fetchHomeProducts,
+  fetchSliders,
+} from "@/api/home.api";
 import { Container } from "@/components/client/AppHeader";
 import { PartnersSection } from "@/components/client/PartnersSection";
 import { ProductCard } from "@/components/client/ProductCard";
@@ -87,10 +91,11 @@ export const LeftCategoryMenu: React.FC<{ categories: IHomeCategory[] }> = ({
   );
 };
 
-
-
-export const Hero: React.FC<{ categories: IHomeCategory[],sliders: ISlider[] }> = ({ categories,sliders }) => {
-   const [i, setI] = useState(0);
+export const Hero: React.FC<{
+  categories: IHomeCategory[];
+  sliders: ISlider[];
+}> = ({ categories, sliders }) => {
+  const [i, setI] = useState(0);
 
   useEffect(() => {
     if (sliders.length === 0) return;
@@ -110,7 +115,7 @@ export const Hero: React.FC<{ categories: IHomeCategory[],sliders: ISlider[] }> 
   return (
     <Container className="py-4">
       <div className="grid grid-cols-1 md:grid-cols-[280px,1fr] gap-4">
-        <LeftCategoryMenu categories={categories}/>
+        <LeftCategoryMenu categories={categories} />
         {/* SLIDER */}
         <div className="relative overflow-hidden rounded-2xl">
           <Link to={s.redirectUrl}>
@@ -141,8 +146,7 @@ export const Hero: React.FC<{ categories: IHomeCategory[],sliders: ISlider[] }> 
 
 // ---------- Category grid section ----------
 // tạm dùng ảnh placeholder vì BE chưa trả image
-const DEFAULT_CATEGORY_IMAGE =
-  "https://picsum.photos/seed/category/400/400";
+const DEFAULT_CATEGORY_IMAGE = "https://picsum.photos/seed/category/400/400";
 
 type ChildWithParent = IChildCategory & {
   parentId: number;
@@ -155,7 +159,11 @@ export const CategoryCard: React.FC<{ c: ChildWithParent }> = ({ c }) => (
     className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 hover:shadow-sm"
   >
     <div className="h-36 w-full rounded-xl overflow-hidden bg-slate-100">
-      <img src={DEFAULT_CATEGORY_IMAGE} alt={c.name} className="h-full w-full object-cover" />
+      <img
+        src={DEFAULT_CATEGORY_IMAGE}
+        alt={c.name}
+        className="h-full w-full object-cover"
+      />
     </div>
     <div className="w-full text-left">
       <h3 className="font-semibold text-indigo-800 uppercase tracking-tight">
@@ -165,11 +173,10 @@ export const CategoryCard: React.FC<{ c: ChildWithParent }> = ({ c }) => (
   </a>
 );
 
-
-export const CategorySection: React.FC<{ categories: IHomeCategory[]; loading?: boolean }> = ({
-  categories,
-  loading = false,
-}) => {
+export const CategorySection: React.FC<{
+  categories: IHomeCategory[];
+  loading?: boolean;
+}> = ({ categories, loading = false }) => {
   // Gộp tất cả children của các root category lại thành 1 list phẳng
   type ChildWithParent = IChildCategory & {
     parentId: number;
@@ -206,11 +213,6 @@ export const CategorySection: React.FC<{ categories: IHomeCategory[]; loading?: 
   );
 };
 
-
-
-
-
-
 // ---------- Home page ----------
 export const DSHStoreHome: React.FC = () => {
   const [categories, setCategories] = useState<IHomeCategory[]>([]);
@@ -229,7 +231,7 @@ export const DSHStoreHome: React.FC = () => {
         const categoryData = await fetchHomeCategories();
         setCategories(categoryData);
         const sliderData = await fetchSliders();
-        setSliders(sliderData)
+        setSliders(sliderData);
         setProductPageLoading(true);
         const data = await fetchHomeProducts(page, size);
         setProductPage(data);
@@ -243,15 +245,13 @@ export const DSHStoreHome: React.FC = () => {
 
   return (
     <>
-      <Hero categories={categories} sliders={sliders}/>
+      <Hero categories={categories} sliders={sliders} />
       <CategorySection categories={categories} loading={loading} />
       {/* Product sections */}
-       {/* PRODUCT LIST: tất cả biến thể, sort theo sold, phân trang */}
+      {/* PRODUCT LIST: tất cả biến thể, sort theo sold, phân trang */}
       <Container className="py-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl sm:text-2xl font-bold">
-            SẢN PHẨM BÁN CHẠY
-          </h2>
+          <h2 className="text-xl sm:text-2xl font-bold">SẢN PHẨM BÁN CHẠY</h2>
           {/* nếu muốn thêm filter / sort UI thì để chỗ này */}
         </div>
 
@@ -259,9 +259,11 @@ export const DSHStoreHome: React.FC = () => {
           <div className="text-sm text-slate-500">Đang tải sản phẩm...</div>
         )}
 
-        {!productPageLoading && productPage && productPage.items.length === 0 && (
-          <div className="text-sm text-slate-500">Chưa có sản phẩm.</div>
-        )}
+        {!productPageLoading &&
+          productPage &&
+          productPage.items.length === 0 && (
+            <div className="text-sm text-slate-500">Chưa có sản phẩm.</div>
+          )}
 
         {!productPageLoading && productPage && productPage.items.length > 0 && (
           <>

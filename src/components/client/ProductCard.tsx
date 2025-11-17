@@ -1,8 +1,5 @@
 import React from "react";
-import {
-  AiOutlineHeart,
-  AiOutlineEye,
-} from "react-icons/ai";
+import { AiOutlineHeart, AiOutlineEye } from "react-icons/ai";
 import { HiOutlineSwitchHorizontal } from "react-icons/hi";
 import { useCurrentApp } from "../context/AppContext";
 import { toast } from "react-toastify";
@@ -41,21 +38,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const { isAuthenticated, reloadWishlistCount } = useCurrentApp();
 
   const handleAddWishlist = async (e: React.MouseEvent<HTMLButtonElement>) => {
-  e.stopPropagation();
+    e.stopPropagation();
 
-  if (!isAuthenticated) {
-    toast.info("Vui lòng đăng nhập để thêm sản phẩm yêu thích");
-    return;
-  }
+    if (!isAuthenticated) {
+      toast.info("Vui lòng đăng nhập để thêm sản phẩm yêu thích");
+      return;
+    }
 
-  try {
-    await addToWishlistApi(productVariantId);
-    toast.success("Đã thêm vào danh sách yêu thích");
-    await reloadWishlistCount();         // 👈 update count global
-  } catch {
-    toast.error("Không thể thêm vào danh sách yêu thích");
-  }
-};
+    try {
+      await addToWishlistApi(productVariantId);
+      toast.success("Đã thêm vào danh sách yêu thích");
+      await reloadWishlistCount(); // 👈 update count global
+    } catch {
+      toast.error("Không thể thêm vào danh sách yêu thích");
+    }
+  };
   return (
     <div
       onClick={onClick}
@@ -63,7 +60,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                  shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer"
     >
       <div className="relative p-4 pb-2">
-
         {/* Badge giảm giá */}
         {discountPercent > 0 && (
           <div className="absolute left-4 top-4 bg-red-500 text-white text-xs px-2 py-1 rounded-md">
@@ -102,13 +98,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Ảnh */}
         <div className="aspect-[3/4] flex items-center justify-center">
-          <img src={imageUrl} alt={name} className="object-contain max-h-full" />
+          <img
+            src={imageUrl}
+            alt={name}
+            className="object-contain max-h-full"
+          />
         </div>
       </div>
 
       {/* Nội dung */}
       <div className="px-4 pb-4">
-        <h3 className="text-sm font-semibold line-clamp-2 min-h-[40px]">{name}</h3>
+        <h3 className="text-sm font-semibold line-clamp-2 min-h-[40px]">
+          {name}
+        </h3>
 
         {/* Rating */}
         <div className="flex items-center gap-2 text-xs mt-2">
@@ -134,7 +136,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Tồn kho */}
         <div className="text-sm text-emerald-600 mt-2 flex items-center gap-1">
           <span className="w-2 h-2 bg-emerald-600 rounded-full" />
-          Tồn kho: {stock}
+          Còn lại : {stock}
         </div>
 
         {/* Nút thêm giỏ hàng */}
@@ -143,7 +145,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             e.stopPropagation();
             onAddToCart?.();
           }}
-          className="w-full bg-red-600 text-white py-3 rounded-full font-semibold mt-3
+          className="w-full bg-indigo-600  hover:bg-indigo-700 text-white py-3 rounded-full font-semibold mt-3
                      opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition"
         >
           Thêm giỏ hàng

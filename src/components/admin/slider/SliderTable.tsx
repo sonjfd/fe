@@ -9,7 +9,7 @@ export const SliderTable: React.FC<{
   onPrev: ()=>void; onNext: ()=>void; onGoto: (page:number)=>void;
   onEdit: (id:number)=>void; onDelete: (id:number)=>void;
   onToggleActive: (s:Slider)=>void; onChangePosition: (s:Slider,pos:number)=>void;
-}> = ({ rows, loading, error, page, total, size, totalPages, onPrev, onNext, onGoto, onEdit, onDelete, onToggleActive, onChangePosition }) => (
+}> = ({ rows, loading, error, page, total, totalPages, onPrev, onNext, onGoto, onEdit, onDelete, onToggleActive, onChangePosition }) => (
   <>
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
