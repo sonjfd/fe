@@ -30,6 +30,7 @@ import AdminSlidersPage from "./pages/admin/SliderList";
 import { WishlistPage } from "./pages/users/WishlistPage";
 import GoogleOAuthHandler from "./pages/auth/GoogleOAuthHandler";
 import UpdatePasswordPage from "./pages/auth/UpdatePasswordPage";
+import AboutPage from "./pages/users/AboutPage";
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
@@ -51,6 +52,7 @@ export const ROUTER = createBrowserRouter([
       { path: "/update-password", element: <UpdatePasswordPage /> },
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
+      { path: "gioi-thieu", element: <AboutPage /> },
     ],
   },
   {

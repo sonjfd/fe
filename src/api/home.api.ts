@@ -54,9 +54,22 @@ export const removeFromWishlistApi = async (
   return res;
 };
 
-export const fetchHomeSections = async (): Promise<IHomeCategorySection[]> => {
-  const res = await axios.get<IBackendRes<IHomeCategorySection[]>>(
-    "/api/v1/home/sections"
+export const fetchHomeProducts = async (
+  page = 1,
+  size = 50
+): Promise<IModelPaginate<IHomeProductVariant>> => {
+  const res = await axios.get<
+    IBackendRes<IModelPaginate<IHomeProductVariant>>
+  >("/api/v1/home/products", {
+    params: { page, size },
+  });
+
+  return (
+    res.data ?? {
+      page,
+      size,
+      total: 0,
+      items: [],
+    }
   );
-  return res.data ?? [];
 };

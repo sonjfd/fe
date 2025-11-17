@@ -1,6 +1,8 @@
-import { fetchHomeCategories, fetchHomeSections, fetchSliders } from "@/api/home.api";
+import { fetchHomeCategories, fetchHomeProducts, fetchSliders } from "@/api/home.api";
 import { Container } from "@/components/client/AppHeader";
+import { PartnersSection } from "@/components/client/PartnersSection";
 import { ProductCard } from "@/components/client/ProductCard";
+import { TestimonialsSection } from "@/components/client/TestimonialsSection";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -206,60 +208,6 @@ export const CategorySection: React.FC<{ categories: IHomeCategory[]; loading?: 
 
 
 
-// ---------- Product  ----------
-type HomeProductSectionProps = {
-  section: IHomeCategorySection;
-};
-
-const HomeProductSection: React.FC<HomeProductSectionProps> = ({ section }) => {
-  return (
-    <Container className="py-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl sm:text-2xl font-bold">
-          {section.categoryName}
-        </h2>
-        <a
-          href={`/category/${section.categoryId}`}
-          className="text-sm text-slate-700 hover:text-indigo-700"
-        >
-          Xem tất cả →
-        </a>
-      </div>
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-        {section.variants.map((v) => {
-          const name = v.variantName || v.productName;
-
-          return (
-            <ProductCard
-              productVariantId={v.variantId}
-              key={v.variantId}
-              name={name}
-              imageUrl={
-                v.thumbnailUrl ||
-                "https://via.placeholder.com/400x400?text=No+Image"
-              }
-              salePrice={v.price}
-              stock={v.stock}
-              // tạm thời chưa có data discount / rating / review từ BE
-              discountPercent={0}
-              rating={5}
-              reviewCount={v.sold} // nếu bạn có riêng field review thì đổi lại
-              originalPrice={undefined}
-              onClick={() => {
-                // sau này bạn chuyển sang navigate("/product/..." )
-                console.log("Clicked variant", v.variantId);
-              }}
-              onAddToCart={() => {
-                console.log("Add to cart variant", v.variantId);
-              }}
-            />
-          );
-        })}
-      </div>
-    </Container>
-  );
-};
 
 
 
@@ -268,8 +216,11 @@ export const DSHStoreHome: React.FC = () => {
   const [categories, setCategories] = useState<IHomeCategory[]>([]);
   const [sliders, setSliders] = useState<ISlider[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [sections, setSections] = useState<IHomeCategorySection[]>([]);
-  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [productPage, setProductPage] =
+    useState<IModelPaginate<IHomeProductVariant> | null>(null);
+  const [productPageLoading, setProductPageLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const size = 50;
 
   useEffect(() => {
     const load = async () => {
@@ -279,32 +230,171 @@ export const DSHStoreHome: React.FC = () => {
         setCategories(categoryData);
         const sliderData = await fetchSliders();
         setSliders(sliderData)
-        setLoadingProducts(true);
-        const data = await fetchHomeSections();
-        setSections(data);
+        setProductPageLoading(true);
+        const data = await fetchHomeProducts(page, size);
+        setProductPage(data);
       } finally {
         setLoading(false);
-        setLoadingProducts(false);
+        setProductPageLoading(false);
       }
     };
     load();
-  }, []);
+  }, [page]);
 
   return (
     <>
       <Hero categories={categories} sliders={sliders}/>
       <CategorySection categories={categories} loading={loading} />
       {/* Product sections */}
-      {loadingProducts && (
-        <Container className="py-4">
-          <div className="text-sm text-slate-500">Đang tải sản phẩm...</div>
-        </Container>
-      )}
+       {/* PRODUCT LIST: tất cả biến thể, sort theo sold, phân trang */}
+      <Container className="py-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl sm:text-2xl font-bold">
+            SẢN PHẨM BÁN CHẠY
+          </h2>
+          {/* nếu muốn thêm filter / sort UI thì để chỗ này */}
+        </div>
 
-      {!loadingProducts &&
-        sections.map((section) => (
-          <HomeProductSection key={section.categoryId} section={section} />
-        ))}
+        {productPageLoading && (
+          <div className="text-sm text-slate-500">Đang tải sản phẩm...</div>
+        )}
+
+        {!productPageLoading && productPage && productPage.items.length === 0 && (
+          <div className="text-sm text-slate-500">Chưa có sản phẩm.</div>
+        )}
+
+        {!productPageLoading && productPage && productPage.items.length > 0 && (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+              {productPage.items.map((p) => (
+                <ProductCard
+                  key={p.variantId}
+                  productVariantId={p.variantId}
+                  name={p.variantName || p.productName}
+                  imageUrl={
+                    p.thumbnailUrl ||
+                    "https://via.placeholder.com/400x400?text=No+Image"
+                  }
+                  salePrice={p.price}
+                  stock={p.stock}
+                  discountPercent={0}
+                  rating={5}
+                  reviewCount={p.sold}
+                  onClick={() => {
+                    console.log("Click variant", p.variantId);
+                  }}
+                  onAddToCart={() => {
+                    console.log("Add to cart variant", p.variantId);
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Pagination đẹp hơn */}
+            {(() => {
+              const totalPages = Math.max(
+                1,
+                Math.ceil(productPage.total / productPage.size)
+              );
+
+              // tính các trang hiển thị (max 5 nút số)
+              const pages: number[] = [];
+              const start = Math.max(1, page - 2);
+              const end = Math.min(totalPages, page + 2);
+              for (let p = start; p <= end; p++) pages.push(p);
+
+              const canPrev = page > 1;
+              const canNext = page < totalPages;
+
+              const from = (page - 1) * productPage.size + 1;
+              const to = Math.min(page * productPage.size, productPage.total);
+
+              return (
+                <div className="mt-8 flex flex-col items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <button
+                      disabled={!canPrev}
+                      onClick={() => canPrev && setPage(page - 1)}
+                      className="h-9 px-3 rounded-full border text-sm bg-white hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white"
+                    >
+                      ‹
+                    </button>
+
+                    {start > 1 && (
+                      <>
+                        <button
+                          onClick={() => setPage(1)}
+                          className={`h-9 min-w-[36px] px-3 rounded-full border text-sm ${
+                            page === 1
+                              ? "bg-indigo-600 text-white border-indigo-600"
+                              : "bg-white text-slate-700 hover:bg-slate-50"
+                          }`}
+                        >
+                          1
+                        </button>
+                        {start > 2 && (
+                          <span className="px-1 text-sm text-slate-500">…</span>
+                        )}
+                      </>
+                    )}
+
+                    {pages.map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => setPage(p)}
+                        className={`h-9 min-w-[36px] px-3 rounded-full border text-sm ${
+                          p === page
+                            ? "bg-indigo-600 text-white border-indigo-600"
+                            : "bg-white text-slate-700 hover:bg-slate-50"
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+
+                    {end < totalPages && (
+                      <>
+                        {end < totalPages - 1 && (
+                          <span className="px-1 text-sm text-slate-500">…</span>
+                        )}
+                        <button
+                          onClick={() => setPage(totalPages)}
+                          className={`h-9 min-w-[36px] px-3 rounded-full border text-sm ${
+                            page === totalPages
+                              ? "bg-indigo-600 text-white border-indigo-600"
+                              : "bg-white text-slate-700 hover:bg-slate-50"
+                          }`}
+                        >
+                          {totalPages}
+                        </button>
+                      </>
+                    )}
+
+                    <button
+                      disabled={!canNext}
+                      onClick={() => canNext && setPage(page + 1)}
+                      className="h-9 px-3 rounded-full border text-sm bg-white hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white"
+                    >
+                      ›
+                    </button>
+                  </div>
+
+                  <p className="text-xs text-slate-500">
+                    Hiển thị {from.toLocaleString("vi-VN")} –{" "}
+                    {to.toLocaleString("vi-VN")} trên tổng{" "}
+                    {productPage.total.toLocaleString("vi-VN")} sản phẩm
+                  </p>
+                </div>
+              );
+            })()}
+          </>
+        )}
+      </Container>
+      {/* === ĐÁNH GIÁ KHÁCH HÀNG === */}
+      <TestimonialsSection />
+
+      {/* === ĐỐI TÁC === */}
+      <PartnersSection />
     </>
   );
 };
