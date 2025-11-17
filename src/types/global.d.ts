@@ -175,58 +175,9 @@ declare global {
     newPassword: string;        // * bắt buộc (≥8, có hoa/thường/ký tự đặc biệt)
   }
 
-  // ===== Address (FE dùng camelCase) =====
-  export interface IAddress {
-    id: number | string;
-    userId: number;             // liên kết tới IUser.id
-    name: string;               // tên người nhận
-    phone: string;              // sđt người nhận
-    province: string;
-    district: string;
-    ward: string;
-    addressDetail: string;
-    isDefault: boolean;
-    createdAt: string;          // ISO string
-    updatedAt: string;          // ISO string
-  }
+  
+  
 
-  // Payload tạo/cập nhật địa chỉ
-  export interface IUpsertAddressReq {
-    name: string;               // * bắt buộc
-    phone: string;              // * bắt buộc
-    province: string;           // * bắt buộc
-    district: string;           // * bắt buộc
-    ward: string;               // * bắt buộc
-    addressDetail: string;      // * bắt buộc
-    isDefault?: boolean;        // tùy chọn (true để đặt mặc định)
-  }
-
-  // ===== (Tùy chọn) Kiểu khi BE trả snake_case =====
-  // Nếu API trả đúng theo cột DB, bạn có thể dùng các DTO này để map sang FE
-  export interface IAddressResDTO {
-    id: number | string;
-    user_id: number;
-    full_name: string;
-    phone: string;
-    province: string;
-    district: string;
-    ward: string;
-    address_detail: string;
-    is_default: boolean;
-    created_at: string;
-    updated_at: string;
-  }
-
-  export interface IUserProfileResDTO {
-    id: number;
-    full_name: string;
-    email: string;
-    phone: string;
-    avatar: string;
-    status: IUserStatus;
-    gender: IGender;
-    role: { id: number };
-  }
 
   // HOME CATEGORY
     interface IHomeCategory {
@@ -289,5 +240,26 @@ interface IWishlistProductVariant extends IHomeProductVariant {
   wishlistId: number;
 }
 
+    interface IAddress {
+        id: number;
+        fullName: string;
+        phone: string;
+        province: string;
+        district: string;
+        ward: string;
+        addressDetail: string;
+        isDefault: boolean;
+        createdAt: string;
+    }
+
+    interface IUpsertAddressReq {
+        fullName: string;
+        phone: string;
+        province: string;
+        district: string;
+        ward: string;
+        addressDetail: string;
+        isDefault?: boolean;
+    }
 
 }
