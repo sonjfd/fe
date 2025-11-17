@@ -175,34 +175,6 @@ declare global {
     newPassword: string;        // * bắt buộc (≥8, có hoa/thường/ký tự đặc biệt)
   }
 
-  // ===== Address (FE dùng camelCase) =====
-  export interface IAddress {
-    id: number | string;
-    userId: number;             // liên kết tới IUser.id
-    name: string;               // tên người nhận
-    phone: string;              // sđt người nhận
-    province: string;
-    district: string;
-    ward: string;
-    addressDetail: string;
-    isDefault: boolean;
-    createdAt: string;          // ISO string
-    updatedAt: string;          // ISO string
-  }
-
-  // Payload tạo/cập nhật địa chỉ
-  export interface IUpsertAddressReq {
-    name: string;               // * bắt buộc
-    phone: string;              // * bắt buộc
-    province: string;           // * bắt buộc
-    district: string;           // * bắt buộc
-    ward: string;               // * bắt buộc
-    addressDetail: string;      // * bắt buộc
-    isDefault?: boolean;        // tùy chọn (true để đặt mặc định)
-  }
-
-  // ===== (Tùy chọn) Kiểu khi BE trả snake_case =====
-  // Nếu API trả đúng theo cột DB, bạn có thể dùng các DTO này để map sang FE
 
 
 
@@ -280,5 +252,26 @@ declare global {
 
 
 
+  interface IAddress {
+    id: number;
+    fullName: string;
+    phone: string;
+    province: string;
+    district: string;
+    ward: string;
+    addressDetail: string;
+    isDefault: boolean;
+    createdAt: string;
+  }
+
+  interface IUpsertAddressReq {
+    fullName: string;
+    phone: string;
+    province: string;
+    district: string;
+    ward: string;
+    addressDetail: string;
+    isDefault?: boolean;
+  }
 
 }
