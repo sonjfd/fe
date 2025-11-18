@@ -248,6 +248,7 @@ declare global {
     sold: number
     stock: number;
     thumbnail: string;
+    productId: number;
   }
 
 
@@ -273,5 +274,56 @@ declare global {
     addressDetail: string;
     isDefault?: boolean;
   }
+
+
+  interface AttributeValueFilter {
+    id: number;
+    value: string;
+  }
+
+  interface AttributeFilter {
+    id: number;
+    name: string;
+    code: string;
+    values: AttributeValueFilter[];
+  }
+
+
+
+  type AttributeValueDTO = {
+    id: number;
+    value: string;
+  };
+
+  interface AttributeDTO {
+    id: number;
+    code: string;
+    name: string;
+    values: AttributeValueDTO[];
+  };
+
+  interface VariantDTO {
+    id: number;
+    sku: string;
+    name: string;
+    price: number;
+    stock: number;
+    sold: number;
+    thumbnail: string;
+    valueIds: number[];
+  };
+
+  interface ProductDetailDTO {
+    id: number;
+    name: string;
+    code: string;
+    sku: string;
+    description: string;
+    images: string[];
+    attributes: AttributeDTO[];
+    variants: VariantDTO[];
+    defaultVariantId: number;
+  };
+
 
 }

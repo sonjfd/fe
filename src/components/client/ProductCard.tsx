@@ -1,13 +1,15 @@
 import React from "react";
-import { AiOutlineHeart, AiOutlineEye } from "react-icons/ai";
-import { HiOutlineSwitchHorizontal } from "react-icons/hi";
+import { AiOutlineHeart } from "react-icons/ai";
 import { useCurrentApp } from "../context/AppContext";
 import { toast } from "react-toastify";
 import { addToWishlistApi } from "@/api/home.api";
+import { useNavigate } from "react-router-dom";
 
 type ProductCardProps = {
   productVariantId: number;
   name: string;
+  sku: string;
+  productId: number;
   imageUrl: string;
   discountPercent?: number;
   rating?: number;
@@ -25,6 +27,8 @@ const formatCurrency = (value: number) =>
 export const ProductCard: React.FC<ProductCardProps> = ({
   productVariantId,
   name,
+  sku,
+  productId,
   imageUrl,
   discountPercent = 0,
   rating = 5,
@@ -36,6 +40,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onClick,
 }) => {
   const { isAuthenticated, reloadWishlistCount } = useCurrentApp();
+  const navigate = useNavigate();
+
+  const goDetail = (productId: number, sku: string) => {
+    navigate(`/products/${productId}?sku=${encodeURIComponent(sku)}`);
+  };
 
   const handleAddWishlist = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
@@ -76,43 +85,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           >
             <AiOutlineHeart className="text-xl" />
           </button>
-
-          {/* Icon Eye (hover mới hiện) */}
-          <button
-            className="w-9 h-9 bg-white flex items-center justify-center rounded-full shadow-md
-                       opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <AiOutlineEye className="text-xl" />
-          </button>
-
-          {/* Icon So sánh */}
-          <button
-            className="w-9 h-9 bg-white flex items-center justify-center rounded-full shadow-md
-                       opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <HiOutlineSwitchHorizontal className="text-xl" />
-          </button>
         </div>
 
-        {/* Ảnh */}
         <div className="aspect-[3/4] flex items-center justify-center">
           <img
             src={imageUrl}
             alt={name}
             className="object-contain max-h-full"
+            onClick={() => goDetail(productId, sku)}
           />
         </div>
       </div>
 
       {/* Nội dung */}
       <div className="px-4 pb-4">
-        <h3 className="text-sm font-semibold line-clamp-2 min-h-[40px]">
+        <h3
+          className="text-sm font-semibold line-clamp-2 min-h-[40px]"
+          onClick={() => goDetail(productId, sku)}
+        >
           {name}
         </h3>
 
-        {/* Rating */}
         <div className="flex items-center gap-2 text-xs mt-2">
           <div className="text-yellow-400">
             {"★".repeat(rating)}
