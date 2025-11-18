@@ -32,6 +32,7 @@ import GoogleOAuthHandler from "./pages/auth/GoogleOAuthHandler";
 import UpdatePasswordPage from "./pages/auth/UpdatePasswordPage";
 import AboutPage from "./pages/users/AboutPage";
 import CategoryPage from "./pages/users/FilterPage";
+import { CartPage } from "./pages/users/client/CardPage";
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
@@ -55,6 +56,8 @@ export const ROUTER = createBrowserRouter([
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
       { path: "gioi-thieu", element: <AboutPage /> },
+      { path: "cart", element: <CartPage /> },
+
     ],
   },
   {

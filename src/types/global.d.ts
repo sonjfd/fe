@@ -274,4 +274,32 @@ declare global {
     isDefault?: boolean;
   }
 
+  export interface ICartItem {
+  id: string;
+  variantId: string;
+  sku: string;
+  productName: string;
+  thumbnailUrl: string;
+  quantity: number;
+  price: number;
+  total: number;
+}
+
+
+export interface ICartResponse {
+  cartId: string;
+  items: ICartItem[];
+  total: number;
+}
+
+
+export interface AddToCartRequest {
+  variantId: string;
+  quantity: number;
+}
+
+export interface UpdateCartQuantityRequest {
+  cartDetailId: string;
+  quantity: number;
+}
 }
