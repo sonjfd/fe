@@ -62,6 +62,40 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       toast.error("Không thể thêm vào danh sách yêu thích");
     }
   };
+
+  const handleAddToCart = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.stopPropagation();
+
+    // Bắt buộc đăng nhập
+    if (!isAuthenticated) {
+      toast.info("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`);
+      return;
+    }
+
+    try {
+      const data = await addToCartApi({
+        variantId: productVariantId as unknown as string,
+        quantity: 1,
+      });
+      if (!data || !data.data) {
+        toast.error(data?.message || "Không thể thêm sản phẩm vào giỏ hàng");
+        return;
+      }
+
+      toast.success("Đã thêm sản phẩm vào giỏ hàng");
+      await reloadCart(); // 👈 cập nhật lại count + popup cart
+
+      onAddToCart?.();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      // Có thể parse message từ backend nếu bạn trả message cụ thể
+      toast.error("Không thể thêm sản phẩm vào giỏ hàng");
+    }
+  };
+
   return (
     <div
       onClick={onClick}
@@ -69,16 +103,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                  shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer"
     >
       <div className="relative p-4 pb-2">
-        {/* Badge giảm giá */}
         {discountPercent > 0 && (
           <div className="absolute left-4 top-4 bg-red-500 text-white text-xs px-2 py-1 rounded-md">
             {discountPercent}%
           </div>
         )}
 
-        {/* ICON */}
         <div className="absolute right-4 top-4 flex flex-col gap-2">
-          {/* Icon Yêu thích (luôn hiện) */}
           <button
             className="w-9 h-9 bg-white flex items-center justify-center rounded-full shadow-md"
             onClick={handleAddWishlist}
@@ -97,7 +128,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </div>
       </div>
 
-      {/* Nội dung */}
       <div className="px-4 pb-4">
         <h3
           className="text-sm font-semibold line-clamp-2 min-h-[40px]"
@@ -114,7 +144,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <span>{reviewCount} đánh giá</span>
         </div>
 
-        {/* Giá */}
         <div className="mt-2">
           {originalPrice && originalPrice > salePrice && (
             <span className="line-through text-gray-400 text-sm">
@@ -126,18 +155,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         </div>
 
-        {/* Tồn kho */}
         <div className="text-sm text-emerald-600 mt-2 flex items-center gap-1">
           <span className="w-2 h-2 bg-emerald-600 rounded-full" />
           Còn lại : {stock}
         </div>
 
-        {/* Nút thêm giỏ hàng */}
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onAddToCart?.();
-          }}
+          onClick={handleAddToCart}
           className="w-full bg-indigo-600  hover:bg-indigo-700 text-white py-3 rounded-full font-semibold mt-3
                      opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition"
         >

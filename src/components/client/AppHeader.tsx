@@ -5,7 +5,6 @@ import { useCurrentApp } from "../context/AppContext";
 import { logoutApi } from "@/api/auth.api";
 import { toSlug } from "@/utils/slug";
 import avatarDefault from "@/assets/img/avatar-default.png";
-import { NavLink } from "react-router-dom";
 
 // ---------- util ----------
 type ClassValue = string | false | null | undefined;
@@ -39,11 +38,6 @@ export const TopStrip: React.FC = () => (
 );
 
 // ---------- Category nav ----------
-const menu = [
-  { label: "TRANG CHỦ", path: "/" },
-  { label: "GIỚI THIỆU", path: "/gioi-thieu" },
-  { label: "LIÊN HỆ", path: "/lien-he" },
-];
 export const CategoryNavBar: React.FC = () => (
   <div className="border-t border-slate-200">
     <Container>
@@ -195,15 +189,140 @@ const AccountMenu: React.FC<{
   );
 };
 
+// ---------- Cart menu (dùng AppContext mới) ----------
+const CartMenu: React.FC = () => {
+  const { isAuthenticated, cart, cartCount } = useCurrentApp();
+  const [open, setOpen] = useState(false);
+  const timer = useRef<number | null>(null);
+  const navigate = useNavigate();
+
+  const show = () => {
+    if (timer.current) window.clearTimeout(timer.current);
+    setOpen(true);
+  };
+  const hide = () => {
+    timer.current = window.setTimeout(() => setOpen(false), 120);
+  };
+
+  const handleClickCart = () => {
+    if (!isAuthenticated) {
+      // Bắt buộc đăng nhập trước, sau login quay lại /cart
+      navigate("/login?redirect=/cart");
+      return;
+    }
+    navigate("/cart");
+  };
+
+  const hasItems = !!cart && cart.items && cart.items.length > 0;
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={show}
+      onMouseLeave={hide}
+      onFocus={show}
+      onBlur={hide}
+    >
+      {/* Icon giỏ hàng */}
+      <button
+        onClick={handleClickCart}
+        aria-label="Giỏ hàng"
+        className="relative text-slate-700 hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"
+      >
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          aria-hidden
+        >
+          <path d="M6 6h15l-2 8H8L6 6z" />
+          <path d="M6 6L5 3H3" />
+          <circle cx="9" cy="20" r="1.5" />
+          <circle cx="17" cy="20" r="1.5" />
+        </svg>
+        <span className="absolute -right-2 -top-2 rounded-full bg-rose-600 text-white text-[10px] px-1.5 min-w-[18px] text-center">
+          {cartCount}
+        </span>
+      </button>
+
+      {/* Popover */}
+      <div
+        className={cn(
+          "absolute right-0 top-full mt-2 w-[340px] rounded-2xl border border-slate-200 bg-white shadow-xl transition-all",
+          open
+            ? "opacity-100 visible translate-y-0"
+            : "opacity-0 invisible -translate-y-1"
+        )}
+      >
+        <div className="absolute -top-2 right-4 h-4 w-4 rotate-45 bg-white border-t border-l border-slate-200" />
+
+        {/* Chưa đăng nhập hoặc không có sản phẩm */}
+        {!isAuthenticated || !hasItems ? (
+          <div className="px-4 py-6 text-center text-sm text-slate-500">
+            <img
+              src="https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/empty_cart.png"
+              alt="Empty cart"
+              className="h-20 mx-auto mb-2 opacity-80"
+            />
+            <p>Chưa có sản phẩm</p>
+          </div>
+        ) : (
+          <div className="p-3">
+            <p className="text-sm font-medium text-slate-800 mb-2">
+              Sản phẩm mới thêm
+            </p>
+            <div className="max-h-72 overflow-y-auto flex flex-col gap-3">
+              {cart!.items.map((item) => (
+                <div key={item.id} className="flex gap-3 text-sm">
+                  <img
+                    src={item.thumbnailUrl}
+                    alt={item.productName}
+                    className="w-14 h-14 rounded object-cover border border-slate-100"
+                  />
+                  <div className="flex-1">
+                    <p className="line-clamp-2 text-slate-800">
+                      {item.productName}
+                    </p>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-rose-600 font-semibold">
+                        {item.price.toLocaleString("vi-VN")}₫
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        x{item.quantity}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={handleClickCart}
+              className="mt-3 w-full rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+            >
+              Xem giỏ hàng
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // ---------- Header ----------
 export const AppHeader: React.FC = () => {
-  const { user, isAuthenticated, setUser, setIsAuthenticated, wishlistCount, setWishlistCount } =
-    useCurrentApp();
-  const navigate = useNavigate(); // Next.js: const router = useRouter()
+  const {
+    user,
+    isAuthenticated,
+    setUser,
+    setIsAuthenticated,
+    wishlistCount,
+    setWishlistCount,
+  } = useCurrentApp();
+  const navigate = useNavigate();
 
-  console.log(user);
-
-  // Map dữ liệu IUser của bạn -> UserView hiển thị
   const userView: UserView | null =
     isAuthenticated && user
       ? {
@@ -213,7 +332,6 @@ export const AppHeader: React.FC = () => {
       : null;
 
   const handleLogin = () => {
-    // Tùy dự án: mở modal hoặc điều hướng
     navigate("/login");
   };
 
@@ -226,8 +344,8 @@ export const AppHeader: React.FC = () => {
     } finally {
       setUser(null);
       setIsAuthenticated(false);
-      setWishlistCount(0);   
-      navigate("/"); // optional
+      setWishlistCount(0);
+      navigate("/");
     }
   };
 
@@ -288,36 +406,16 @@ export const AppHeader: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-5">
-          {/* Thay link “Tài khoản” bằng menu mới */}
           <AccountMenu
             userView={userView}
             onLogin={handleLogin}
             onLogout={handleLogout}
           />
+
+          {/* Wishlist icon */}
           <Link
-            to="/wishlist" // tạm, sau này bạn làm route riêng
+            to="/wishlist"
             aria-label="Sản phẩm yêu thích"
-            className="relative text-slate-700 hover:text-indigo-700"
-          >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            aria-hidden
-          >
-            <path d="M12 21s-6.716-4.438-9-8.25C1.32 10.12 2.5 6 6.5 6c2 0 3.5 1.5 3.5 1.5S11.5 6 13.5 6C17.5 6 18.68 10.12 21 12.75 18.716 16.562 12 21 12 21z" />
-          </svg>
-          {wishlistCount > 0 && (
-            <span className="absolute -right-2 -top-2 rounded-full bg-rose-600 text-white text-[10px] px-1.5">
-              {wishlistCount}
-            </span>
-          )}
-        </Link>
-          <a
-            href="#"
-            aria-label="Giỏ hàng"
             className="relative text-slate-700 hover:text-indigo-700"
           >
             <svg
@@ -328,15 +426,17 @@ export const AppHeader: React.FC = () => {
               stroke="currentColor"
               aria-hidden
             >
-              <path d="M6 6h15l-2 8H8L6 6z" />
-              <path d="M6 6L5 3H3" />
-              <circle cx="9" cy="20" r="1.5" />
-              <circle cx="17" cy="20" r="1.5" />
+              <path d="M12 21s-6.716-4.438-9-8.25C1.32 10.12 2.5 6 6.5 6c2 0 3.5 1.5 3.5 1.5S11.5 6 13.5 6C17.5 6 18.68 10.12 21 12.75 18.716 16.562 12 21 12 21z" />
             </svg>
-            <span className="absolute -right-2 -top-2 rounded-full bg-rose-600 text-white text-[10px] px-1.5">
-              0
-            </span>
-          </a>
+            {wishlistCount > 0 && (
+              <span className="absolute -right-2 -top-2 rounded-full bg-rose-600 text-white text-[10px] px-1.5">
+                {wishlistCount}
+              </span>
+            )}
+          </Link>
+
+          {/* Cart menu dùng AppContext */}
+          <CartMenu />
         </div>
       </Container>
 
