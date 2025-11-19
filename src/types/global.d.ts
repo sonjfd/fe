@@ -260,23 +260,23 @@ declare global {
     district: string;
     ward: string;
     addressDetail: string;
-    isDefault: boolean;
+    default: boolean;
     createdAt: string;
   }
 
   interface IUpsertAddressReq {
     fullName: string;
     phone: string;
-    province: string;
-    district: string;
-    ward: string;
+    provinceId: number;
+    districtId: number;
+    wardId: number;
     addressDetail: string;
     isDefault?: boolean;
   }
 
   export interface ICartItem {
-  id: string;
-  variantId: string;
+  id: number;
+  variantId: number;
   sku: string;
   productName: string;
   thumbnailUrl: string;
@@ -287,19 +287,19 @@ declare global {
 
 
 export interface ICartResponse {
-  cartId: string;
+  cartId: number;
   items: ICartItem[];
   total: number;
 }
 
 
 export interface AddToCartRequest {
-  variantId: string;
+  variantId: number;
   quantity: number;
 }
 
 export interface UpdateCartQuantityRequest {
-  cartDetailId: string;
+  cartDetailId: number;
   quantity: number;
 }
 }

@@ -33,6 +33,7 @@ import UpdatePasswordPage from "./pages/auth/UpdatePasswordPage";
 import AboutPage from "./pages/users/AboutPage";
 import CategoryPage from "./pages/users/FilterPage";
 import { CartPage } from "./pages/users/client/CardPage";
+import { CheckoutPage } from "./pages/users/client/CheckoutPage";
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
@@ -68,6 +69,7 @@ export const ROUTER = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
+      { path: "checkout", element: <CheckoutPage /> },
       { path: "wishlist", element: <WishlistPage /> },
       {
         path: "tai-khoan",
