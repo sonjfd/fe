@@ -34,7 +34,6 @@ export default function UpdateVariantModal({
   const submit = async () => {
     try {
       setSaving(true);
-      // Gọi trực tiếp PUT kèm body (phù hợp với nhu cầu cập nhật price/stock)
       await axios.put(`/api/v1/admin/variants/${value.id}`, {
         price: Number(price) || 0,
         stock: Number(stock) || 0,

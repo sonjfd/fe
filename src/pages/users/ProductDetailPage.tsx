@@ -1,4 +1,6 @@
+import { addToCartApi } from "@/api/cart.api";
 import { fetchProductDetail } from "@/api/home.api";
+import { useCurrentApp } from "@/components/context/AppContext";
 import React, { useEffect, useState } from "react";
 import {
   useLocation,
@@ -6,6 +8,7 @@ import {
   useParams,
   useSearchParams,
 } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("vi-VN").format(value) + "₫";
@@ -27,6 +30,7 @@ const renderStars = (rating: number) => {
 };
 
 const ProductDetailPage: React.FC = () => {
+  const { reloadCart } = useCurrentApp();
   const { id } = useParams();
   const productId = Number(id);
 
@@ -74,6 +78,8 @@ const ProductDetailPage: React.FC = () => {
       time: "1 tuần trước",
     },
   ]);
+
+  const [quantity, setQuantity] = useState<string>("1");
 
   useEffect(() => {
     if (!productId) return;
@@ -210,6 +216,27 @@ const ProductDetailPage: React.FC = () => {
     );
   }
 
+  const quantityNumber = Number(quantity);
+  const isQuantityValid =
+    quantity.trim() !== "" &&
+    !Number.isNaN(quantityNumber) &&
+    quantityNumber >= 1 &&
+    quantityNumber < currentVariant.stock;
+
+  const handleAddToCard = async (id: number, quantity: number) => {
+    const payload = {
+      variantId: id,
+      quantity: Number(quantity),
+    };
+    const res = await addToCartApi(payload);
+    if (res.data) {
+      toast.success("Thêm vào giỏ hàng thành công");
+      reloadCart();
+    } else {
+      toast.error(res.message);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-8">
       <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
@@ -318,13 +345,50 @@ const ProductDetailPage: React.FC = () => {
               ))}
             </div>
 
-            <div className="mt-4 flex gap-3">
-              <button className="flex-1 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 rounded-full shadow-md shadow-gray-200 transition">
-                Thêm vào giỏ hàng
-              </button>
-              <button className="px-5 py-3 rounded-full border border-gray-300 text-gray-700 text-sm font-medium bg-white hover:bg-gray-50">
-                Mua ngay
-              </button>
+            <div className="mt-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-700">Số lượng:</span>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  max={currentVariant.stock - 1}
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  className={[
+                    "w-24 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1",
+                    isQuantityValid
+                      ? "border-gray-300 focus:ring-gray-400"
+                      : "border-red-400 focus:ring-red-400",
+                  ].join(" ")}
+                />
+                <span className="text-xs text-gray-500">
+                  Còn lại {currentVariant.stock} sản phẩm
+                </span>
+              </div>
+
+              {!isQuantityValid && (
+                <div className="text-xs text-red-500">
+                  Vui lòng nhập số lượng từ 1 đến {currentVariant.stock}.
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  className={[
+                    "flex-1 bg-gray-800 text-white font-semibold py-3 rounded-full shadow-md shadow-gray-200 transition",
+                    isQuantityValid
+                      ? "hover:bg-gray-900 cursor-pointer"
+                      : "opacity-60 cursor-not-allowed",
+                  ].join(" ")}
+                  disabled={!isQuantityValid}
+                  onClick={() => {
+                    handleAddToCard(currentVariant.id, Number(quantity));
+                  }}
+                >
+                  Thêm vào giỏ hàng
+                </button>
+              </div>
             </div>
           </div>
         </div>

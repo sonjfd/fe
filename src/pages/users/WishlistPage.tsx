@@ -102,6 +102,8 @@ export const WishlistPage: React.FC = () => {
                     item.thumbnailUrl ||
                     "https://via.placeholder.com/400x400?text=No+Image"
                   }
+                  sku=""
+                  productId={1}
                   discountPercent={0}
                   rating={5}
                   reviewCount={item.sold}
@@ -135,9 +137,7 @@ export const WishlistPage: React.FC = () => {
                 </span>
                 <button
                   disabled={page >= totalPages}
-                  onClick={() =>
-                    setPage((p) => Math.min(totalPages, p + 1))
-                  }
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   className="px-3 py-1 rounded border border-slate-200 text-sm disabled:opacity-50"
                 >
                   Sau

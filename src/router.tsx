@@ -34,6 +34,7 @@ import AboutPage from "./pages/users/AboutPage";
 import CategoryPage from "./pages/users/FilterPage";
 import { CartPage } from "./pages/users/client/CardPage";
 import ProductDetailPage from "./pages/users/ProductDetailPage";
+import { CheckoutPage } from "./pages/users/client/CheckoutPage";
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
@@ -55,6 +56,7 @@ export const ROUTER = createBrowserRouter([
       { path: "/update-password", element: <UpdatePasswordPage /> },
       { path: "/category/:id", element: <CategoryPage /> },
       { path: "/products/:id", element: <ProductDetailPage /> },
+      { path: "/checkout", element: <CheckoutPage /> },
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
       { path: "gioi-thieu", element: <AboutPage /> },
@@ -69,6 +71,7 @@ export const ROUTER = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
+      { path: "checkout", element: <CheckoutPage /> },
       { path: "wishlist", element: <WishlistPage /> },
       {
         path: "tai-khoan",

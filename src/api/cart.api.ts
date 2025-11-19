@@ -13,7 +13,7 @@ export const updateCartQuantityApi = (data: UpdateCartQuantityRequest) => {
   return axiosCustomize.put<IBackendRes<ICartResponse>>(`${baseURL}/cart/update`, data);
 };
 
-export const removeCartItemApi = (cartDetailId: string) => {
+export const removeCartItemApi = (cartDetailId: number) => {
   return axiosCustomize.delete<IBackendRes<ICartResponse>>(
     `${baseURL}/cart/remove/${cartDetailId}`
   );

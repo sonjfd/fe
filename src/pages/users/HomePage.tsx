@@ -282,14 +282,14 @@ export const DSHStoreHome: React.FC = () => {
                   discountPercent={0}
                   rating={5}
                   reviewCount={p.sold}
-                  sku=""
+                  sku={p.sku}
                   onClick={() => {
                     console.log("Click variant", p.variantId);
                   }}
                   onAddToCart={() => {
                     console.log("Add to cart variant", p.variantId);
                   }}
-                  productId={2}
+                  productId={p.productId}
                 />
               ))}
             </div>

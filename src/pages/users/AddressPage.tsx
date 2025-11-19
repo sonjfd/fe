@@ -1,6 +1,6 @@
 import React from "react";
 import {
-    listAddresses,
+    getMyAddresses as listAddresses,
     createAddress,
     updateAddress,
     deleteAddress,
@@ -94,7 +94,7 @@ export default function AddressPage() {
             {a.fullName} — {a.phone}
           </span>
 
-                                            {a.isDefault && (
+                                            {a.default && (
                                                 <span
                                                     className="inline-flex items-center rounded border border-slate-700 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
               Mặc định
@@ -127,7 +127,7 @@ export default function AddressPage() {
                                             Xóa
                                         </button>
 
-                                        {!a.isDefault && (
+                                        {!a.default && (
                                             <button
                                                 onClick={() => onSetDefault(a.id)}
                                                 className="text-slate-800 hover:underline"

@@ -4,6 +4,7 @@ import { useCurrentApp } from "../context/AppContext";
 import { toast } from "react-toastify";
 import { addToWishlistApi } from "@/api/home.api";
 import { useNavigate } from "react-router-dom";
+import { addToCartApi } from "@/api/cart.api";
 
 type ProductCardProps = {
   productVariantId: number;
@@ -39,7 +40,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onAddToCart,
   onClick,
 }) => {
-  const { isAuthenticated, reloadWishlistCount } = useCurrentApp();
+  const { isAuthenticated, reloadWishlistCount, reloadCart } = useCurrentApp();
   const navigate = useNavigate();
 
   const goDetail = (productId: number, sku: string) => {
@@ -77,7 +78,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
     try {
       const data = await addToCartApi({
-        variantId: productVariantId as unknown as string,
+        variantId: productVariantId as number,
         quantity: 1,
       });
       if (!data || !data.data) {
