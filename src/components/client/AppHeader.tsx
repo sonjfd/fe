@@ -262,7 +262,7 @@ const CartMenu: React.FC = () => {
         {!isAuthenticated || !hasItems ? (
           <div className="px-4 py-6 text-center text-sm text-slate-500">
             <img
-              src="https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/empty_cart.png"
+              src="https://hoanghamobile.com/Content/web/content-icon/no-item.png"
               alt="Empty cart"
               className="h-20 mx-auto mb-2 opacity-80"
             />

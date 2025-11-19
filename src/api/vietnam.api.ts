@@ -1,18 +1,35 @@
-import axios from "axios";
+import instance from "@/services/axios.customize";
+export type LocationItem = {
+    id: number;
+    name: string;
+};
 
-const BASE = "https://provinces.open-api.vn/api";
+const LOCATION_BASE = "/api/v1/locations";
 
-export async function getProvinces() {
-    const res = await axios.get(`${BASE}/p/`);
-    return res.data as { code: number; name: string }[];
+export async function getProvinces(): Promise<LocationItem[]> {
+    const res = await instance.get<IBackendRes<LocationItem[]>>(
+        `${LOCATION_BASE}/provinces`
+    );
+    // do interceptor đã return response.data nên ở đây res = ApiResponse<LocationItem[]>
+    return res.data!;
 }
 
-export async function getDistricts(provinceCode: number) {
-    const res = await axios.get(`${BASE}/p/${provinceCode}?depth=2`);
-    return (res.data.districts || []) as { code: number; name: string }[];
+export async function getDistricts(provinceId: number): Promise<LocationItem[]> {
+    const res = await instance.get<IBackendRes<LocationItem[]>>(
+        `${LOCATION_BASE}/districts`,
+        {
+            params: { provinceId },
+        }
+    );
+    return res.data!;
 }
 
-export async function getWards(districtCode: number) {
-    const res = await axios.get(`${BASE}/d/${districtCode}?depth=2`);
-    return (res.data.wards || []) as { code: number; name: string }[];
+export async function getWards(districtId: number): Promise<LocationItem[]> {
+    const res = await instance.get<IBackendRes<LocationItem[]>>(
+        `${LOCATION_BASE}/wards`,
+        {
+            params: { districtId },
+        }
+    );
+    return res.data!;
 }

@@ -29,7 +29,14 @@ export const CartPage: React.FC = () => {
   }
 
   const [isUpdating, setIsUpdating] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [localQuantities, setLocalQuantities] = useState<Record<number, number>>(
+  {}
+);
+
+// Lưu timer cho từng item để debounce
+const debounceTimers = React.useRef<Record<number, number | undefined>>({});
+
 
   // Mỗi khi giỏ hàng thay đổi → mặc định chọn hết (giống Shopee)
   useEffect(() => {
@@ -39,6 +46,58 @@ export const CartPage: React.FC = () => {
       setSelectedIds(new Set());
     }
   }, [cart]);
+
+  useEffect(() => {
+  if (cart && cart.items.length > 0) {
+    setSelectedIds(new Set(cart.items.map((i) => i.id)));
+
+    // sync lại số lượng hiển thị theo server
+    setLocalQuantities(
+      cart.items.reduce((acc, item) => {
+        acc[item.id] = item.quantity;
+        return acc;
+      }, {} as Record<number, number>)
+    );
+  } else {
+    setSelectedIds(new Set());
+    setLocalQuantities({});
+  }
+  }, [cart]);
+
+  const DEBOUNCE_MS = 600;
+
+const handleInputQuantityChange = (item: ICartItem, value: number) => {
+  if (Number.isNaN(value)) return;
+
+  // Không cho nhập < 1
+  if (value < 1) {
+    value = 1;
+  }
+
+  // Cập nhật quantity hiển thị
+  setLocalQuantities((prev) => ({
+    ...prev,
+    [item.id]: value,
+  }));
+
+  // Clear timer cũ (nếu có)
+  const oldTimer = debounceTimers.current[item.id];
+  if (oldTimer) {
+    clearTimeout(oldTimer);
+  }
+
+  // Set timer mới
+  const timerId = window.setTimeout(() => {
+    // Nếu value bằng với quantity hiện tại của server thì khỏi gọi
+    if (value === item.quantity) return;
+
+    handleChangeQuantity(item, value);
+  }, DEBOUNCE_MS);
+
+  debounceTimers.current[item.id] = timerId;
+};
+
+
 
   const isAllSelected =
     cart && cart.items.length > 0
@@ -89,10 +148,13 @@ export const CartPage: React.FC = () => {
 
     try {
       setIsUpdating(true);
-      await updateCartQuantityApi({
+      const data = await updateCartQuantityApi({
         cartDetailId: item.id,
         quantity: newQuantity,
       });
+      if(!data.data){
+        toast.error(data.message)
+      }
       await reloadCart();
     } catch (error) {
       toast.error("Không thể cập nhật số lượng sản phẩm");
@@ -153,7 +215,7 @@ export const CartPage: React.FC = () => {
           <h1 className="text-xl font-semibold mb-4">Giỏ hàng</h1>
           <div className="bg-white rounded-xl shadow-sm py-10 flex flex-col items-center">
             <img
-              src="https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/empty_cart.png"
+              src="https://hoanghamobile.com/Content/web/content-icon/no-item.png"
               alt="Empty cart"
               className="h-24 mb-4 opacity-80"
             />
@@ -244,9 +306,12 @@ export const CartPage: React.FC = () => {
                     <div className="col-span-2 flex items-center justify-center gap-2">
                       <button
                         type="button"
-                        disabled={isUpdating || item.quantity <= 1}
+                        disabled={isUpdating || (localQuantities[item.id] ?? item.quantity) <= 1}
                         onClick={() =>
-                          handleChangeQuantity(item, item.quantity - 1)
+                          handleInputQuantityChange(
+                            item,
+                            (localQuantities[item.id] ?? item.quantity) - 1
+                          )
                         }
                         className="w-8 h-8 border rounded flex items-center justify-center text-lg disabled:opacity-40"
                       >
@@ -255,22 +320,25 @@ export const CartPage: React.FC = () => {
                       <input
                         type="number"
                         min={1}
-                        value={item.quantity}
+                        value={localQuantities[item.id] ?? item.quantity}
                         onChange={(e) =>
-                          handleChangeQuantity(item, Number(e.target.value))
+                          handleInputQuantityChange(item, Number(e.target.value))
                         }
                         className="w-12 h-8 border rounded text-center text-sm"
                       />
-                      <button
-                        type="button"
-                        disabled={isUpdating}
-                        onClick={() =>
-                          handleChangeQuantity(item, item.quantity + 1)
-                        }
-                        className="w-8 h-8 border rounded flex items-center justify-center text-lg disabled:opacity-40"
-                      >
-                        +
-                      </button>
+                    <button
+                      type="button"
+                      disabled={isUpdating}
+                      onClick={() =>
+                        handleInputQuantityChange(
+                          item,
+                          (localQuantities[item.id] ?? item.quantity) + 1
+                        )
+                      }
+                      className="w-8 h-8 border rounded flex items-center justify-center text-lg disabled:opacity-40"
+                    >
+                      +
+                    </button>
                     </div>
 
                     {/* Thành tiền */}
@@ -320,10 +388,8 @@ export const CartPage: React.FC = () => {
                   isUpdating || selectedItems.length === 0 || selectedTotal <= 0
                 }
                 onClick={() => {
-                  toast.info(
-                    "Chức năng thanh toán cho sản phẩm đã chọn sẽ được triển khai sau 😊"
-                  );
-                  // sau này: navigate("/checkout?selected=" + list id)
+                  const ids = selectedItems.map((i) => i.id); // cartDetailId
+                  navigate("/checkout", { state: { selectedIds: ids } });
                 }}
                 className="mt-4 w-full bg-rose-600 hover:bg-rose-700 text-white py-3 rounded-full text-sm font-semibold disabled:opacity-60"
               >

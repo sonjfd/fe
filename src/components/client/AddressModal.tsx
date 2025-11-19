@@ -1,3 +1,4 @@
+// AddressModal.tsx
 import React from "react";
 import { getProvinces, getDistricts, getWards } from "@/api/vietnam.api";
 import { toast } from "react-toastify";
@@ -14,25 +15,31 @@ type AddressErrors = {
     phone?: string;
 };
 
+type LocationItem = {
+    id: number;
+    name: string;
+};
+
 export const AddressModal: React.FC<AddressModalProps> = ({
-                                                              open,
-                                                              onClose,
-                                                              onSubmit,
-                                                              initial,
-                                                          }) => {
+    open,
+    onClose,
+    onSubmit,
+    initial,
+}) => {
     const [fullName, setFullName] = React.useState(initial?.fullName ?? "");
     const [phone, setPhone] = React.useState(initial?.phone ?? "");
     const [addressDetail, setAddressDetail] = React.useState(
         initial?.addressDetail ?? ""
     );
 
-    const [provinceCode, setProvinceCode] = React.useState<number | "">("");
-    const [districtCode, setDistrictCode] = React.useState<number | "">("");
-    const [wardCode, setWardCode] = React.useState<number | "">("");
+    // 🔄 Dùng ID thay vì code
+    const [provinceId, setProvinceId] = React.useState<number | "">("");
+    const [districtId, setDistrictId] = React.useState<number | "">("");
+    const [wardId, setWardId] = React.useState<number | "">("");
 
-    const [provinces, setProvinces] = React.useState<any[]>([]);
-    const [districts, setDistricts] = React.useState<any[]>([]);
-    const [wards, setWards] = React.useState<any[]>([]);
+    const [provinces, setProvinces] = React.useState<LocationItem[]>([]);
+    const [districts, setDistricts] = React.useState<LocationItem[]>([]);
+    const [wards, setWards] = React.useState<LocationItem[]>([]);
 
     const [loading, setLoading] = React.useState(false);
     const [errors, setErrors] = React.useState<AddressErrors>({});
@@ -45,15 +52,18 @@ export const AddressModal: React.FC<AddressModalProps> = ({
                 setFullName(initial.fullName);
                 setPhone(initial.phone);
                 setAddressDetail(initial.addressDetail);
+                // ⚠️ Hiện tại BE chỉ trả name nên không pre-select được tỉnh/huyện/xã
+                // => giữ behavior cũ: user phải chọn lại location
             } else {
                 setFullName("");
                 setPhone("");
                 setAddressDetail("");
             }
+
             setErrors({});
-            setProvinceCode("");
-            setDistrictCode("");
-            setWardCode("");
+            setProvinceId("");
+            setDistrictId("");
+            setWardId("");
             setDistricts([]);
             setWards([]);
         }
@@ -61,31 +71,33 @@ export const AddressModal: React.FC<AddressModalProps> = ({
 
     async function loadProvinces() {
         try {
-            const pv = await getProvinces();
+            const pv = await getProvinces(); // [{id, name}]
             setProvinces(pv);
         } catch {
             toast.error("Không tải được danh sách tỉnh/thành");
         }
     }
 
-    async function handleProvinceChange(code: number) {
-        setProvinceCode(code);
-        setDistrictCode("");
-        setWardCode("");
+    async function handleProvinceChange(id: number) {
+        setProvinceId(id);
+        setDistrictId("");
+        setWardId("");
+        setDistricts([]);
         setWards([]);
         try {
-            const ds = await getDistricts(code);
+            const ds = await getDistricts(id); // [{id, name}]
             setDistricts(ds);
         } catch {
             toast.error("Không tải được danh sách quận/huyện");
         }
     }
 
-    async function handleDistrictChange(code: number) {
-        setDistrictCode(code);
-        setWardCode("");
+    async function handleDistrictChange(id: number) {
+        setDistrictId(id);
+        setWardId("");
+        setWards([]);
         try {
-            const ws = await getWards(code);
+            const ws = await getWards(id); // [{id, name}]
             setWards(ws);
         } catch {
             toast.error("Không tải được danh sách phường/xã");
@@ -117,32 +129,27 @@ export const AddressModal: React.FC<AddressModalProps> = ({
     }
 
     async function handleSubmit() {
-        // validate tên + phone giống bên profile
         if (!validateFields()) return;
 
-        if (!provinceCode) {
+        if (!provinceId) {
             toast.error("Vui lòng chọn Tỉnh/Thành");
             return;
         }
-        if (!districtCode) {
+        if (!districtId) {
             toast.error("Vui lòng chọn Quận/Huyện");
             return;
         }
-        if (!wardCode) {
+        if (!wardId) {
             toast.error("Vui lòng chọn Phường/Xã");
             return;
         }
 
-        const province = provinces.find((p) => p.code === provinceCode)?.name ?? "";
-        const district = districts.find((d) => d.code === districtCode)?.name ?? "";
-        const ward = wards.find((w) => w.code === wardCode)?.name ?? "";
-
         const payload: IUpsertAddressReq = {
             fullName: fullName.trim(),
             phone: phone.trim(),
-            province,
-            district,
-            ward,
+            provinceId: Number(provinceId),
+            districtId: Number(districtId),
+            wardId: Number(wardId),
             addressDetail,
             isDefault: initial?.isDefault ?? false,
         };
@@ -174,7 +181,9 @@ export const AddressModal: React.FC<AddressModalProps> = ({
                             className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:border-slate-800 focus:ring-2 focus:ring-slate-800/20"
                         />
                         {errors.fullName && (
-                            <p className="mt-1 text-xs text-red-600">{errors.fullName}</p>
+                            <p className="mt-1 text-xs text-red-600">
+                                {errors.fullName}
+                            </p>
                         )}
                     </div>
 
@@ -186,18 +195,20 @@ export const AddressModal: React.FC<AddressModalProps> = ({
                             className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:border-slate-800 focus:ring-2 focus:ring-slate-800/20"
                         />
                         {errors.phone && (
-                            <p className="mt-1 text-xs text-red-600">{errors.phone}</p>
+                            <p className="mt-1 text-xs text-red-600">
+                                {errors.phone}
+                            </p>
                         )}
                     </div>
 
                     <select
                         className="w-full rounded-md border px-3 py-2 text-sm"
-                        value={provinceCode}
+                        value={provinceId}
                         onChange={(e) => handleProvinceChange(Number(e.target.value))}
                     >
                         <option value="">-- Chọn Tỉnh / Thành phố --</option>
                         {provinces.map((p) => (
-                            <option key={p.code} value={p.code}>
+                            <option key={p.id} value={p.id}>
                                 {p.name}
                             </option>
                         ))}
@@ -205,13 +216,13 @@ export const AddressModal: React.FC<AddressModalProps> = ({
 
                     <select
                         className="w-full rounded-md border px-3 py-2 text-sm"
-                        value={districtCode}
+                        value={districtId}
                         onChange={(e) => handleDistrictChange(Number(e.target.value))}
-                        disabled={!provinceCode}
+                        disabled={!provinceId}
                     >
                         <option value="">-- Chọn Quận / Huyện --</option>
                         {districts.map((d) => (
-                            <option key={d.code} value={d.code}>
+                            <option key={d.id} value={d.id}>
                                 {d.name}
                             </option>
                         ))}
@@ -219,13 +230,13 @@ export const AddressModal: React.FC<AddressModalProps> = ({
 
                     <select
                         className="w-full rounded-md border px-3 py-2 text-sm"
-                        value={wardCode}
-                        onChange={(e) => setWardCode(Number(e.target.value))}
-                        disabled={!districtCode}
+                        value={wardId}
+                        onChange={(e) => setWardId(Number(e.target.value))}
+                        disabled={!districtId}
                     >
                         <option value="">-- Chọn Phường / Xã --</option>
                         {wards.map((w) => (
-                            <option key={w.code} value={w.code}>
+                            <option key={w.id} value={w.id}>
                                 {w.name}
                             </option>
                         ))}
