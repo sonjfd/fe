@@ -27,16 +27,12 @@ export const CartPage: React.FC = () => {
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-<<<<<<< Updated upstream
-  const [localQuantities, setLocalQuantities] = useState<Record<number, number>>(
-  {}
-);
+  const [localQuantities, setLocalQuantities] = useState<
+    Record<number, number>
+  >({});
 
-// Lưu timer cho từng item để debounce
-const debounceTimers = React.useRef<Record<number, number | undefined>>({});
-
-=======
->>>>>>> Stashed changes
+  // Lưu timer cho từng item để debounce
+  const debounceTimers = React.useRef<Record<number, number | undefined>>({});
 
   // Mỗi khi giỏ hàng thay đổi → mặc định chọn hết (giống Shopee)
   useEffect(() => {
@@ -48,56 +44,54 @@ const debounceTimers = React.useRef<Record<number, number | undefined>>({});
   }, [cart]);
 
   useEffect(() => {
-  if (cart && cart.items.length > 0) {
-    setSelectedIds(new Set(cart.items.map((i) => i.id)));
+    if (cart && cart.items.length > 0) {
+      setSelectedIds(new Set(cart.items.map((i) => i.id)));
 
-    // sync lại số lượng hiển thị theo server
-    setLocalQuantities(
-      cart.items.reduce((acc, item) => {
-        acc[item.id] = item.quantity;
-        return acc;
-      }, {} as Record<number, number>)
-    );
-  } else {
-    setSelectedIds(new Set());
-    setLocalQuantities({});
-  }
+      // sync lại số lượng hiển thị theo server
+      setLocalQuantities(
+        cart.items.reduce((acc, item) => {
+          acc[item.id] = item.quantity;
+          return acc;
+        }, {} as Record<number, number>)
+      );
+    } else {
+      setSelectedIds(new Set());
+      setLocalQuantities({});
+    }
   }, [cart]);
 
   const DEBOUNCE_MS = 600;
 
-const handleInputQuantityChange = (item: ICartItem, value: number) => {
-  if (Number.isNaN(value)) return;
+  const handleInputQuantityChange = (item: ICartItem, value: number) => {
+    if (Number.isNaN(value)) return;
 
-  // Không cho nhập < 1
-  if (value < 1) {
-    value = 1;
-  }
+    // Không cho nhập < 1
+    if (value < 1) {
+      value = 1;
+    }
 
-  // Cập nhật quantity hiển thị
-  setLocalQuantities((prev) => ({
-    ...prev,
-    [item.id]: value,
-  }));
+    // Cập nhật quantity hiển thị
+    setLocalQuantities((prev) => ({
+      ...prev,
+      [item.id]: value,
+    }));
 
-  // Clear timer cũ (nếu có)
-  const oldTimer = debounceTimers.current[item.id];
-  if (oldTimer) {
-    clearTimeout(oldTimer);
-  }
+    // Clear timer cũ (nếu có)
+    const oldTimer = debounceTimers.current[item.id];
+    if (oldTimer) {
+      clearTimeout(oldTimer);
+    }
 
-  // Set timer mới
-  const timerId = window.setTimeout(() => {
-    // Nếu value bằng với quantity hiện tại của server thì khỏi gọi
-    if (value === item.quantity) return;
+    // Set timer mới
+    const timerId = window.setTimeout(() => {
+      // Nếu value bằng với quantity hiện tại của server thì khỏi gọi
+      if (value === item.quantity) return;
 
-    handleChangeQuantity(item, value);
-  }, DEBOUNCE_MS);
+      handleChangeQuantity(item, value);
+    }, DEBOUNCE_MS);
 
-  debounceTimers.current[item.id] = timerId;
-};
-
-
+    debounceTimers.current[item.id] = timerId;
+  };
 
   const isAllSelected =
     cart && cart.items.length > 0
@@ -152,8 +146,8 @@ const handleInputQuantityChange = (item: ICartItem, value: number) => {
         cartDetailId: item.id,
         quantity: newQuantity,
       });
-      if(!data.data){
-        toast.error(data.message)
+      if (!data.data) {
+        toast.error(data.message);
       }
       await reloadCart();
     } catch (error) {
@@ -304,7 +298,10 @@ const handleInputQuantityChange = (item: ICartItem, value: number) => {
                     <div className="col-span-2 flex items-center justify-center gap-2">
                       <button
                         type="button"
-                        disabled={isUpdating || (localQuantities[item.id] ?? item.quantity) <= 1}
+                        disabled={
+                          isUpdating ||
+                          (localQuantities[item.id] ?? item.quantity) <= 1
+                        }
                         onClick={() =>
                           handleInputQuantityChange(
                             item,
@@ -320,23 +317,26 @@ const handleInputQuantityChange = (item: ICartItem, value: number) => {
                         min={1}
                         value={localQuantities[item.id] ?? item.quantity}
                         onChange={(e) =>
-                          handleInputQuantityChange(item, Number(e.target.value))
+                          handleInputQuantityChange(
+                            item,
+                            Number(e.target.value)
+                          )
                         }
                         className="w-12 h-8 border rounded text-center text-sm"
                       />
-                    <button
-                      type="button"
-                      disabled={isUpdating}
-                      onClick={() =>
-                        handleInputQuantityChange(
-                          item,
-                          (localQuantities[item.id] ?? item.quantity) + 1
-                        )
-                      }
-                      className="w-8 h-8 border rounded flex items-center justify-center text-lg disabled:opacity-40"
-                    >
-                      +
-                    </button>
+                      <button
+                        type="button"
+                        disabled={isUpdating}
+                        onClick={() =>
+                          handleInputQuantityChange(
+                            item,
+                            (localQuantities[item.id] ?? item.quantity) + 1
+                          )
+                        }
+                        className="w-8 h-8 border rounded flex items-center justify-center text-lg disabled:opacity-40"
+                      >
+                        +
+                      </button>
                     </div>
 
                     {/* Thành tiền */}

@@ -356,4 +356,46 @@ declare global {
     cartDetailId: number;
     quantity: number;
   }
+
+
+  interface ShippingQuote {
+    fee: number;
+    serviceFee: number;
+    insuranceFee: number;
+    expectedDeliveryTime: string;
+  }
+
+  interface OrderItem {
+    variantId: number;
+    quantity: number;
+    price: number;
+  }
+
+  interface CreateOrderRequest {
+    addressId: number;
+    codAmount: number;
+    itemsValue: number;
+    items: OrderItem[];
+    paymentMethod: string;
+  }
+
+
+  interface Order {
+    id: number;
+    totalPrice: number;
+    paymentMethod: string;
+    paymentStatus: string;
+    ghnOrderCode: string;
+    ghnFee: number;
+    ghnExpectedDelivery: string;
+    orderStatus: string;
+  }
+  interface OrderCreateResponse {
+    order: Order;
+    paymentUrl?: string;
+  }
+
+
+
+
 }
