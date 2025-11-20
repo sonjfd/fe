@@ -398,4 +398,57 @@ declare global {
 
 
 
+  export interface UpdateCartQuantityRequest {
+    cartDetailId: number;
+    quantity: number;
+  }
+  // ========== Voucher types ==========
+  type VoucherDiscountType = "PERCENT" | "FIXED";
+  type VoucherStatus = "ACTIVE" | "INACTIVE" | "EXPIRED";
+  type VoucherApplyScope = "ALL" | "ASSIGNED";
+
+  interface IVoucher {
+    id: number;
+    code: string;
+    imageUrl?: string | null;
+    discountType: VoucherDiscountType;
+    discountValue: number;
+    maxDiscountAmount?: number | null;
+    minOrderValue?: number | null;
+    usageLimit?: number | null;
+    usedCount?: number | null;
+    userLimit?: number | null;
+    applyScope: VoucherApplyScope;
+    startDate: string; // ISO
+    endDate: string;   // ISO
+    status: VoucherStatus;
+  }
+
+  interface ICreateVoucherReq {
+    code: string;
+    imageUrl?: string | null;
+    discountType: VoucherDiscountType;
+    discountValue: number;
+    maxDiscountAmount?: number | null;
+    minOrderValue?: number | null;
+    usageLimit?: number | null;
+    userLimit?: number | null;
+    applyScope: VoucherApplyScope;
+    startDate: string; // datetime-local string -> backend parse
+    endDate: string;
+    assignedUserEmails?: string[];
+    status: VoucherStatus;
+    // dùng khi cần gửi danh sách email (nếu backend hỗ trợ)
+  }
+
+  interface IUpdateVoucherReq extends ICreateVoucherReq {
+    id: number;
+  }
+
+  interface IUserEmailLite {
+    id: number;
+    email: string;
+    fullName: string;
+  }
+
 }
