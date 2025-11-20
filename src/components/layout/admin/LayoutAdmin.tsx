@@ -33,6 +33,8 @@ const I = {
     "M16 13v-2H8V8l-5 4 5 4v-3h8zm3-10h-7v2h7v14h-7v2h7a2 2 0 002-2V5a2 2 0 00-2-2z",
   contact:
     "M2 4a2 2 0 012-2h16a2 2 0 012 2v12a2 2 0 01-2 2H8l-4 4v-4H4a2 2 0 01-2-2V4zm4 3h12v2H6V7zm0 4h10v2H6v-2z",
+    voucher:
+        "M4 4h16a1 1 0 011 1v10.5a1 1 0 01-.3.7l-3.5 3.5a1 1 0 01-.7.3H4a1 1 0 01-1-1V5a1 1 0 011-1zm1 2v12h11.09L19 15.09V6H5zm5 2h2v2h2v2h-2v2h-2v-2H8v-2h2V8z",
 };
 
 /* ====== Menu config (CHỈ những mục cần thiết) ====== */
@@ -87,7 +89,12 @@ const MENU: MenuNode[] = [
       },
     ],
   },
-
+    {
+        key: "vouchers",
+        icon: <Icon d={I.voucher} />,
+        label: "Voucher",
+        to: "/admin/vouchers",
+    },
   {
     key: "inventory",
     icon: <Icon d={I.warehouse} />,

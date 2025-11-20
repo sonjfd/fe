@@ -37,3 +37,22 @@ return await http.post<UploadSingleRes>(`${BASE}/folders/${encodeURIComponent(fo
 headers: { 'Content-Type': 'multipart/form-data' },
 });
 }
+// Upload voucherimage theo code (trả về 1 URL)
+export async function uploadVoucherImg(
+    voucherCode: string,
+    file: File
+): Promise<UploadSingleRes> {
+    const cleanCode = voucherCode.trim();
+    const form = new FormData();
+    form.append("file", file);
+
+    const res = await http.post<UploadSingleRes>(
+        `${BASE}/vouchers/${encodeURIComponent(cleanCode)}/image`,
+        form,
+        {
+            headers: { "Content-Type": "multipart/form-data" },
+        }
+    );
+
+    return res; // IBackendRes<string> – dùng res.data = url
+}

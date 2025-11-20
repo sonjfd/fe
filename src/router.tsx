@@ -34,6 +34,7 @@ import AboutPage from "./pages/users/AboutPage";
 import CategoryPage from "./pages/users/FilterPage";
 import { CartPage } from "./pages/users/client/CardPage";
 import { CheckoutPage } from "./pages/users/client/CheckoutPage";
+import VoucherListPage from "pages/admin/VoucherList.tsx";
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
@@ -116,6 +117,8 @@ export const ROUTER = createBrowserRouter([
 
       { path: "sliders", element: <AdminSlidersPage /> },
       // { path: "sliders/:id", element: <SliderDetail /> },     // active only
+        // { path: "sliders/:id", element: <SliderDetail /> },     // active only
+        { path: "vouchers", element: <VoucherListPage /> },
     ],
   },
   { path: "*", element: <NotFoundPage /> },
