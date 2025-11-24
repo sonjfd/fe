@@ -51,21 +51,23 @@ export const AppProvider = (props: TProps) => {
 
   /* ---------- WISHLIST ---------- */
   const reloadWishlistCount = useCallback(async () => {
-  if (!isAuthenticated) {
-    setWishlistCount(0);
-    return;
-  }
-  try {
-    const page = await fetchMyWishlist(1, 1, "createdAt", "desc");
-    setWishlistCount(page.total);
-  } catch {
-    setWishlistCount(0);
-  }
-  }, [isAuthenticated]);
+    // Chỉ cho role USER dùng wishlist
+    if (!isAuthenticated || user?.role !== "USER") {
+      setWishlistCount(0);
+      return;
+    }
+    try {
+      const page = await fetchMyWishlist(1, 1, "createdAt", "desc");
+      setWishlistCount(page.total);
+    } catch {
+      setWishlistCount(0);
+    }
+  }, [isAuthenticated, user]);
 
   /* ---------- CART ---------- */
   const reloadCart = useCallback(async () => {
-    if (!isAuthenticated) {
+    // Chỉ cho role USER dùng cart
+    if (!isAuthenticated || user?.role !== "USER") {
       setCart(null);
       return;
     }
@@ -79,7 +81,7 @@ export const AppProvider = (props: TProps) => {
     } finally {
       setIsCartLoading(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   /* ---------- FETCH ACCOUNT LẦN ĐẦU ---------- */
   useEffect(() => {
@@ -100,14 +102,16 @@ export const AppProvider = (props: TProps) => {
 
   /* ---------- MỖI KHI LOGIN / LOGOUT ---------- */
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user?.role === "USER") {
+      // Chỉ role USER mới load data
       reloadWishlistCount();
       reloadCart();
     } else {
+      // Các role khác hoặc chưa login -> clear
       setWishlistCount(0);
       setCart(null);
     }
-  }, [isAuthenticated, reloadWishlistCount, reloadCart]);
+  }, [isAuthenticated, user, reloadWishlistCount, reloadCart]);
 
   if (isAppLoading) {
     return <CenterSpinner />;

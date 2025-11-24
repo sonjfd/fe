@@ -38,3 +38,8 @@ export const vnPayPayment = (orderId: number, totalAmount: number) => {
     return axios.post<IBackendRes<VNPayResponse>>(backendUrl, { orderId, totalAmount })
 
 }
+
+export const cancelUrl = (id: number) => {
+    const backendUrl = `/api/v1/orders/${id}`
+    return axios.delete(backendUrl)
+}

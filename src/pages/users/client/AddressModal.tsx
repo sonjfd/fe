@@ -200,7 +200,7 @@ export const AddressModal: React.FC<AddressModalProps> = ({
               <option key={p.code} value={p.code}>
                 {p.name}
               </option>
-              ))}
+            ))}
           </select>
 
           <select

@@ -1,4 +1,4 @@
-import { getUserOrder } from "@/api/order.api";
+import { cancelUrl, getUserOrder } from "@/api/order.api";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import UserOrderDetail from "./UserOrderDetail";
@@ -97,36 +97,61 @@ export default function UserOrderPage() {
     switch (s) {
       case "COMPLETED":
         return "Đã hoàn thành";
-      case "PROCESSING":
-        return "Đang xử lý";
+      case "RETURNED":
+        return "Hoàn trả hàng";
       case "SHIPPING":
         return "Đang giao";
-      case "DELIVERED":
-        return "Đã giao";
+      case "FAILED":
+        return "Hư hỏng";
       case "CANCELLED":
         return "Đã hủy";
+      case "PENDING":
+        return "Đơn hàng mới tạo";
+      case "CONFIRMED":
+        return "Chuẩn bị giao";
       default:
         return s;
     }
   };
 
   const handleCancelOrder = async (o: Order) => {
-    if (
-      o.orderStatus === "CANCELLED" ||
-      o.orderStatus === "COMPLETED" ||
-      o.orderStatus === "DELIVERED"
-    ) {
+    if (o.orderStatus === "CANCELLED" || o.orderStatus === "COMPLETED") {
       return;
     }
-    const ok = window.confirm("Bạn chắc chắn muốn huỷ đơn hàng này?");
-    if (!ok) return;
-
-    try {
-      toast.success("Huỷ đơn hàng thành công (mock)");
-      await load();
-    } catch (e: any) {
-      toast.error(e?.message || "Huỷ đơn hàng thất bại");
-    }
+    toast(
+      ({ closeToast }) => (
+        <div className="space-y-2">
+          <p>Bạn có chắc muốn huỷ đơn hàng này?</p>
+          <div className="flex gap-2">
+            <button
+              className="px-3 py-1 rounded bg-red-600 text-white"
+              onClick={async () => {
+                const res = await cancelUrl(o.id);
+                if (res.data === null) {
+                  toast.error(res.message);
+                  closeToast();
+                  load();
+                  return;
+                }
+                load();
+                toast.success("Đã huỷ đơn!");
+                closeToast();
+              }}
+            >
+              Xóa
+            </button>
+            <button className="px-3 py-1 rounded border" onClick={closeToast}>
+              Hủy
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+      }
+    );
   };
 
   return (
