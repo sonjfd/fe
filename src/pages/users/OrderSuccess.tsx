@@ -1,5 +1,4 @@
-import { updatePaymentStatus } from "@/api/order.api";
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 type PaymentStatus = "COD" | "SUCCESS" | "FAILED";
@@ -8,38 +7,17 @@ const OrderSuccess: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const vnp_ResponseCode = searchParams.get("vnp_ResponseCode");
-  const vnp_TxnRef = searchParams.get("vnp_TxnRef");
-
-  // Xác định trạng thái
+  const statusParam = searchParams.get("status");
   const status: PaymentStatus = useMemo(() => {
-    if (vnp_ResponseCode === "00") return "SUCCESS"; // thanh toán VNPay thành công
-    if (vnp_ResponseCode) return "FAILED"; // VNPay trả về nhưng code khác 00
-    return "COD"; // không có code => đơn COD
-  }, [vnp_ResponseCode]);
+    if (statusParam === "SUCCESS") return "SUCCESS";
+    if (statusParam === "FAILED") return "FAILED";
+    return "COD";
+  }, [statusParam]);
 
-  const handleGoHome = () => {
-    navigate("/"); // trang chủ
-  };
+  const handleGoHome = () => navigate("/");
+  const handleViewOrders = () => navigate("/tai-khoan/don-mua");
+  const handleGoCart = () => navigate("/cart");
 
-  const handleViewOrders = () => {
-    navigate("/orders"); // trang danh sách đơn hàng (tuỳ route bạn đặt)
-  };
-
-  const handleGoCart = () => {
-    navigate("/cart");
-  };
-
-  useEffect(() => {
-    if (!vnp_TxnRef) return;
-
-    const update = async () => {
-      await updatePaymentStatus(vnp_TxnRef as string, status);
-    };
-    update();
-  }, [vnp_TxnRef, status]);
-
-  // Text hiển thị theo trạng thái
   const title =
     status === "SUCCESS"
       ? "Thanh toán thành công!"
@@ -49,7 +27,7 @@ const OrderSuccess: React.FC = () => {
 
   const description =
     status === "SUCCESS"
-      ? `Đơn hàng của bạn đã thanh toán qua VNPay . Chúng tôi sẽ xử lý và giao hàng trong thời gian sớm nhất.`
+      ? "Đơn hàng của bạn đã thanh toán qua VNPay. Chúng tôi sẽ xử lý và giao hàng trong thời gian sớm nhất."
       : status === "FAILED"
       ? "Thanh toán qua VNPay không thành công. Bạn có thể thử lại hoặc chọn phương thức thanh toán khác."
       : "Đơn hàng của bạn đã được ghi nhận và sẽ thanh toán khi nhận hàng.";
@@ -57,16 +35,15 @@ const OrderSuccess: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="max-w-md w-full bg-white shadow-lg rounded-2xl p-8 text-center">
-        {/* Icon */}
         <div
           className="mx-auto flex items-center justify-center h-16 w-16 rounded-full mb-4"
           style={{
             backgroundColor:
               status === "FAILED"
-                ? "#fee2e2" // red-100
+                ? "#fee2e2"
                 : status === "SUCCESS"
-                ? "#dcfce7" // green-100
-                : "#e5e7eb", // gray-200
+                ? "#dcfce7"
+                : "#e5e7eb",
           }}
         >
           {status === "SUCCESS" && <span className="text-3xl">✅</span>}
@@ -74,13 +51,9 @@ const OrderSuccess: React.FC = () => {
           {status === "COD" && <span className="text-3xl">📦</span>}
         </div>
 
-        {/* Tiêu đề */}
         <h1 className="text-2xl font-semibold text-gray-900 mb-2">{title}</h1>
-
-        {/* Mô tả */}
         <p className="text-gray-600 mb-6">{description}</p>
 
-        {/* Nút hành động */}
         {status === "FAILED" ? (
           <div className="flex flex-col sm:flex-row gap-3">
             <button

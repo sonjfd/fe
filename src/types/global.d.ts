@@ -1,6 +1,10 @@
 export { };
 
 declare global {
+
+  interface Window {
+    global: any;
+  }
   interface IBackendRes<T> {
     message?: string;
     data?: T;
@@ -450,5 +454,82 @@ declare global {
     email: string;
     fullName: string;
   }
+
+
+  export interface OrderUser {
+    id: number;
+    fullName: string;
+    email: string;
+    phone: string;
+  }
+
+  export interface Order {
+    id: number;
+    totalPrice: number;
+    paymentMethod: string;
+    paymentStatus: string;
+    orderStatus: string;
+    ghnExpectedDelivery: string;
+    ghnFee: number;
+    province: string;
+    district: string;
+    ward: string;
+    addressDetail: string;
+    user: OrderUser;
+  }
+
+
+
+
+
+
+
+  interface IVariantOrder {
+    id: number;
+    name: string;
+    thumbnail: string;
+  }
+
+  interface IOrderDetailItem {
+    id: number;
+    quantity: number;
+    price: number;
+    variant: IVariantOrder;
+  }
+
+  interface OneOrder {
+    id: number;
+    totalPrice: number;
+    paymentMethod: "VN_PAY" | "CASH";
+    paymentStatus: "PAID" | "PENDING" | "FAILED" | "CANCELLED" | "REFUNDED";
+    orderStatus: "COMPLETED" | "PROCESSING" | "SHIPPING" | "DELIVERED" | "CANCELLED";
+
+    ghnExpectedDelivery: string;
+    ghnFee: number;
+
+    province: string;
+    district: string;
+    ward: string;
+    addressDetail: string;
+
+    user: OrderUser;
+    details: IOrderDetailItem[];
+  }
+
+  interface VNPayResponse {
+    paymentUrl: string
+  }
+
+  interface AdminNotification {
+    id: number;
+    title: string;
+    message: string;
+    createdAt: string;
+    isRead: boolean;
+    receiver: string;
+    type: "ORDER" | "CONTACT" | "OTHER";
+    referenceId: number;
+  }
+
 
 }

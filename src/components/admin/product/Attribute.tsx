@@ -241,7 +241,7 @@ export default function AttributePanel() {
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl font-semibold">
-          <span className="font-bold">Thuộc tính</span> — Sản phẩm #{pid}
+          <span className="font-bold">Thuộc tính</span>
         </h2>
         <button
           onClick={() => navigate(-1)}

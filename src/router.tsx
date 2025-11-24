@@ -5,7 +5,6 @@ import UserList from "./pages/admin/UserList";
 
 import CategoryList from "./pages/admin/CategoryList";
 import OrderList from "./pages/admin/OrderList";
-import OrderDetail from "./pages/admin/OrderDetail";
 
 import { ContactPage } from "./pages/users/ContactPage";
 import ProductList from "./pages/admin/ProductList";
@@ -34,10 +33,10 @@ import AboutPage from "./pages/users/AboutPage";
 import CategoryPage from "./pages/users/FilterPage";
 import { CartPage } from "./pages/users/client/CardPage";
 import ProductDetailPage from "./pages/users/ProductDetailPage";
-import { CheckoutPage } from "./pages/users/CheckoutPage";
 import OrderSuccess from "./pages/users/OrderSuccess";
-import { CheckoutPage } from "./pages/users/client/CheckoutPage";
 import VoucherListPage from "pages/admin/VoucherList.tsx";
+import { CheckoutPage } from "./pages/users/CheckoutPage";
+import UserOrderPage from "./pages/users/UserOrderPage";
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
@@ -84,6 +83,7 @@ export const ROUTER = createBrowserRouter([
           { path: "ho-so", element: <ProfilePage /> },
           { path: "dia-chi", element: <AddressPage /> },
           { path: "doi-mat-khau", element: <ChangePasswordPage /> },
+          { path: "don-mua", element: <UserOrderPage /> },
         ],
       },
     ],
@@ -110,7 +110,6 @@ export const ROUTER = createBrowserRouter([
       { path: "categories", element: <CategoryList /> },
 
       { path: "orders", element: <OrderList /> },
-      { path: "orders/:id", element: <OrderDetail /> },
       { path: "roles", element: <RoleManagementPage /> },
       { path: "contact-message", element: <AdminContactsPage /> },
       // active only

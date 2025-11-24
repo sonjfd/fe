@@ -20,3 +20,21 @@ export const getUserAddresses = () => {
 export const updatePaymentStatus = (uuid: string, status: string) => {
     return axios.put("/api/v1/orders/update-payment-status", { uuid, status });
 };
+
+export const getUserOrder = (query: string) => {
+    const backendUrl = `/api/v1/orders?${query}`;
+    return axios.get<IBackendRes<IModelPaginate<Order>>>(backendUrl)
+
+}
+
+export const getOrderDetail = (id: number) => {
+    const backendUrl = `/api/v1/orders/${id}`;
+    return axios.get<IBackendRes<OneOrder>>(backendUrl)
+
+}
+
+export const vnPayPayment = (orderId: number, totalAmount: number) => {
+    const backendUrl = `/api/v1/payment/vn-pay`
+    return axios.post<IBackendRes<VNPayResponse>>(backendUrl, { orderId, totalAmount })
+
+}

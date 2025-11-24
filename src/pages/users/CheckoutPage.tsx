@@ -5,6 +5,7 @@ import {
   createOrder,
   getShippingFree,
   getUserAddresses,
+  vnPayPayment,
 } from "@/api/order.api";
 import { useCurrentApp } from "@/components/context/AppContext";
 
@@ -132,17 +133,23 @@ export const CheckoutPage: React.FC = () => {
         paymentMethod,
       };
 
-      const res = await createOrder(payload); // 👈 res = { message, data }
-
-      console.log("createOrder response >>>", res);
+      const res = await createOrder(payload);
 
       if (res && res.data) {
-        const { order, paymentUrl } = res.data;
-        console.log("order.paymentMethod =", order.paymentMethod);
-        console.log("paymentUrl =", paymentUrl);
+        const { order } = res.data;
 
-        if (order.paymentMethod === "VN_PAY" && paymentUrl) {
-          window.location.href = paymentUrl;
+        if (order.paymentMethod === "VN_PAY") {
+          const res = await vnPayPayment(
+            order.id,
+            order.ghnFee + order.totalPrice
+          );
+          const { paymentUrl } = res.data as { paymentUrl: string };
+          if (paymentUrl) {
+            window.location.href = paymentUrl;
+            return;
+          } else {
+            toast.error("Không lấy được link thanh toán VNPay");
+          }
           return;
         }
 
@@ -344,7 +351,7 @@ export const CheckoutPage: React.FC = () => {
               <div className="border-t mt-3 pt-3 flex justify-between items-center">
                 <span className="text-sm text-slate-700">Tổng thanh toán</span>
                 <span className="text-xl font-bold text-rose-600">
-                  {formatCurrency(totalPay)}
+                  {formatCurrency(totalPay + shippingFee)}
                 </span>
               </div>
               <p className="mt-2 text-xs text-slate-500">
