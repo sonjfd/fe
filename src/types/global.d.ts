@@ -57,18 +57,6 @@ declare global {
     }
   }
 
-  interface ContactMessage {
-    id: number;
-    full_name: string;
-    email: string;
-    phone?: string | null;
-    subject?: string | null;
-    message: string;
-    status: ContactStatus;
-    created_at: string; // ISO string
-    updated_at: string; // ISO string
-  }
-
   interface ILogin {
     access_token: string;
     user: {
@@ -135,19 +123,19 @@ declare global {
 
 
 
-  export interface ContactMessage {
-    id: number;
-    full_name: string;
-    email: string;
-    phone?: string | null;
-    subject?: string | null;
-    message: string;
-    status: ContactStatus;
-    ip_address?: string | null;
-    user_agent?: string | null;
-    created_at: string; // ISO
-    updated_at: string; // ISO
-  }
+  interface ContactMessage {
+  id: number;
+  fullName: string;
+  email: string;
+  phone?: string | null;
+  subject?: string | null;
+  message: string;
+  status: ContactStatus;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
   //Profile
   export interface IUserProfile {
@@ -206,19 +194,8 @@ declare global {
     updatedAt: string;
   }
 
-  interface IWishlistItem {
-    wishlistId: number;
-    productId: number;
-    productName: string;
-    productSlug: string;
-    productVariantId: number;
-    sku: string;
-    price: number;
-    promotionPrice: number | null;
-    thumbnail: string | null;
-  }
-
   interface IHomeProductVariant {
+    productId?: number;
     variantId: number;
     variantName: string;
     productName: string;
@@ -227,14 +204,6 @@ declare global {
     sold: number;
     thumbnailUrl: string | null;
   }
-
-  interface IHomeCategorySection {
-    categoryId: number;
-    categoryName: string;
-    variants: IHomeProductVariant[];
-  }
-
-
 
   interface IWishlistProductVariant extends IHomeProductVariant {
     wishlistId: number;
@@ -302,4 +271,12 @@ export interface UpdateCartQuantityRequest {
   cartDetailId: number;
   quantity: number;
 }
+
+type ContactNotification = {
+  id: number;
+  fullName: string;
+  subject: string;
+  createdAt: string;
+  read: boolean;
+};
 }

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import logoUrl from "@/assets/img/logo.png";
 import { Link, useNavigate } from "react-router-dom";
-import { useCurrentApp } from "../context/AppContext";
+import { useCurrentApp } from "@/components/context/AppContext";
 import { logoutApi } from "@/api/auth.api";
 import { toSlug } from "@/utils/slug";
 import avatarDefault from "@/assets/img/avatar-default.png";

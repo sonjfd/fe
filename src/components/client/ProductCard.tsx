@@ -1,9 +1,9 @@
-import React from "react";
-import { AiOutlineHeart, AiOutlineEye } from "react-icons/ai";
+import React, { useEffect, useState } from "react";
+import { AiOutlineHeart, AiOutlineEye,AiFillHeart } from "react-icons/ai";
 import { HiOutlineSwitchHorizontal } from "react-icons/hi";
 import { useCurrentApp } from "../context/AppContext";
 import { toast } from "react-toastify";
-import { addToWishlistApi } from "@/api/home.api";
+import { toggleWishlistApi } from "@/api/home.api";
 import { useLocation, useNavigate } from "react-router-dom";
 import { addToCartApi } from "@/api/cart.api";
 
@@ -19,6 +19,8 @@ type ProductCardProps = {
   stock: number;
   onAddToCart?: () => void;
   onClick?: () => void;
+  onToggleWishlist?: (added: boolean) => void;
+  isWishlisted?: boolean;
 };
 
 const formatCurrency = (value: number) =>
@@ -36,23 +38,39 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   stock,
   onAddToCart,
   onClick,
+  onToggleWishlist,
+  isWishlisted
 }) => {
   const { isAuthenticated, reloadWishlistCount, reloadCart } = useCurrentApp();
   const navigate = useNavigate();
   const location = useLocation();
+  const [wish, setWish] = useState(isWishlisted ?? false);
+
+  useEffect(() => {
+  setWish(isWishlisted ?? false);
+  }, [isWishlisted]);
 
   const handleAddWishlist = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
 
     if (!isAuthenticated) {
       toast.info("Vui lòng đăng nhập để thêm sản phẩm yêu thích");
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`);
       return;
     }
 
     try {
-      await addToWishlistApi(productVariantId);
-      toast.success("Đã thêm vào danh sách yêu thích");
-      await reloadWishlistCount(); // 👈 update count global
+      const res = await toggleWishlistApi(productVariantId);
+      const added = res.data;
+      setWish(!!added);
+      if (added) {
+        toast.success("Đã thêm vào danh sách yêu thích");
+      } else {
+        toast.info("Đã xóa khỏi danh sách yêu thích");
+      }
+
+      await reloadWishlistCount();
+      onToggleWishlist?.(added!);
     } catch {
       toast.error("Không thể thêm vào danh sách yêu thích");
     }
@@ -73,7 +91,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
     try {
       const data = await addToCartApi({
-        variantId: productVariantId as unknown as string,
+        variantId: productVariantId,
         quantity: 1,
       });
       if (!data || !data.data) {
@@ -82,8 +100,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       }
 
       toast.success("Đã thêm sản phẩm vào giỏ hàng");
-      await reloadCart(); // 👈 cập nhật lại count + popup cart
-
+      await reloadCart();
       onAddToCart?.();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
@@ -110,7 +127,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             className="w-9 h-9 bg-white flex items-center justify-center rounded-full shadow-md"
             onClick={handleAddWishlist}
           >
-            <AiOutlineHeart className="text-xl" />
+            {wish ? (
+              <AiFillHeart className="text-xl text-red-500" />
+            ) : (
+              <AiOutlineHeart className="text-xl text-gray-600" />
+            )}
           </button>
 
           <button

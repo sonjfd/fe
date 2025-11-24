@@ -12,7 +12,7 @@ interface FormData {
 }
 
 const Login = () => {
-  const { setIsAuthenticated, setUser, reloadWishlistCount} = useCurrentApp();
+  const { setIsAuthenticated, setUser} = useCurrentApp();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [searchParams] = useSearchParams();
 
@@ -37,12 +37,11 @@ const Login = () => {
         const acc = await fetchAccountAPI();
         setUser(acc.data?.user as any);
         setIsAuthenticated(true);
-        await reloadWishlistCount();
-
+        const redirect = searchParams.get("redirect");
         if (acc.data?.user?.role === "ADMIN") {
           navigate("/admin");
         } else {
-          navigate("/");
+          navigate(redirect || "/");
         }
       } else {
         toast.error(res.message);

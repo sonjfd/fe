@@ -40,7 +40,7 @@ export const ContactDetailModal: React.FC<{
           <div className="grid gap-4 text-sm sm:grid-cols-2">
             <div>
               <span className="text-gray-500">Họ và tên</span>
-              <div className="font-medium">{item.full_name}</div>
+              <div className="font-medium">{item.fullName}</div>
             </div>
             <div>
               <span className="text-gray-500">Email</span>
@@ -61,13 +61,13 @@ export const ContactDetailModal: React.FC<{
             <div>
               <span className="text-gray-500">Ngày tạo</span>
               <div className="font-medium">
-                {new Date(item.created_at).toLocaleString()}
+                {new Date(item.createdAt).toLocaleString()}
               </div>
             </div>
             <div>
               <span className="text-gray-500">Cập nhật lần cuối</span>
               <div className="font-medium">
-                {new Date(item.updated_at).toLocaleString()}
+                {new Date(item.updatedAt).toLocaleString()}
               </div>
             </div>
           </div>
