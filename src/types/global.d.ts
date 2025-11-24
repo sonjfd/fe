@@ -208,6 +208,8 @@ declare global {
     stock: number;
     sold: number;
     thumbnailUrl: string | null;
+    ratingAverage: number | null;
+    ratingCount: number | null;
   }
 
   interface IWishlistProductVariant extends IHomeProductVariant {
