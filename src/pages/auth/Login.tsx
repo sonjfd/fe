@@ -12,7 +12,7 @@ interface FormData {
 }
 
 const Login = () => {
-  const { setIsAuthenticated, setUser, reloadWishlistCount} = useCurrentApp();
+  const { setIsAuthenticated, setUser} = useCurrentApp();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [searchParams] = useSearchParams();
 
@@ -37,12 +37,11 @@ const Login = () => {
         const acc = await fetchAccountAPI();
         setUser(acc.data?.user as any);
         setIsAuthenticated(true);
-        await reloadWishlistCount();
-
+        const redirect = searchParams.get("redirect");
         if (acc.data?.user?.role === "ADMIN") {
           navigate("/admin");
         } else {
-          navigate("/");
+          navigate(redirect || "/");
         }
       } else {
         toast.error(res.message);
@@ -129,7 +128,14 @@ const Login = () => {
             Đăng nhập
           </button>
         </form>
-
+          <div className="flex justify-end text-sm" >
+              <Link
+                  to="/forgot-password"
+                  className="text-blue-600 hover:underline"
+              >
+                  Quên mật khẩu?
+              </Link>
+          </div>
         <div className="my-6 flex items-center gap-3">
           <div className="h-px flex-1 bg-slate-200"></div>
           <span className="text-xs uppercase tracking-wider text-slate-500">

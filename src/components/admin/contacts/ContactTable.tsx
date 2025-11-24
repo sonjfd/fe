@@ -3,17 +3,33 @@ import {
   getContactMessage,
   listContactMessages,
   updateContactStatus,
+  bulkDeleteContactMessages,
+  bulkUpdateContactStatus
 } from "@/api/admin.contact.api";
 import { useEffect, useMemo, useState } from "react";
 import { FiltersBar } from "./FilterBar";
 import { StatusPill } from "./StatusPill";
 import { ContactDetailModal } from "./ContactDetailModal";
+import { confirmToast } from "@/components/ConfirmToast";
+import { toast } from "react-toastify";
+import { useDebounce } from "@/hook/UseDebounce";
 
 export const ContactTable: React.FC = () => {
   const [page, setPage] = useState(0); // 0-based
   const [size, setSize] = useState(10);
+
+  // === Filter states ===
   const [status, setStatus] = useState<ContactStatus | "ALL">("ALL");
-  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const debouncedSearch = useDebounce(searchInput, 400);
+
+  const [startDate, setStartDate] = useState<string | undefined>();
+  const [endDate, setEndDate] = useState<string | undefined>();
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
+
+  // === Data states ===
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<IModelPaginate<ContactMessage>>({
@@ -27,25 +43,27 @@ export const ContactTable: React.FC = () => {
   const [detailItem, setDetailItem] = useState<ContactMessage | null>(null);
 
   const totalPages = useMemo(
-    () => Math.max(1, Math.ceil((data?.total || 0) / (data?.size || size))),
+    () => Math.max(1, Math.ceil((data.total || 0) / (size || 10))),
     [data, size]
   );
 
+  // === Fetch data ===
   async function fetchData() {
     try {
       setLoading(true);
       setError(null);
-      const res = await listContactMessages({ page, size, status, search });
-      if (res) {
-        setData({
-          ...res,
-          items: res.items.map((it) => ({
-            ...it,
-            full_name: it.full_name,
-            created_at: it.created_at,
-          })),
-        });
-      }
+
+      const res = await listContactMessages({
+        page,
+        size,
+        status,
+        search:debouncedSearch,
+        startDate,
+        endDate,
+        sortDir,
+      });
+
+      if (res) setData(res);
     } catch (e: any) {
       setError(e.message || "Có lỗi xảy ra khi tải dữ liệu");
     } finally {
@@ -56,7 +74,67 @@ export const ContactTable: React.FC = () => {
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, size, status, search]);
+  }, [page, size, status, debouncedSearch, startDate, endDate, sortDir]);
+
+  const allSelected =
+  data.items.length > 0 &&
+  data.items.every((m) => selectedIds.includes(m.id));
+
+const isSelected = (id: number) => selectedIds.includes(id);
+
+const toggleSelectAll = () => {
+  if (allSelected) {
+    setSelectedIds([]);
+  } else {
+    setSelectedIds(data.items.map((m) => m.id));
+  }
+};
+
+const toggleSelectOne = (id: number) => {
+  setSelectedIds((prev) =>
+    prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+  );
+};
+
+async function handleBulkStatus(next: ContactStatus) {
+  if (selectedIds.length === 0) return;
+  const map = {
+    PENDING: "chờ xử lý",
+    READ: "đã đọc",
+    RESOLVED: "đã xử lý",
+  }
+
+  const ok = await confirmToast(
+    `Bạn có chắc muốn cập nhật trạng thái ${selectedIds.length} liên hệ sang "${map[next]}"?`
+  );
+  if (!ok) return;
+
+  await bulkUpdateContactStatus(selectedIds, next);
+
+  toast.success("Cập nhật trạng thái thành công!");
+
+  setSelectedIds([]);
+  fetchData();
+}
+
+
+async function handleBulkDelete() {
+  if (selectedIds.length === 0) return;
+
+  const ok = await confirmToast(
+    `Bạn có chắc muốn xoá ${selectedIds.length} liên hệ đã chọn?`
+  );
+  if (!ok) return;
+
+  await bulkDeleteContactMessages(selectedIds);
+
+  toast.success("Đã xoá thành công!");
+
+  setSelectedIds([]);
+  fetchData();
+}
+
+
 
   async function handleStatus(id: number, next: ContactStatus) {
     await updateContactStatus(id, next);
@@ -81,6 +159,35 @@ export const ContactTable: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-neutral-200 p-4">
           <h2 className="text-lg font-semibold">Liên hệ</h2>
+
+          {selectedIds.length > 0 && (
+    <div className="flex items-center gap-2 text-sm">
+      <span className="text-gray-600">
+        Đã chọn {selectedIds.length} liên hệ
+      </span>
+      <button
+        onClick={() => handleBulkStatus("READ")}
+        className="rounded-md border border-gray-200 px-3 py-1 hover:bg-gray-50"
+        title="Đánh dấu tất cả là đã đọc"
+      >
+        Đánh dấu đã đọc
+      </button>
+      <button
+        onClick={() => handleBulkStatus("RESOLVED")}
+        className="rounded-md border border-gray-200 px-3 py-1 hover:bg-gray-50"
+        title="Đánh dấu tất cả là đã xử lý"
+      >
+        Đã xử lý
+      </button>
+      <button
+        onClick={handleBulkDelete}
+        className="rounded-md border border-red-200 px-3 py-1 text-red-600 hover:bg-red-50"
+        title="Xoá các liên hệ đã chọn"
+      >
+        Xoá
+      </button>
+    </div>
+  )}
         </div>
 
         {/* Filter bar */}
@@ -90,15 +197,30 @@ export const ContactTable: React.FC = () => {
             setPage(0);
             setStatus(s);
           }}
-          search={search}
+          search={searchInput}
           setSearch={(v) => {
             setPage(0);
-            setSearch(v);
+            setSearchInput(v);
           }}
           size={size}
           setSize={(n) => {
             setPage(0);
             setSize(n);
+          }}
+          startDate={startDate}
+          setStartDate={(v) => {
+            setPage(0);
+            setStartDate(v);
+          }}
+          endDate={endDate}
+          setEndDate={(v) => {
+            setPage(0);
+            setEndDate(v);
+          }}
+          sortDir={sortDir}
+          setSortDir={(v) => {
+            setPage(0);
+            setSortDir(v);
           }}
         />
 
@@ -107,6 +229,14 @@ export const ContactTable: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-neutral-50 text-neutral-600">
               <tr>
+                <th className="px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={toggleSelectAll}
+                    title="Chọn / bỏ chọn tất cả"
+                  />
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">
                   Stt
                 </th>
@@ -166,35 +296,54 @@ export const ContactTable: React.FC = () => {
 
               {!loading &&
                 !error &&
-                data.items.map((m, idx) => (
+                data.items.map((m: ContactMessage, idx:number) => (
                   <tr key={m.id} className="hover:bg-gray-50">
-                    {/* STT */}
-                    <td className="px-6 py-4">
-                      {page * size + idx + 1}
+                    {/* Checkbox */}
+                    <td className="px-4 py-4">
+                      <input
+                        type="checkbox"
+                        checked={isSelected(m.id)}
+                        onChange={() => toggleSelectOne(m.id)}
+                        title={isSelected(m.id) ? "Bỏ chọn" : "Chọn liên hệ này"}
+                      />
                     </td>
+                    {/* STT */}
+                    <td className="px-6 py-4">{page * size + idx + 1}</td>
 
+                    {/* Tên + phone */}
                     <td className="px-6 py-4">
-                      <div className="font-medium">{m.full_name}</div>
+                      <div className="font-medium">{m.fullName}</div>
                       <div className="text-xs text-gray-500">
                         {m.phone || ""}
                       </div>
                     </td>
+
+                    {/* Email */}
                     <td className="px-6 py-4 text-sm">{m.email}</td>
+
+                    {/* Tiêu đề */}
                     <td className="px-6 py-4 text-sm truncate max-w-[18rem]">
                       {m.subject || "—"}
                     </td>
+
+                    {/* Ngày tạo */}
                     <td className="px-6 py-4 text-sm">
-                      {new Date(m.created_at).toLocaleString()}
+                      {new Date(m.createdAt).toLocaleString("vi-VN")}
                     </td>
+
+                    {/* Trạng thái */}
                     <td className="px-6 py-4">
                       <StatusPill status={m.status} />
                     </td>
+
+                    {/* Thao tác */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3 text-gray-600">
+                        {/* Xem chi tiết */}
                         <button
                           onClick={() => openDetail(m.id)}
                           className="hover:text-gray-900"
-                          title="Xem chi tiết"
+                          title="Xem chi tiết liên hệ"
                         >
                           <svg
                             className="h-5 w-5"
@@ -212,11 +361,12 @@ export const ContactTable: React.FC = () => {
                           </svg>
                         </button>
 
+                        {/* Đánh dấu đã đọc */}
                         {m.status !== "READ" && (
                           <button
                             onClick={() => handleStatus(m.id, "READ")}
                             className="hover:text-gray-900"
-                            title="Đánh dấu đã đọc"
+                            title="Đánh dấu là đã đọc"
                           >
                             <svg
                               className="h-5 w-5"
@@ -234,11 +384,12 @@ export const ContactTable: React.FC = () => {
                           </button>
                         )}
 
+                        {/* Đánh dấu đã xử lý */}
                         {m.status !== "RESOLVED" && (
                           <button
                             onClick={() => handleStatus(m.id, "RESOLVED")}
                             className="hover:text-gray-900"
-                            title="Đánh dấu đã xử lý"
+                            title="Đánh dấu là đã xử lý"
                           >
                             <svg
                               className="h-5 w-5"
@@ -256,10 +407,11 @@ export const ContactTable: React.FC = () => {
                           </button>
                         )}
 
+                        {/* Xoá */}
                         <button
                           onClick={() => handleDelete(m.id)}
                           className="hover:text-red-600"
-                          title="Xoá"
+                          title="Xoá liên hệ này"
                         >
                           <svg
                             className="h-5 w-5"
@@ -283,7 +435,7 @@ export const ContactTable: React.FC = () => {
           </table>
         </div>
 
-        {/* Pagination: giữ kiểu số như ban đầu */}
+        {/* Pagination */}
         <div className="flex items-center justify-between p-4 text-sm">
           <span className="text-gray-500">
             Hiển thị {data.items.length} / {data.total}
@@ -296,24 +448,21 @@ export const ContactTable: React.FC = () => {
             >
               ‹
             </button>
-            {Array.from({
-              length: Math.min(5, Math.max(1, totalPages)),
-            }).map((_, i) => {
-              const n = i; // hiển thị 5 trang đầu giống bản gốc
-              return (
-                <button
-                  key={n}
-                  onClick={() => setPage(n)}
-                  className={`h-9 w-9 rounded-lg border ${
-                    page === n
-                      ? "border-indigo-200 bg-indigo-50 text-indigo-600"
-                      : "border-gray-200"
-                  }`}
-                >
-                  {n + 1}
-                </button>
-              );
-            })}
+
+            {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setPage(i)}
+                className={`h-9 w-9 rounded-lg border ${
+                  page === i
+                    ? "border-indigo-200 bg-indigo-50 text-indigo-600"
+                    : "border-gray-200"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
             <button
               disabled={page >= totalPages - 1}
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}

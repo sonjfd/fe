@@ -142,9 +142,8 @@ const AssignVoucherUsersModal: React.FC<Props> = ({
   async function handleSave() {
     try {
       setSaving(true);
-
       const emails = selected.map((u) => u.email);
-      await adminAssignVoucherUsers(voucher?.id as number, emails);
+      await adminAssignVoucherUsers(voucher!.id, emails);
       toast.success("Cập nhật danh sách khách hàng sử dụng voucher thành công");
       onClose();
     } catch (err: any) {

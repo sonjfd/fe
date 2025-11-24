@@ -51,16 +51,16 @@ export const AppProvider = (props: TProps) => {
 
   /* ---------- WISHLIST ---------- */
   const reloadWishlistCount = useCallback(async () => {
-    if (!isAuthenticated) {
-      setWishlistCount(0);
-      return;
-    }
-    try {
-      const page = await fetchMyWishlist(0, 1, "createdAt", "desc");
-      setWishlistCount(page.total);
-    } catch {
-      setWishlistCount(0);
-    }
+  if (!isAuthenticated) {
+    setWishlistCount(0);
+    return;
+  }
+  try {
+    const page = await fetchMyWishlist(1, 1, "createdAt", "desc");
+    setWishlistCount(page.total);
+  } catch {
+    setWishlistCount(0);
+  }
   }, [isAuthenticated]);
 
   /* ---------- CART ---------- */

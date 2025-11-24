@@ -2,7 +2,10 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { updateCartQuantityApi, removeCartItemApi } from "@/api/cart.api";
+import {
+  updateCartQuantityApi,
+  removeCartItemApi
+} from "@/api/cart.api";
 import { toast } from "react-toastify";
 import { useCurrentApp } from "@/components/context/AppContext";
 
@@ -27,12 +30,11 @@ export const CartPage: React.FC = () => {
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-  const [localQuantities, setLocalQuantities] = useState<
-    Record<number, number>
-  >({});
+  const [localQuantities, setLocalQuantities] = useState<Record<number, string>>({});
 
-  // Lưu timer cho từng item để debounce
-  const debounceTimers = React.useRef<Record<number, number | undefined>>({});
+// Lưu timer cho từng item để debounce
+const debounceTimers = React.useRef<Record<number, number | undefined>>({});
+
 
   // Mỗi khi giỏ hàng thay đổi → mặc định chọn hết (giống Shopee)
   useEffect(() => {
@@ -44,54 +46,72 @@ export const CartPage: React.FC = () => {
   }, [cart]);
 
   useEffect(() => {
-    if (cart && cart.items.length > 0) {
-      setSelectedIds(new Set(cart.items.map((i) => i.id)));
+  if (cart && cart.items.length > 0) {
+    setSelectedIds(new Set(cart.items.map((i) => i.id)));
+    setLocalQuantities(
+      cart.items.reduce((acc, item) => {
+        acc[item.id] = String(item.quantity);
+        return acc;
+      }, {} as Record<number, string>)
+    );
+  } else {
+    setSelectedIds(new Set());
+    setLocalQuantities({});
+  }
+}, [cart]);
 
-      // sync lại số lượng hiển thị theo server
-      setLocalQuantities(
-        cart.items.reduce((acc, item) => {
-          acc[item.id] = item.quantity;
-          return acc;
-        }, {} as Record<number, number>)
-      );
-    } else {
-      setSelectedIds(new Set());
-      setLocalQuantities({});
-    }
-  }, [cart]);
 
   const DEBOUNCE_MS = 600;
 
-  const handleInputQuantityChange = (item: ICartItem, value: number) => {
-    if (Number.isNaN(value)) return;
+const handleInputQuantityChange = (item: ICartItem, value: string) => {
+  // Cập nhật state local hiển thị
+  setLocalQuantities((prev) => ({
+    ...prev,
+    [item.id]: value,
+  }));
 
-    // Không cho nhập < 1
-    if (value < 1) {
-      value = 1;
+  // Clear timer cũ
+  const old = debounceTimers.current[item.id];
+  if (old) clearTimeout(old);
+
+  // Set timer mới
+  debounceTimers.current[item.id] = window.setTimeout(() => {
+    // Parse sang số
+    const parsed = parseInt(value, 10);
+
+    // Nếu không phải số hợp lệ → revert về quantity cũ
+    if (isNaN(parsed) || parsed < 1) {
+      setLocalQuantities((prev) => ({
+        ...prev,
+        [item.id]: String(item.quantity),
+      }));
+      return;
     }
 
-    // Cập nhật quantity hiển thị
+    // Nếu không thay đổi thì thôi
+    if (parsed === item.quantity) return;
+
+    handleChangeQuantity(item, parsed);
+  }, DEBOUNCE_MS);
+};
+
+const handleQuantityBlur = (item: ICartItem) => {
+  const value = localQuantities[item.id];
+  const parsed = parseInt(value, 10);
+
+  if (isNaN(parsed) || parsed < 1) {
     setLocalQuantities((prev) => ({
       ...prev,
-      [item.id]: value,
+      [item.id]: String(item.quantity),
     }));
+    return;
+  }
 
-    // Clear timer cũ (nếu có)
-    const oldTimer = debounceTimers.current[item.id];
-    if (oldTimer) {
-      clearTimeout(oldTimer);
-    }
+  if (parsed !== item.quantity) {
+    handleChangeQuantity(item, parsed);
+  }
+};
 
-    // Set timer mới
-    const timerId = window.setTimeout(() => {
-      // Nếu value bằng với quantity hiện tại của server thì khỏi gọi
-      if (value === item.quantity) return;
-
-      handleChangeQuantity(item, value);
-    }, DEBOUNCE_MS);
-
-    debounceTimers.current[item.id] = timerId;
-  };
 
   const isAllSelected =
     cart && cart.items.length > 0
@@ -146,8 +166,8 @@ export const CartPage: React.FC = () => {
         cartDetailId: item.id,
         quantity: newQuantity,
       });
-      if (!data.data) {
-        toast.error(data.message);
+      if(!data.data){
+        toast.error(data.message)
       }
       await reloadCart();
     } catch (error) {
@@ -158,7 +178,9 @@ export const CartPage: React.FC = () => {
   };
 
   const handleRemoveItem = async (item: ICartItem) => {
-    const ok = window.confirm(`Xóa "${item.productName}" khỏi giỏ hàng?`);
+    const ok = window.confirm(
+      `Xóa "${item.productName}" khỏi giỏ hàng?`
+    );
     if (!ok) return;
 
     try {
@@ -296,43 +318,42 @@ export const CartPage: React.FC = () => {
 
                     {/* Số lượng */}
                     <div className="col-span-2 flex items-center justify-center gap-2">
+                      {/* Nút giảm */}
                       <button
                         type="button"
-                        disabled={
-                          isUpdating ||
-                          (localQuantities[item.id] ?? item.quantity) <= 1
-                        }
-                        onClick={() =>
-                          handleInputQuantityChange(
-                            item,
-                            (localQuantities[item.id] ?? item.quantity) - 1
-                          )
-                        }
+                        disabled={isUpdating}
+                        onClick={() => {
+                          const current = parseInt(localQuantities[item.id], 10);
+                          const safeValue = isNaN(current) ? item.quantity : current;
+                          const newValue = Math.max(1, safeValue - 1);
+
+                          handleInputQuantityChange(item, String(newValue));
+                        }}
                         className="w-8 h-8 border rounded flex items-center justify-center text-lg disabled:opacity-40"
                       >
                         -
                       </button>
+
+                      {/* Input */}
                       <input
-                        type="number"
-                        min={1}
-                        value={localQuantities[item.id] ?? item.quantity}
-                        onChange={(e) =>
-                          handleInputQuantityChange(
-                            item,
-                            Number(e.target.value)
-                          )
-                        }
+                        type="text"
+                        value={localQuantities[item.id] ?? String(item.quantity)}
+                        onChange={(e) => handleInputQuantityChange(item, e.target.value)}
+                        onBlur={() => handleQuantityBlur(item)}
                         className="w-12 h-8 border rounded text-center text-sm"
                       />
+
+                      {/* Nút tăng */}
                       <button
                         type="button"
                         disabled={isUpdating}
-                        onClick={() =>
-                          handleInputQuantityChange(
-                            item,
-                            (localQuantities[item.id] ?? item.quantity) + 1
-                          )
-                        }
+                        onClick={() => {
+                          const current = parseInt(localQuantities[item.id], 10);
+                          const safeValue = isNaN(current) ? item.quantity : current;
+                          const newValue = safeValue + 1;
+
+                          handleInputQuantityChange(item, String(newValue));
+                        }}
                         className="w-8 h-8 border rounded flex items-center justify-center text-lg disabled:opacity-40"
                       >
                         +
