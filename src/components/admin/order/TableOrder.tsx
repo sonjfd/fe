@@ -112,14 +112,18 @@ export default function TableOrder() {
     switch (s) {
       case "COMPLETED":
         return "Đã hoàn thành";
-      case "PROCESSING":
-        return "Đang xử lý";
+      case "RETURNED":
+        return "Hoàn trả hàng";
       case "SHIPPING":
         return "Đang giao";
-      case "DELIVERED":
-        return "Đã giao";
+      case "FAILED":
+        return "Hư hỏng";
       case "CANCELLED":
         return "Đã hủy";
+      case "PENDING":
+        return "Đơn hàng mới tạo";
+      case "CONFIRMED":
+        return "Chuẩn bị giao";
       default:
         return s;
     }

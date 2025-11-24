@@ -39,14 +39,12 @@ export const LeftCategoryMenu: React.FC<{ categories: IHomeCategory[] }> = ({
       </div>
 
       <ul className="divide-y divide-slate-100">
-        {parentWithChildren.map((c) => (
+        {parentWithChildren?.map((c) => (
           <li
             key={c.id}
             className="group relative flex items-center justify-between px-4 py-3 text-sm cursor-pointer hover:bg-slate-50"
           >
-            <span className="flex-1">
-              {c.name}
-            </span>
+            <span className="flex-1">{c.name}</span>
 
             <span className="ml-2 text-slate-400 group-hover:text-slate-700">
               <svg
@@ -147,8 +145,7 @@ export const Hero: React.FC<{
 };
 
 // ---------- Category grid section ----------
-const DEFAULT_CATEGORY_IMAGE =
-  "https://picsum.photos/seed/category/400/400";
+const DEFAULT_CATEGORY_IMAGE = "https://picsum.photos/seed/category/400/400";
 
 type StaticCategory = {
   id: number;
@@ -162,78 +159,66 @@ const STATIC_CATEGORIES: StaticCategory[] = [
     id: 1,
     name: "Điện thoại",
     slug: "dien-thoai",
-    imageUrl:
-      "https://picsum.photos/seed/phone/400/400",
+    imageUrl: "https://picsum.photos/seed/phone/400/400",
   },
   {
     id: 2,
     name: "Laptop",
     slug: "laptop",
-    imageUrl:
-      "https://picsum.photos/seed/laptop/400/400",
+    imageUrl: "https://picsum.photos/seed/laptop/400/400",
   },
   {
     id: 3,
     name: "Tablet",
     slug: "tablet",
-    imageUrl:
-      "https://picsum.photos/seed/tablet/400/400",
+    imageUrl: "https://picsum.photos/seed/tablet/400/400",
   },
   {
     id: 4,
     name: "Âm thanh",
     slug: "am-thanh",
-    imageUrl:
-      "https://picsum.photos/seed/audio/400/400",
+    imageUrl: "https://picsum.photos/seed/audio/400/400",
   },
   {
     id: 5,
     name: "Phụ kiện",
     slug: "phu-kien",
-    imageUrl:
-      "https://picsum.photos/seed/accessories/400/400",
+    imageUrl: "https://picsum.photos/seed/accessories/400/400",
   },
   {
     id: 6,
     name: "TV & Màn hình",
     slug: "tv-man-hinh",
-    imageUrl:
-      "https://picsum.photos/seed/tv/400/400",
+    imageUrl: "https://picsum.photos/seed/tv/400/400",
   },
   {
     id: 7,
     name: "Nhà thông minh",
     slug: "nha-thong-minh",
-    imageUrl:
-      "https://picsum.photos/seed/smart-home/400/400",
+    imageUrl: "https://picsum.photos/seed/smart-home/400/400",
   },
   {
     id: 8,
     name: "Thiết bị đeo",
     slug: "thiet-bi-deo",
-    imageUrl:
-      "https://picsum.photos/seed/wearable/400/400",
+    imageUrl: "https://picsum.photos/seed/wearable/400/400",
   },
   {
     id: 9,
     name: "Máy tính bàn",
     slug: "may-tinh-ban",
-    imageUrl:
-      "https://picsum.photos/seed/desktop/400/400",
+    imageUrl: "https://picsum.photos/seed/desktop/400/400",
   },
   {
     id: 10,
     name: "Gaming Gear",
     slug: "gaming-gear",
-    imageUrl:
-      "https://picsum.photos/seed/gaming/400/400",
+    imageUrl: "https://picsum.photos/seed/gaming/400/400",
   },
 ];
 
 export const CategoryCard: React.FC<{ c: StaticCategory }> = ({ c }) => (
-  <span
-    className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 hover:shadow-sm hover:-translate-y-0.5 transition"
-  >
+  <span className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 hover:shadow-sm hover:-translate-y-0.5 transition">
     <div className="h-36 w-full rounded-xl overflow-hidden bg-slate-100">
       <img
         src={c.imageUrl ?? DEFAULT_CATEGORY_IMAGE}
@@ -253,9 +238,7 @@ export const CategorySection: React.FC = () => {
   return (
     <Container className="py-6">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-xl sm:text-2xl font-bold">
-          DANH MỤC SẢN PHẨM
-        </h2>
+        <h2 className="text-xl sm:text-2xl font-bold">DANH MỤC SẢN PHẨM</h2>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
@@ -267,10 +250,9 @@ export const CategorySection: React.FC = () => {
   );
 };
 
-
 // ---------- Home page ----------
 export const DSHStoreHome: React.FC = () => {
-  const { isAuthenticated,wishlistCount } = useCurrentApp();
+  const { isAuthenticated, wishlistCount } = useCurrentApp();
   const [categories, setCategories] = useState<IHomeCategory[]>([]);
   const [sliders, setSliders] = useState<ISlider[]>([]);
   const [productPage, setProductPage] =
@@ -295,7 +277,7 @@ export const DSHStoreHome: React.FC = () => {
     };
     load();
   }, [page]);
-    useEffect(() => {
+  useEffect(() => {
     if (!isAuthenticated) {
       setWishlistIds(new Set());
       return;
@@ -309,14 +291,14 @@ export const DSHStoreHome: React.FC = () => {
           data.items.map((item: IWishlistProductVariant) => item.variantId)
         );
         setWishlistIds(ids);
-        console.log(ids)
+        console.log(ids);
       } catch (e) {
         console.error("Load wishlist error", e);
       }
     };
 
     loadWishlist();
-  }, [isAuthenticated,wishlistCount]);
+  }, [isAuthenticated, wishlistCount]);
 
   return (
     <>
@@ -342,7 +324,6 @@ export const DSHStoreHome: React.FC = () => {
 
         {!productPageLoading && productPage && productPage.items.length > 0 && (
           <>
-          {console.log(productPage.items[1].productId)}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
               {productPage.items.map((p) => (
                 <ProductCard
