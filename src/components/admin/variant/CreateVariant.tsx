@@ -176,9 +176,7 @@ export default function CreateVariants() {
           >
             ← Quay lại
           </button>
-          <h2 className="text-lg font-semibold">
-            Tạo biến thể — Product #{pid}
-          </h2>
+          <h2 className="text-lg font-semibold">Tạo biến thể</h2>
         </div>
         <button
           onClick={onSave}

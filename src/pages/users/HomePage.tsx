@@ -1,12 +1,14 @@
 import {
   fetchHomeCategories,
   fetchHomeProducts,
+  fetchMyWishlist,
   fetchSliders,
 } from "@/api/home.api";
 import { Container } from "@/components/client/AppHeader";
 import { PartnersSection } from "@/components/client/PartnersSection";
 import { ProductCard } from "@/components/client/ProductCard";
 import { TestimonialsSection } from "@/components/client/TestimonialsSection";
+import { useCurrentApp } from "@/components/context/AppContext";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -42,9 +44,9 @@ export const LeftCategoryMenu: React.FC<{ categories: IHomeCategory[] }> = ({
             key={c.id}
             className="group relative flex items-center justify-between px-4 py-3 text-sm cursor-pointer hover:bg-slate-50"
           >
-            <Link to={`/category/${c.id}`} className="flex-1">
+            <span className="flex-1">
               {c.name}
-            </Link>
+            </span>
 
             <span className="ml-2 text-slate-400 group-hover:text-slate-700">
               <svg
@@ -145,89 +147,141 @@ export const Hero: React.FC<{
 };
 
 // ---------- Category grid section ----------
-// tạm dùng ảnh placeholder vì BE chưa trả image
-const DEFAULT_CATEGORY_IMAGE = "https://picsum.photos/seed/category/400/400";
+const DEFAULT_CATEGORY_IMAGE =
+  "https://picsum.photos/seed/category/400/400";
 
-type ChildWithParent = IChildCategory & {
-  parentId: number;
-  parentName: string;
+type StaticCategory = {
+  id: number;
+  name: string;
+  slug: string;
+  imageUrl?: string;
 };
 
-export const CategoryCard: React.FC<{ c: ChildWithParent }> = ({ c }) => (
-  <a
-    href={`/category/${c.id}`}
-    className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 hover:shadow-sm"
+const STATIC_CATEGORIES: StaticCategory[] = [
+  {
+    id: 1,
+    name: "Điện thoại",
+    slug: "dien-thoai",
+    imageUrl:
+      "https://picsum.photos/seed/phone/400/400",
+  },
+  {
+    id: 2,
+    name: "Laptop",
+    slug: "laptop",
+    imageUrl:
+      "https://picsum.photos/seed/laptop/400/400",
+  },
+  {
+    id: 3,
+    name: "Tablet",
+    slug: "tablet",
+    imageUrl:
+      "https://picsum.photos/seed/tablet/400/400",
+  },
+  {
+    id: 4,
+    name: "Âm thanh",
+    slug: "am-thanh",
+    imageUrl:
+      "https://picsum.photos/seed/audio/400/400",
+  },
+  {
+    id: 5,
+    name: "Phụ kiện",
+    slug: "phu-kien",
+    imageUrl:
+      "https://picsum.photos/seed/accessories/400/400",
+  },
+  {
+    id: 6,
+    name: "TV & Màn hình",
+    slug: "tv-man-hinh",
+    imageUrl:
+      "https://picsum.photos/seed/tv/400/400",
+  },
+  {
+    id: 7,
+    name: "Nhà thông minh",
+    slug: "nha-thong-minh",
+    imageUrl:
+      "https://picsum.photos/seed/smart-home/400/400",
+  },
+  {
+    id: 8,
+    name: "Thiết bị đeo",
+    slug: "thiet-bi-deo",
+    imageUrl:
+      "https://picsum.photos/seed/wearable/400/400",
+  },
+  {
+    id: 9,
+    name: "Máy tính bàn",
+    slug: "may-tinh-ban",
+    imageUrl:
+      "https://picsum.photos/seed/desktop/400/400",
+  },
+  {
+    id: 10,
+    name: "Gaming Gear",
+    slug: "gaming-gear",
+    imageUrl:
+      "https://picsum.photos/seed/gaming/400/400",
+  },
+];
+
+export const CategoryCard: React.FC<{ c: StaticCategory }> = ({ c }) => (
+  <span
+    className="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 hover:shadow-sm hover:-translate-y-0.5 transition"
   >
     <div className="h-36 w-full rounded-xl overflow-hidden bg-slate-100">
       <img
-        src={DEFAULT_CATEGORY_IMAGE}
+        src={c.imageUrl ?? DEFAULT_CATEGORY_IMAGE}
         alt={c.name}
         className="h-full w-full object-cover"
       />
     </div>
     <div className="w-full text-left">
-      <h3 className="font-semibold text-indigo-800 uppercase tracking-tight">
+      <h3 className="font-semibold text-indigo-800 uppercase tracking-tight text-sm line-clamp-2">
         {c.name}
       </h3>
     </div>
-  </a>
+  </span>
 );
 
-export const CategorySection: React.FC<{
-  categories: IHomeCategory[];
-  loading?: boolean;
-}> = ({ categories, loading = false }) => {
-  // Gộp tất cả children của các root category lại thành 1 list phẳng
-  type ChildWithParent = IChildCategory & {
-    parentId: number;
-    parentName: string;
-  };
-
-  const childCategories: ChildWithParent[] = categories.flatMap((parent) =>
-    (parent.children ?? []).map((child) => ({
-      ...child,
-      parentId: parent.id,
-      parentName: parent.name,
-    }))
-  );
-
+export const CategorySection: React.FC = () => {
   return (
     <Container className="py-6">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-xl sm:text-2xl font-bold">DANH MỤC SẢN PHẨM</h2>
-        <a href="#" className="text-sm text-slate-700 hover:text-indigo-700">
-          xem tất cả →
-        </a>
+        <h2 className="text-xl sm:text-2xl font-bold">
+          DANH MỤC SẢN PHẨM
+        </h2>
       </div>
 
-      {loading ? (
-        <div className="text-sm text-slate-500">Đang tải danh mục...</div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-          {childCategories.map((c) => (
-            <CategoryCard key={c.id} c={c} />
-          ))}
-        </div>
-      )}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+        {STATIC_CATEGORIES.map((c) => (
+          <CategoryCard key={c.id} c={c} />
+        ))}
+      </div>
     </Container>
   );
 };
 
+
 // ---------- Home page ----------
 export const DSHStoreHome: React.FC = () => {
+  const { isAuthenticated,wishlistCount } = useCurrentApp();
   const [categories, setCategories] = useState<IHomeCategory[]>([]);
   const [sliders, setSliders] = useState<ISlider[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
   const [productPage, setProductPage] =
     useState<IModelPaginate<IHomeProductVariant> | null>(null);
   const [productPageLoading, setProductPageLoading] = useState(false);
   const [page, setPage] = useState(1);
   const size = 50;
-
+  const [wishlistIds, setWishlistIds] = useState<Set<number>>(new Set());
   useEffect(() => {
     const load = async () => {
       try {
-        setLoading(true);
         const categoryData = await fetchHomeCategories();
         setCategories(categoryData);
         const sliderData = await fetchSliders();
@@ -236,17 +290,38 @@ export const DSHStoreHome: React.FC = () => {
         const data = await fetchHomeProducts(page, size);
         setProductPage(data);
       } finally {
-        setLoading(false);
         setProductPageLoading(false);
       }
     };
     load();
   }, [page]);
+    useEffect(() => {
+    if (!isAuthenticated) {
+      setWishlistIds(new Set());
+      return;
+    }
+
+    const loadWishlist = async () => {
+      try {
+        // lấy đủ lớn để gom hết wishlist (tuỳ backend)
+        const data = await fetchMyWishlist(1, 1000, "createdAt", "desc");
+        const ids = new Set<number>(
+          data.items.map((item: IWishlistProductVariant) => item.variantId)
+        );
+        setWishlistIds(ids);
+        console.log(ids)
+      } catch (e) {
+        console.error("Load wishlist error", e);
+      }
+    };
+
+    loadWishlist();
+  }, [isAuthenticated,wishlistCount]);
 
   return (
     <>
       <Hero categories={categories} sliders={sliders} />
-      <CategorySection categories={categories} loading={loading} />
+      <CategorySection />
       {/* Product sections */}
       {/* PRODUCT LIST: tất cả biến thể, sort theo sold, phân trang */}
       <Container className="py-6">
@@ -267,12 +342,13 @@ export const DSHStoreHome: React.FC = () => {
 
         {!productPageLoading && productPage && productPage.items.length > 0 && (
           <>
+          {console.log(productPage.items[1].productId)}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
               {productPage.items.map((p) => (
                 <ProductCard
                   key={p.variantId}
                   productVariantId={p.variantId}
-                  name={p.variantName || p.productName}
+                  name={p.productName}
                   imageUrl={
                     p.thumbnailUrl ||
                     "https://via.placeholder.com/400x400?text=No+Image"
@@ -282,12 +358,23 @@ export const DSHStoreHome: React.FC = () => {
                   discountPercent={0}
                   rating={5}
                   reviewCount={p.sold}
+                  isWishlisted={wishlistIds.has(p.variantId)}
+                  onToggleWishlist={(added) => {
+                    setWishlistIds((prev) => {
+                      const next = new Set(prev);
+                      if (added) next.add(p.variantId);
+                      else next.delete(p.variantId);
+                      return next;
+                    });
+                  }}
+                  sku={p.sku}
                   onClick={() => {
                     console.log("Click variant", p.variantId);
                   }}
                   onAddToCart={() => {
                     console.log("Add to cart variant", p.variantId);
                   }}
+                  productId={p.productId}
                 />
               ))}
             </div>

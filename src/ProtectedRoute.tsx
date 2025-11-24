@@ -63,6 +63,26 @@ function BackOrHome({
     </div>
   );
 }
+function AdminLink({
+  extraAdminLink,
+}: {
+  extraAdminLink?: { href: string; label: string };
+}) {
+  const baseBtn =
+    "px-4 py-3 rounded-xl border border-slate-200 hover:bg-slate-50";
+
+
+
+  return (
+    <div className="flex flex-wrap gap-3 mt-6">
+      {extraAdminLink && (
+        <Link to={extraAdminLink.href} className={baseBtn}>
+          {extraAdminLink.label}
+        </Link>
+      )}
+    </div>
+  );
+}
 
 function ErrorCard({
   code,
@@ -146,7 +166,7 @@ const ProtectedRoute = ({ children, requireAuth = true }: IProps) => {
         title="Trang này không dành cho tài khoản quản trị"
         message="Vui lòng truy cập khu vực quản trị để tiếp tục."
       >
-        <BackOrHome
+        <AdminLink
           extraAdminLink={{ href: "/admin", label: "Về trang quản trị" }}
         />
       </ErrorCard>

@@ -1,15 +1,16 @@
-import React from "react";
-import { AiOutlineHeart, AiOutlineEye } from "react-icons/ai";
-import { HiOutlineSwitchHorizontal } from "react-icons/hi";
-import { useCurrentApp } from "../context/AppContext";
+import React, { useEffect, useState } from "react";
+import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
+import { useCurrentApp } from "@/components/context/AppContext";
 import { toast } from "react-toastify";
-import { addToWishlistApi } from "@/api/home.api";
+import { toggleWishlistApi } from "@/api/home.api";
 import { useLocation, useNavigate } from "react-router-dom";
 import { addToCartApi } from "@/api/cart.api";
 
 type ProductCardProps = {
   productVariantId: number;
   name: string;
+  sku: string;
+  productId: number;
   imageUrl: string;
   discountPercent?: number;
   rating?: number;
@@ -19,6 +20,8 @@ type ProductCardProps = {
   stock: number;
   onAddToCart?: () => void;
   onClick?: () => void;
+  onToggleWishlist?: (added: boolean) => void;
+  isWishlisted?: boolean;
 };
 
 const formatCurrency = (value: number) =>
@@ -27,6 +30,8 @@ const formatCurrency = (value: number) =>
 export const ProductCard: React.FC<ProductCardProps> = ({
   productVariantId,
   name,
+  sku,
+  productId,
   imageUrl,
   discountPercent = 0,
   rating = 5,
@@ -36,23 +41,43 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   stock,
   onAddToCart,
   onClick,
+  onToggleWishlist,
+  isWishlisted
 }) => {
   const { isAuthenticated, reloadWishlistCount, reloadCart } = useCurrentApp();
   const navigate = useNavigate();
   const location = useLocation();
+  const [wish, setWish] = useState(isWishlisted ?? false);
+
+  useEffect(() => {
+  setWish(isWishlisted ?? false);
+  }, [isWishlisted]);
+
+  const goDetail = (productId: number, sku: string) => {
+    navigate(`/products/${productId}?sku=${encodeURIComponent(sku)}`);
+  };
 
   const handleAddWishlist = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
 
     if (!isAuthenticated) {
       toast.info("Vui lòng đăng nhập để thêm sản phẩm yêu thích");
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`);
       return;
     }
 
     try {
-      await addToWishlistApi(productVariantId);
-      toast.success("Đã thêm vào danh sách yêu thích");
-      await reloadWishlistCount(); // 👈 update count global
+      const res = await toggleWishlistApi(productVariantId);
+      const added = res.data;
+      setWish(!!added);
+      if (added) {
+        toast.success("Đã thêm vào danh sách yêu thích");
+      } else {
+        toast.info("Đã xóa khỏi danh sách yêu thích");
+      }
+
+      await reloadWishlistCount();
+      onToggleWishlist?.(added!);
     } catch {
       toast.error("Không thể thêm vào danh sách yêu thích");
     }
@@ -70,10 +95,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       return;
     }
 
-
     try {
       const data = await addToCartApi({
-        variantId: productVariantId as unknown as string,
+        variantId: productVariantId as number,
         quantity: 1,
       });
       if (!data || !data.data) {
@@ -82,10 +106,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       }
 
       toast.success("Đã thêm sản phẩm vào giỏ hàng");
-      await reloadCart(); // 👈 cập nhật lại count + popup cart
-
+      await reloadCart();
       onAddToCart?.();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Có thể parse message từ backend nếu bạn trả message cụ thể
       toast.error("Không thể thêm sản phẩm vào giỏ hàng");
@@ -110,23 +133,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             className="w-9 h-9 bg-white flex items-center justify-center rounded-full shadow-md"
             onClick={handleAddWishlist}
           >
-            <AiOutlineHeart className="text-xl" />
-          </button>
-
-          <button
-            className="w-9 h-9 bg-white flex items-center justify-center rounded-full shadow-md
-                       opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <AiOutlineEye className="text-xl" />
-          </button>
-
-          <button
-            className="w-9 h-9 bg-white flex items-center justify-center rounded-full shadow-md
-                       opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <HiOutlineSwitchHorizontal className="text-xl" />
+            {wish ? (
+              <AiFillHeart className="text-xl text-red-500" />
+            ) : (
+              <AiOutlineHeart className="text-xl text-gray-600" />
+            )}
           </button>
         </div>
 
@@ -135,12 +146,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             src={imageUrl}
             alt={name}
             className="object-contain max-h-full"
+            onClick={() => goDetail(productId, sku)}
           />
         </div>
       </div>
 
       <div className="px-4 pb-4">
-        <h3 className="text-sm font-semibold line-clamp-2 min-h-[40px]">
+        <h3
+          className="text-sm font-semibold line-clamp-2 min-h-[40px]"
+          onClick={() => goDetail(productId, sku)}
+        >
           {name}
         </h3>
 
@@ -179,4 +194,3 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     </div>
   );
 };
-

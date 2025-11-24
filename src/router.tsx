@@ -5,7 +5,6 @@ import UserList from "./pages/admin/UserList";
 
 import CategoryList from "./pages/admin/CategoryList";
 import OrderList from "./pages/admin/OrderList";
-import OrderDetail from "./pages/admin/OrderDetail";
 
 import { ContactPage } from "./pages/users/ContactPage";
 import ProductList from "./pages/admin/ProductList";
@@ -33,8 +32,15 @@ import UpdatePasswordPage from "./pages/auth/UpdatePasswordPage";
 import AboutPage from "./pages/users/AboutPage";
 import CategoryPage from "./pages/users/FilterPage";
 import { CartPage } from "./pages/users/client/CardPage";
+import { SearchPage } from "./pages/users/SearchPage";
+import ProductDetailPage from "./pages/users/ProductDetailPage";
+import OrderSuccess from "./pages/users/OrderSuccess";
 import { CheckoutPage } from "./pages/users/client/CheckoutPage";
 import VoucherListPage from "pages/admin/VoucherList.tsx";
+import { CheckoutPage } from "./pages/users/CheckoutPage";
+import UserOrderPage from "./pages/users/UserOrderPage";
+import ResetPasswordPage from "pages/auth/ResetPasswordPage.tsx";
+import ForgotPasswordPage from "pages/auth/ForgotPasswordPage.tsx";
 import InventoryPage from "pages/admin/InventoryPage.tsx";
 import PurchaseOrderListPage from "pages/admin/PurchaseOrderListPage.tsx";
 import PurchaseOrderDetailPage from "pages/admin/PurchaseOrderDetailPage";
@@ -57,14 +63,23 @@ export const ROUTER = createBrowserRouter([
         path: "lien-he",
         element: <ContactPage />,
       },
+      {
+        path: "/tim-kiem",
+        element: <SearchPage />
+      },
       { path: "/oauth2/callback", element: <GoogleOAuthHandler /> },
       { path: "/update-password", element: <UpdatePasswordPage /> },
       { path: "/category/:id", element: <CategoryPage /> },
+      { path: "/products/:id", element: <ProductDetailPage /> },
+      { path: "/checkout", element: <CheckoutPage /> },
+      { path: "/thanks", element: <OrderSuccess /> },
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
       { path: "gioi-thieu", element: <AboutPage /> },
       { path: "cart", element: <CartPage /> },
-
+      { path: "wishlist", element: <WishlistPage /> },
+        {path: "forgot-password",element : <ForgotPasswordPage />},
+        { path:"reset-password", element:<ResetPasswordPage />}
     ],
   },
   {
@@ -76,7 +91,6 @@ export const ROUTER = createBrowserRouter([
     ),
     children: [
       { path: "checkout", element: <CheckoutPage /> },
-      { path: "wishlist", element: <WishlistPage /> },
       {
         path: "tai-khoan",
         element: <AccountPage />,
@@ -84,6 +98,7 @@ export const ROUTER = createBrowserRouter([
           { path: "ho-so", element: <ProfilePage /> },
           { path: "dia-chi", element: <AddressPage /> },
           { path: "doi-mat-khau", element: <ChangePasswordPage /> },
+          { path: "don-mua", element: <UserOrderPage /> },
         ],
       },
     ],
@@ -136,8 +151,8 @@ export const ROUTER = createBrowserRouter([
 
       { path: "sliders", element: <AdminSlidersPage /> },
       // { path: "sliders/:id", element: <SliderDetail /> },     // active only
-        // { path: "sliders/:id", element: <SliderDetail /> },     // active only
-        { path: "vouchers", element: <VoucherListPage /> },
+      // { path: "sliders/:id", element: <SliderDetail /> },     // active only
+      { path: "vouchers", element: <VoucherListPage /> },
     ],
   },
   { path: "*", element: <NotFoundPage /> },

@@ -124,7 +124,7 @@ export default function ProductImage() {
 
       <div className="rounded-lg border border-neutral-200 bg-white p-4">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Ảnh sản phẩm — #{pid}</h2>
+          <h2 className="text-lg font-semibold">Ảnh sản phẩm </h2>
         </div>
 
         {loading && (

@@ -1,10 +1,11 @@
 import React, { useState, useRef } from "react";
 import logoUrl from "@/assets/img/logo.png";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useCurrentApp } from "../context/AppContext";
 import { logoutApi } from "@/api/auth.api";
-import { toSlug } from "@/utils/slug";
 import avatarDefault from "@/assets/img/avatar-default.png";
+import { toSlug } from "@/utils/slug";
+import { SearchBar } from "./SearchBar";
 
 // ---------- util ----------
 type ClassValue = string | false | null | undefined;
@@ -36,31 +37,37 @@ export const TopStrip: React.FC = () => (
     </Container>
   </div>
 );
-
 // ---------- Category nav ----------
 export const CategoryNavBar: React.FC = () => (
   <div className="border-t border-slate-200">
     <Container>
       <nav className="flex items-center gap-6 py-3 text-sm overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none]">
         <style>{`.no-scrollbar::-webkit-scrollbar{display:none}`}</style>
+
         {(
           [
             "TRANG CHỦ",
             "GIỚI THIỆU",
-            "VẬN CHUYỂN",
-            "THANH TOÁN",
-            "TIN TỨC",
             "LIÊN HỆ",
           ] as const
-        ).map((c) => (
-          <Link
-            key={c}
-            to={toSlug(c)}
-            className="whitespace-nowrap text-slate-700 hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"
-          >
-            {c}
-          </Link>
-        ))}
+        ).map((c) => {
+          const path = c === "TRANG CHỦ" ? "/" : `/${toSlug(c)}`;
+
+          return (
+            <NavLink
+              key={c}
+              to={path}
+              className={({ isActive }) =>
+                `whitespace-nowrap text-slate-700 hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 ${
+                  isActive ? "font-semibold text-indigo-700" : ""
+                }`
+              }
+              end={c === "TRANG CHỦ"} 
+            >
+              {c}
+            </NavLink>
+          );
+        })}
       </nav>
     </Container>
   </div>
@@ -166,7 +173,7 @@ const AccountMenu: React.FC<{
             </li>
             <li>
               <Link
-                to="/don-mua"
+                to="/tai-khoan/don-mua"
                 className="block px-4 py-2 hover:bg-slate-50 text-slate-700"
                 role="menuitem"
               >
@@ -385,24 +392,7 @@ export const AppHeader: React.FC = () => {
         </div>
 
         <div className="hidden md:flex flex-1 max-w-2xl">
-          <label className="w-full flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 focus-within:ring-2 focus-within:ring-indigo-300">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              aria-hidden
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="M21 21l-4.35-4.35" />
-            </svg>
-            <input
-              placeholder="Tìm kiếm"
-              className="w-full outline-none text-sm placeholder:text-slate-400"
-              aria-label="Tìm kiếm sản phẩm"
-            />
-          </label>
+          <SearchBar variant="header" />
         </div>
 
         <div className="flex items-center gap-5">
@@ -439,8 +429,8 @@ export const AppHeader: React.FC = () => {
           <CartMenu />
         </div>
       </Container>
-
       <CategoryNavBar />
+
     </header>
   );
 };

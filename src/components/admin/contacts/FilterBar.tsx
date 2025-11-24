@@ -14,9 +14,29 @@ export const FiltersBar: React.FC<{
   setSearch: (v: string) => void;
   size: number;
   setSize: (n: number) => void;
-}> = ({ status, setStatus, search, setSearch, size, setSize }) => {
+  startDate?: string;
+  setStartDate: (v?: string) => void;
+  endDate?: string;
+  setEndDate: (v?: string) => void;
+  sortDir: "asc" | "desc";
+  setSortDir: (v: "asc" | "desc") => void;
+}> = ({
+  status,
+  setStatus,
+  search,
+  setSearch,
+  size,
+  setSize,
+  startDate,
+  setStartDate,
+  endDate,
+  setEndDate,
+  sortDir,
+  setSortDir,
+}) => {
   return (
     <div className="flex flex-wrap items-center gap-3 p-4">
+      {/* STATUS */}
       <div className="flex gap-2 text-sm">
         {STATUS_OPTIONS.map((s) => (
           <button
@@ -32,7 +52,9 @@ export const FiltersBar: React.FC<{
           </button>
         ))}
       </div>
-      <div className="ml-auto flex items-center gap-3">
+
+      <div className="ml-auto flex flex-wrap items-center gap-3">
+        {/* SEARCH */}
         <div className="relative">
           <input
             value={search}
@@ -40,20 +62,33 @@ export const FiltersBar: React.FC<{
             className="h-10 w-72 rounded-lg border-gray-200 pl-3 pr-9 text-sm focus:border-indigo-500 focus:ring-indigo-500"
             placeholder="Tìm theo tên / email / tiêu đề"
           />
-          <svg
-            className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"
-            />
-          </svg>
         </div>
+
+        {/* DATE RANGE */}
+        <input
+          type="date"
+          value={startDate ?? ""}
+          onChange={(e) => setStartDate(e.target.value || undefined)}
+          className="h-10 rounded-lg border-gray-200 text-sm px-2"
+        />
+        <input
+          type="date"
+          value={endDate ?? ""}
+          onChange={(e) => setEndDate(e.target.value || undefined)}
+          className="h-10 rounded-lg border-gray-200 text-sm px-2"
+        />
+
+        {/* SORT DIRECTION (chỉ createdAt) */}
+        <select
+          value={sortDir}
+          onChange={(e) => setSortDir(e.target.value as "asc" | "desc")}
+          className="h-10 rounded-lg border-gray-200 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+        >
+          <option value="desc">Mới nhất</option>
+          <option value="asc">Cũ nhất</option>
+        </select>
+
+        {/* PAGE SIZE */}
         <select
           value={size}
           onChange={(e) => setSize(Number(e.target.value))}
@@ -69,3 +104,4 @@ export const FiltersBar: React.FC<{
     </div>
   );
 };
+

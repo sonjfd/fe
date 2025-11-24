@@ -151,7 +151,7 @@ export const AddressModal: React.FC<AddressModalProps> = ({
             districtId: Number(districtId),
             wardId: Number(wardId),
             addressDetail,
-            isDefault: initial?.isDefault ?? false,
+            isDefault: initial?.default ?? false,
         };
 
         try {
