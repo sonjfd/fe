@@ -166,7 +166,7 @@ const AccountMenu: React.FC<{
             </li>
             <li>
               <Link
-                to="/don-mua"
+                to="/tai-khoan/don-mua"
                 className="block px-4 py-2 hover:bg-slate-50 text-slate-700"
                 role="menuitem"
               >

@@ -1,6 +1,6 @@
 // SliderList.tsx (refactor cho đồng bộ với TableCategory / CategoryList)
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   listSliders,
   getSliderById,
@@ -85,7 +85,7 @@ export default function SliderList() {
 
   const handleEdit = async (id: number) => {
     const slider = await getSliderById(id);
-    setEditing(slider);
+    setEditing(slider!);
     setOpenModal(true);
   };
 

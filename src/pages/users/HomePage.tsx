@@ -272,7 +272,7 @@ export const DSHStoreHome: React.FC = () => {
                 <ProductCard
                   key={p.variantId}
                   productVariantId={p.variantId}
-                  name={p.variantName || p.productName}
+                  name={p.productName}
                   imageUrl={
                     p.thumbnailUrl ||
                     "https://via.placeholder.com/400x400?text=No+Image"
@@ -282,12 +282,14 @@ export const DSHStoreHome: React.FC = () => {
                   discountPercent={0}
                   rating={5}
                   reviewCount={p.sold}
+                  sku={p.sku}
                   onClick={() => {
                     console.log("Click variant", p.variantId);
                   }}
                   onAddToCart={() => {
                     console.log("Add to cart variant", p.variantId);
                   }}
+                  productId={p.productId}
                 />
               ))}
             </div>

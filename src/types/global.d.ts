@@ -1,6 +1,10 @@
 export { };
 
 declare global {
+
+  interface Window {
+    global: any;
+  }
   interface IBackendRes<T> {
     message?: string;
     data?: T;
@@ -222,6 +226,8 @@ declare global {
     variantId: number;
     variantName: string;
     productName: string;
+    productId: number;
+    sku: string;
     price: number;
     stock: number;
     sold: number;
@@ -248,6 +254,7 @@ declare global {
     sold: number
     stock: number;
     thumbnail: string;
+    productId: number;
   }
 
 
@@ -274,81 +281,255 @@ declare global {
     isDefault?: boolean;
   }
 
+
+  interface AttributeValueFilter {
+    id: number;
+    value: string;
+  }
+
+  interface AttributeFilter {
+    id: number;
+    name: string;
+    code: string;
+    values: AttributeValueFilter[];
+  }
+
+
+
+  type AttributeValueDTO = {
+    id: number;
+    value: string;
+  };
+
+  interface AttributeDTO {
+    id: number;
+    code: string;
+    name: string;
+    values: AttributeValueDTO[];
+  };
+
+  interface VariantDTO {
+    id: number;
+    sku: string;
+    name: string;
+    price: number;
+    stock: number;
+    sold: number;
+    thumbnail: string;
+    valueIds: number[];
+  };
+
+  interface ProductDetailDTO {
+    id: number;
+    name: string;
+    code: string;
+    sku: string;
+    description: string;
+    images: string[];
+    attributes: AttributeDTO[];
+    variants: VariantDTO[];
+    defaultVariantId: number;
+  };
+
+
   export interface ICartItem {
-  id: number;
-  variantId: number;
-  sku: string;
-  productName: string;
-  thumbnailUrl: string;
-  quantity: number;
-  price: number;
-  total: number;
-}
+    id: number;
+    variantId: number;
+    sku: string;
+    productName: string;
+    thumbnailUrl: string;
+    quantity: number;
+    price: number;
+    total: number;
+  }
 
 
-export interface ICartResponse {
-  cartId: number;
-  items: ICartItem[];
-  total: number;
-}
+  export interface ICartResponse {
+    cartId: number;
+    items: ICartItem[];
+    total: number;
+  }
 
 
-export interface AddToCartRequest {
-  variantId: number;
-  quantity: number;
-}
+  export interface AddToCartRequest {
+    variantId: number;
+    quantity: number;
+  }
 
-export interface UpdateCartQuantityRequest {
-  cartDetailId: number;
-  quantity: number;
-}
-    // ========== Voucher types ==========
-    type VoucherDiscountType = "PERCENT" | "FIXED";
-    type VoucherStatus = "ACTIVE" | "INACTIVE" | "EXPIRED";
-    type VoucherApplyScope = "ALL" | "ASSIGNED";
+  export interface UpdateCartQuantityRequest {
+    cartDetailId: number;
+    quantity: number;
+  }
 
-    interface IVoucher {
-        id: number;
-        code: string;
-        imageUrl?: string | null;
-        discountType: VoucherDiscountType;
-        discountValue: number;
-        maxDiscountAmount?: number | null;
-        minOrderValue?: number | null;
-        usageLimit?: number | null;
-        usedCount?: number | null;
-        userLimit?: number | null;
-        applyScope: VoucherApplyScope;
-        startDate: string; // ISO
-        endDate: string;   // ISO
-        status: VoucherStatus;
-    }
 
-    interface ICreateVoucherReq {
-        code: string;
-        imageUrl?: string | null;
-        discountType: VoucherDiscountType;
-        discountValue: number;
-        maxDiscountAmount?: number | null;
-        minOrderValue?: number | null;
-        usageLimit?: number | null;
-        userLimit?: number | null;
-        applyScope: VoucherApplyScope;
-        startDate: string; // datetime-local string -> backend parse
-        endDate: string;
-        assignedUserEmails?: string[];
-        status: VoucherStatus;
-        // dùng khi cần gửi danh sách email (nếu backend hỗ trợ)
-    }
+  interface ShippingQuote {
+    fee: number;
+    serviceFee: number;
+    insuranceFee: number;
+    expectedDeliveryTime: string;
+  }
 
-    interface IUpdateVoucherReq extends ICreateVoucherReq {
-        id: number;
-    }
+  interface OrderItem {
+    variantId: number;
+    quantity: number;
+    price: number;
+  }
 
-    interface IUserEmailLite {
-        id: number;
-        email: string;
-        fullName: string;
-    }
+  interface CreateOrderRequest {
+    addressId: number;
+    codAmount: number;
+    itemsValue: number;
+    items: OrderItem[];
+    paymentMethod: string;
+  }
+
+
+  interface Order {
+    id: number;
+    totalPrice: number;
+    paymentMethod: string;
+    paymentStatus: string;
+    ghnOrderCode: string;
+    ghnFee: number;
+    ghnExpectedDelivery: string;
+    orderStatus: string;
+  }
+  interface OrderCreateResponse {
+    order: Order;
+    paymentUrl?: string;
+  }
+
+
+
+
+  export interface UpdateCartQuantityRequest {
+    cartDetailId: number;
+    quantity: number;
+  }
+  // ========== Voucher types ==========
+  type VoucherDiscountType = "PERCENT" | "FIXED";
+  type VoucherStatus = "ACTIVE" | "INACTIVE" | "EXPIRED";
+  type VoucherApplyScope = "ALL" | "ASSIGNED";
+
+  interface IVoucher {
+    id: number;
+    code: string;
+    imageUrl?: string | null;
+    discountType: VoucherDiscountType;
+    discountValue: number;
+    maxDiscountAmount?: number | null;
+    minOrderValue?: number | null;
+    usageLimit?: number | null;
+    usedCount?: number | null;
+    userLimit?: number | null;
+    applyScope: VoucherApplyScope;
+    startDate: string; // ISO
+    endDate: string;   // ISO
+    status: VoucherStatus;
+  }
+
+  interface ICreateVoucherReq {
+    code: string;
+    imageUrl?: string | null;
+    discountType: VoucherDiscountType;
+    discountValue: number;
+    maxDiscountAmount?: number | null;
+    minOrderValue?: number | null;
+    usageLimit?: number | null;
+    userLimit?: number | null;
+    applyScope: VoucherApplyScope;
+    startDate: string; // datetime-local string -> backend parse
+    endDate: string;
+    assignedUserEmails?: string[];
+    status: VoucherStatus;
+    // dùng khi cần gửi danh sách email (nếu backend hỗ trợ)
+  }
+
+  interface IUpdateVoucherReq extends ICreateVoucherReq {
+    id: number;
+  }
+
+  interface IUserEmailLite {
+    id: number;
+    email: string;
+    fullName: string;
+  }
+
+
+  export interface OrderUser {
+    id: number;
+    fullName: string;
+    email: string;
+    phone: string;
+  }
+
+  export interface Order {
+    id: number;
+    totalPrice: number;
+    paymentMethod: string;
+    paymentStatus: string;
+    orderStatus: string;
+    ghnExpectedDelivery: string;
+    ghnFee: number;
+    province: string;
+    district: string;
+    ward: string;
+    addressDetail: string;
+    user: OrderUser;
+  }
+
+
+
+
+
+
+
+  interface IVariantOrder {
+    id: number;
+    name: string;
+    thumbnail: string;
+  }
+
+  interface IOrderDetailItem {
+    id: number;
+    quantity: number;
+    price: number;
+    variant: IVariantOrder;
+  }
+
+  interface OneOrder {
+    id: number;
+    totalPrice: number;
+    paymentMethod: "VN_PAY" | "CASH";
+    paymentStatus: "PAID" | "PENDING" | "FAILED" | "CANCELLED" | "REFUNDED";
+    orderStatus: "COMPLETED" | "PROCESSING" | "SHIPPING" | "DELIVERED" | "CANCELLED";
+
+    ghnExpectedDelivery: string;
+    ghnFee: number;
+
+    province: string;
+    district: string;
+    ward: string;
+    addressDetail: string;
+
+    user: OrderUser;
+    details: IOrderDetailItem[];
+  }
+
+  interface VNPayResponse {
+    paymentUrl: string
+  }
+
+  interface AdminNotification {
+    id: number;
+    title: string;
+    message: string;
+    createdAt: string;
+    isRead: boolean;
+    receiver: string;
+    type: "ORDER" | "CONTACT" | "OTHER";
+    referenceId: number;
+  }
+
 
 }

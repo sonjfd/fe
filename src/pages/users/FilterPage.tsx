@@ -1,119 +1,233 @@
-import { useEffect, useMemo, useState } from "react";
-import { ProductCard } from "@/components/client/ProductCard";
-import { fetchVariantByCategory } from "@/api/home.api";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { ProductCard } from "@/components/client/ProductCard";
+import {
+  fetchCategoryAttributes,
+  fetchVariantByCategory,
+} from "@/api/home.api";
+
+type PriceRangeKey = "RANGE_0_5" | "RANGE_5_15" | "RANGE_15_PLUS";
 
 export default function CategoryPage() {
   const { id } = useParams();
   const cid = Number(id);
 
-  const [data, setData] = useState<IModelPaginate<VariantFilter> | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [rows, setRows] = useState<VariantFilter[]>([]);
+  const [meta, setMeta] = useState({ page: 1, size: 12, total: 0 });
+  const [loading, setLoading] = useState(false);
 
-  const [sort, setSort] = useState<"newest" | "popular" | "asc" | "desc">(
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(12);
+  const [sortTab, setSortTab] = useState<"newest" | "popular" | "asc" | "desc">(
     "newest"
   );
-  const [priceFilters, setPriceFilters] = useState<string[]>([]);
-  const [pageSize, setPageSize] = useState(12);
-  const [page, setPage] = useState(1);
+
+  const [priceRanges, setPriceRanges] = useState<PriceRangeKey[]>([]);
+
+  const [attributeFilters, setAttributeFilters] = useState<AttributeFilter[]>(
+    []
+  );
+  const [selectedAttrValues, setSelectedAttrValues] = useState<string[]>([]);
+
+  const [pageInput, setPageInput] = useState(page);
+  const inputRef = useRef<number | null>(null);
 
   useEffect(() => {
+    if (!cid) return;
+
     (async () => {
       try {
-        const res = await fetchVariantByCategory(cid);
-        const payload = res.data;
-        setData(payload ?? null);
+        const res = await fetchCategoryAttributes(cid);
+
+        setAttributeFilters(res.data ?? []);
       } catch (err) {
-        console.error("API Error:", err);
+        console.error("API get attributes error:", err);
       }
-      setLoading(false);
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [cid]);
 
-  const variants = data?.items ?? [];
-
-  const togglePrice = (value: string) => {
-    setPriceFilters((prev) =>
+  const togglePriceRange = (value: PriceRangeKey) => {
+    setPriceRanges((prev) =>
       prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
     );
     setPage(1);
+    setPageInput(1);
   };
 
-  const matchPrice = (v: VariantFilter) => {
-    if (priceFilters.length === 0) return true;
-    const rules: Record<string, (p: number) => boolean> = {
-      low: (p) => p <= 5000000,
-      mid: (p) => p > 5000000 && p <= 15000000,
-      high: (p) => p > 15000000,
-    };
-    return priceFilters.some((key) => rules[key](v.price));
+  const toggleAttributeValue = (value: string) => {
+    setSelectedAttrValues((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    );
+    setPage(1);
+    setPageInput(1);
   };
 
-  const processed = useMemo(() => {
-    let arr = variants.filter(matchPrice);
-    arr = arr.sort((a, b) => {
-      switch (sort) {
-        case "popular":
-          return b.sold - a.sold;
-        case "asc":
-          return a.price - b.price;
-        case "desc":
-          return b.price - a.price;
-        default:
-          return b.id - a.id;
-      }
+  const query = useMemo(() => {
+    const params = new URLSearchParams();
+
+    params.set("page", String(page));
+    params.set("size", String(size));
+
+    // sort
+    switch (sortTab) {
+      case "popular":
+        params.set("sort", "popular");
+        break;
+      case "asc":
+        params.set("sort", "price_asc");
+        break;
+      case "desc":
+        params.set("sort", "price_desc");
+        break;
+      case "newest":
+      default:
+        params.set("sort", "createdAt_desc");
+        break;
+    }
+
+    priceRanges.forEach((r) => {
+      params.append("priceRanges", r);
     });
-    return arr;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [variants, priceFilters, sort]);
 
-  const totalPages = Math.max(1, Math.ceil(processed.length / pageSize));
-  const safePage = Math.min(page, totalPages);
-  const pageData = processed.slice(
-    (safePage - 1) * pageSize,
-    safePage * pageSize
+    selectedAttrValues.forEach((val) => {
+      params.append("attributeValues", val);
+    });
+
+    return params.toString();
+  }, [page, size, sortTab, priceRanges, selectedAttrValues]);
+
+  const load = async () => {
+    if (!cid) return;
+    try {
+      setLoading(true);
+      const res = await fetchVariantByCategory(cid, query);
+      const data = res.data;
+
+      setRows(data?.items ?? []);
+      setMeta({
+        page: data?.page as number,
+        size: data?.size ?? size,
+        total: data?.total ?? 0,
+      });
+
+      setPageInput(data?.page as number);
+    } catch (e) {
+      console.error("API Error: ", e);
+      setRows([]);
+      setMeta({ page: 1, size, total: 0 });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, cid]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil((meta.total || 0) / (meta.size || size))
   );
+
+  const handleGoPrev = () => {
+    setPage((p) => Math.max(1, p - 1));
+  };
+
+  const handleGoNext = () => {
+    setPage((p) => Math.min(totalPages, p + 1));
+  };
+
+  const handleResetFilter = () => {
+    setSortTab("newest");
+    setPriceRanges([]);
+    setSelectedAttrValues([]);
+    setPage(1);
+    setSize(12);
+    setPageInput(1);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
         {loading ? (
           <div>Đang tải...</div>
-        ) : !data ? (
-          <div>Không có dữ liệu</div>
         ) : (
           <>
-            <h1 className="text-xl font-bold mb-4">Danh sách sản phẩm</h1>
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-xl font-bold">Danh sách sản phẩm</h1>
+              <button
+                onClick={handleResetFilter}
+                className="text-sm px-3 py-1 border rounded"
+              >
+                Xoá bộ lọc
+              </button>
+            </div>
+
             <div className="grid grid-cols-12 gap-6">
+              {/* LEFT FILTER */}
               <aside className="col-span-3 bg-white p-4 rounded-lg shadow">
                 <h2 className="font-semibold mb-3">Khoảng giá</h2>
+
                 <label className="flex gap-2 mb-2">
                   <input
                     type="checkbox"
-                    checked={priceFilters.includes("low")}
-                    onChange={() => togglePrice("low")}
+                    checked={priceRanges.includes("RANGE_0_5")}
+                    onChange={() => togglePriceRange("RANGE_0_5")}
                   />
-                  <span>0-5.000.000đ</span>
+                  <span>0 - 5.000.000đ</span>
                 </label>
+
                 <label className="flex gap-2 mb-2">
                   <input
                     type="checkbox"
-                    checked={priceFilters.includes("mid")}
-                    onChange={() => togglePrice("mid")}
+                    checked={priceRanges.includes("RANGE_5_15")}
+                    onChange={() => togglePriceRange("RANGE_5_15")}
                   />
                   <span>5.000.000đ - 15.000.000đ</span>
                 </label>
+
                 <label className="flex gap-2 mb-2">
                   <input
                     type="checkbox"
-                    checked={priceFilters.includes("high")}
-                    onChange={() => togglePrice("high")}
+                    checked={priceRanges.includes("RANGE_15_PLUS")}
+                    onChange={() => togglePriceRange("RANGE_15_PLUS")}
                   />
                   <span>Trên 15.000.000đ</span>
                 </label>
+
+                <div className="mt-6">
+                  <h2 className="font-semibold mb-3">Thuộc tính</h2>
+
+                  {attributeFilters.map((attr, idx) => (
+                    <div key={idx} className="mb-4">
+                      <div className="font-medium text-sm mb-1">
+                        {attr.name}
+                      </div>
+
+                      <div className="space-y-1 text-sm">
+                        {attr.values.map((v, i) => (
+                          <label
+                            key={`${attr.name}-${v.value}-${i}`}
+                            className="flex items-center gap-2 cursor-pointer"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedAttrValues.includes(v.value)}
+                              onChange={() => toggleAttributeValue(v.value)}
+                            />
+                            <span>{v.value}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </aside>
+
+              {/* RIGHT CONTENT */}
               <main className="col-span-9">
+                {/* SORT + PAGE SIZE */}
                 <div className="flex justify-between mb-4">
                   <div className="flex bg-gray-100 rounded-full p-1">
                     {[
@@ -124,9 +238,13 @@ export default function CategoryPage() {
                     ].map((t) => (
                       <button
                         key={t.id}
-                        onClick={() => setSort(t.id as any)}
+                        onClick={() => {
+                          setSortTab(t.id as any);
+                          setPage(1);
+                          setPageInput(1);
+                        }}
                         className={`px-3 py-1 rounded-full ${
-                          sort === t.id
+                          sortTab === t.id
                             ? "bg-indigo-600 text-white"
                             : "text-gray-600"
                         }`}
@@ -135,11 +253,13 @@ export default function CategoryPage() {
                       </button>
                     ))}
                   </div>
+
                   <select
-                    value={pageSize}
+                    value={size}
                     onChange={(e) => {
-                      setPageSize(Number(e.target.value));
+                      setSize(Number(e.target.value));
                       setPage(1);
+                      setPageInput(1);
                     }}
                     className="border px-2 py-1 rounded"
                   >
@@ -148,8 +268,10 @@ export default function CategoryPage() {
                     <option value={20}>20 / trang</option>
                   </select>
                 </div>
+
+                {/* PRODUCT GRID */}
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {pageData.map((v) => (
+                  {rows.map((v) => (
                     <ProductCard
                       key={v.id}
                       productVariantId={v.id}
@@ -159,24 +281,63 @@ export default function CategoryPage() {
                       stock={v.stock}
                       rating={5}
                       reviewCount={0}
+                      sku={v.sku}
+                      productId={v.productId}
                     />
                   ))}
                 </div>
-                <div className="mt-6 flex justify-center gap-4">
+
+                {/* PAGINATION + INPUT PAGE */}
+                <div className="mt-6 flex justify-center items-center gap-4 text-sm">
                   <button
                     className="px-3 py-1 border rounded"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={safePage === 1}
+                    onClick={handleGoPrev}
+                    disabled={page <= 1}
                   >
                     Trước
                   </button>
-                  <span>
-                    Trang <b>{safePage}</b> / {totalPages}
-                  </span>
+
+                  <div className="flex items-center gap-2">
+                    <span>Trang</span>
+                    <input
+                      type="number"
+                      value={pageInput}
+                      min={1}
+                      max={totalPages}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+
+                        // Nếu xóa trắng
+                        if (raw === "") {
+                          setPageInput(NaN);
+                          return;
+                        }
+
+                        const num = Number(raw);
+                        setPageInput(num);
+
+                        // Xóa timeout cũ
+                        if (inputRef.current) clearTimeout(inputRef.current);
+
+                        // Sau 500ms user ngừng gõ → setPage
+                        inputRef.current = window.setTimeout(() => {
+                          if (!isNaN(num) && num >= 1) {
+                            const validPage = Math.min(num, totalPages);
+                            setPage(validPage);
+                            setPageInput(validPage);
+                          }
+                        }, 500);
+                      }}
+                      className="w-14 border rounded px-2 py-1 text-center"
+                    />
+
+                    <span>/ {totalPages}</span>
+                  </div>
+
                   <button
                     className="px-3 py-1 border rounded"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={safePage === totalPages}
+                    onClick={handleGoNext}
+                    disabled={page >= totalPages}
                   >
                     Sau
                   </button>
