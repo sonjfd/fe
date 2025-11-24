@@ -1,6 +1,7 @@
+import { getContactStats } from "@/api/admin.contact.api";
 import { logoutApi } from "@/api/auth.api";
 import { useCurrentApp } from "@/components/context/AppContext";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Link,
   Outlet,
@@ -8,6 +9,7 @@ import {
   matchPath,
   useNavigate,
 } from "react-router-dom";
+import { toast } from "react-toastify";
 import AdminNotificationBell from "./AdminNotificationBell";
 
 /* ====== Minimal icons (SVG inline) ====== */
@@ -164,6 +166,18 @@ export default function LayoutAdmin() {
   const [openKeys, setOpenKeys] = React.useState<string[]>([]);
   const location = useLocation();
   const { activeKey, openKey } = useActive(location.pathname);
+  const [pendingContacts, setPendingContacts] = React.useState(0);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const stats = await getContactStats();
+        setPendingContacts(stats);
+      } catch (error) {
+        toast.error("Không thể tải thống kê liên hệ "+error);
+      }
+    })();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -212,6 +226,7 @@ export default function LayoutAdmin() {
               activeKey={activeKey}
               openKeys={openKeys}
               setOpenKeys={setOpenKeys}
+              pendingContacts={pendingContacts}
             />
           ))}
         </nav>
@@ -277,15 +292,22 @@ function MenuItem({
   activeKey,
   openKeys,
   setOpenKeys,
+  pendingContacts,
 }: {
   node: MenuNode;
   collapsed: boolean;
   activeKey?: string;
   openKeys: string[];
   setOpenKeys: React.Dispatch<React.SetStateAction<string[]>>;
+  pendingContacts?: number;
 }) {
   const isOpen = openKeys.includes(node.key);
   const isActive = activeKey === node.key;
+
+  const isContacts = node.key === "contacts";
+  const showBadge = isContacts && (pendingContacts ?? 0) > 0;
+  const badgeText =
+    pendingContacts && pendingContacts > 99 ? "99+" : pendingContacts;
 
   if (!node.children?.length) {
     const Inner = (
@@ -299,17 +321,32 @@ function MenuItem({
       >
         <span
           className={cx(
-            "shrink-0",
+            "relative shrink-0",
             isActive
               ? "text-white"
               : "text-neutral-500 group-hover:text-neutral-700"
           )}
         >
           {node.icon}
+          {/* chấm nhỏ khi collapse */}
+          {collapsed && showBadge && (
+            <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500" />
+          )}
         </span>
-        {!collapsed && <span className="truncate">{node.label}</span>}
+
+        {!collapsed && (
+          <span className="flex-1 truncate flex items-center justify-between">
+            <span>{node.label}</span>
+            {showBadge && (
+              <span className="ml-2 inline-flex min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-semibold text-white">
+                {badgeText}
+              </span>
+            )}
+          </span>
+        )}
       </div>
     );
+
     return node.to ? <Link to={node.to}>{Inner}</Link> : <div>{Inner}</div>;
   }
 
@@ -365,6 +402,7 @@ function MenuItem({
             activeKey={activeKey}
             openKeys={openKeys}
             setOpenKeys={setOpenKeys}
+            pendingContacts={pendingContacts}
           />
         ))}
       </div>

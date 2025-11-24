@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Container } from "@/components/client/AppHeader";
 import { ProductCard } from "@/components/client/ProductCard";
 import { fetchMyWishlist } from "@/api/home.api";
@@ -8,6 +8,7 @@ import { useCurrentApp } from "@/components/context/AppContext";
 export const WishlistPage: React.FC = () => {
   const { isAuthenticated } = useCurrentApp();
   const navigate = useNavigate();
+  const location = useLocation()
 
   const [pageData, setPageData] =
     useState<IModelPaginate<IWishlistProductVariant> | null>(null);
@@ -15,6 +16,12 @@ export const WishlistPage: React.FC = () => {
 
   const [page, setPage] = useState(1);
   const size = 10;
+
+  useEffect(() => {
+      if (!isAuthenticated) {
+        navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`);
+      }
+    }, [isAuthenticated, navigate, location.pathname]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -33,31 +40,8 @@ export const WishlistPage: React.FC = () => {
   }, [page, size, isAuthenticated]);
 
   if (!isAuthenticated) {
-    return (
-      <Container className="py-6">
-        <p className="text-sm text-slate-500 mb-2">
-          <Link to="/" className="hover:text-indigo-600">
-            Trang chủ
-          </Link>{" "}
-          / <span>Sản phẩm yêu thích</span>
-        </p>
-        <h1 className="text-2xl font-bold mb-4">Sản phẩm yêu thích</h1>
-        <div className="bg-white rounded-2xl border border-slate-200 p-6">
-          <p className="text-slate-700">
-            Vui lòng{" "}
-            <button
-              onClick={() => navigate("/login")}
-              className="text-indigo-600 font-semibold"
-            >
-              đăng nhập
-            </button>{" "}
-            để xem danh sách sản phẩm yêu thích.
-          </p>
-        </div>
-      </Container>
-    );
-  }
-
+      return null;
+    }
   const total = pageData?.total ?? 0;
   const totalPages =
     pageData && pageData.size > 0
@@ -117,6 +101,24 @@ export const WishlistPage: React.FC = () => {
                   }}
                   onAddToCart={() => {
                     console.log("Add to cart from wishlist", item.variantId);
+                  }}
+                  isWishlisted={true}
+                  onToggleWishlist={(added) => {
+                    if (!added) {
+                      setPageData((prev) => {
+                        if (!prev) return prev;
+                        const newItems = prev.items.filter(
+                          (x) => x.wishlistId !== item.wishlistId
+                        );
+                        const newTotal = Math.max(0, prev.total - 1);
+
+                        return {
+                          ...prev,
+                          items: newItems,
+                          total: newTotal,
+                        };
+                      });
+                    }
                   }}
                 />
               ))}
