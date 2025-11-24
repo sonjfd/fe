@@ -95,7 +95,7 @@ const CreatePurchaseOrderPage = () => {
     return (
         <div className="p-6 bg-gray-100 min-h-screen flex justify-center">
             <div className="w-full max-w-4xl bg-white rounded shadow-lg p-8">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">📝 Tạo Đơn Nhập Hàng Mới</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">Tạo Đơn Nhập Hàng Mới</h2>
 
                 <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Nhà Cung Cấp</label>
