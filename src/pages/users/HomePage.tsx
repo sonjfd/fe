@@ -342,43 +342,41 @@ export const DSHStoreHome: React.FC = () => {
 
         {!productPageLoading && productPage && productPage.items.length > 0 && (
           <>
-          {console.log(productPage.items[1].productId)}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-              {productPage.items.map((p) => (
-                <ProductCard
-                  key={p.variantId}
-                  productVariantId={p.variantId}
-                  name={p.productName}
-                  imageUrl={
-                    p.thumbnailUrl ||
-                    "https://via.placeholder.com/400x400?text=No+Image"
-                  }
-                  salePrice={p.price}
-                  stock={p.stock}
-                  discountPercent={0}
-                  rating={5}
-                  reviewCount={p.sold}
-                  isWishlisted={wishlistIds.has(p.variantId)}
-                  onToggleWishlist={(added) => {
-                    setWishlistIds((prev) => {
-                      const next = new Set(prev);
-                      if (added) next.add(p.variantId);
-                      else next.delete(p.variantId);
-                      return next;
-                    });
-                  }}
-                  sku={p.sku}
-                  onClick={() => {
-                    console.log("Click variant", p.variantId);
-                  }}
-                  onAddToCart={() => {
-                    console.log("Add to cart variant", p.variantId);
-                  }}
-                  productId={p.productId}
-                />
-              ))}
-            </div>
-
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+                  {productPage.items.map((p) => (
+                      <ProductCard
+                          key={p.variantId}
+                          productVariantId={p.variantId}
+                          name={p.productName}
+                          imageUrl={
+                              p.thumbnailUrl ||
+                              "https://via.placeholder.com/400x400?text=No+Image"
+                          }
+                          salePrice={p.price}
+                          stock={p.stock}
+                          discountPercent={0}
+                          rating={p.ratingAverage ?? 0}
+                          reviewCount={p.ratingCount ?? 0}
+                          isWishlisted={wishlistIds.has(p.variantId)}
+                          onToggleWishlist={(added) => {
+                              setWishlistIds((prev) => {
+                                  const next = new Set(prev);
+                                  if (added) next.add(p.variantId);
+                                  else next.delete(p.variantId);
+                                  return next;
+                              });
+                          }}
+                          sku={p.sku}
+                          onClick={() => {
+                              console.log("Click variant", p.variantId);
+                          }}
+                          onAddToCart={() => {
+                              console.log("Add to cart variant", p.variantId);
+                          }}
+                          productId={p.productId}
+                      />
+                  ))}
+              </div>
             {/* Pagination đẹp hơn */}
             {(() => {
               const totalPages = Math.max(
