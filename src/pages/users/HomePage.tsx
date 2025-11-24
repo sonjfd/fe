@@ -337,8 +337,8 @@ export const DSHStoreHome: React.FC = () => {
                   salePrice={p.price}
                   stock={p.stock}
                   discountPercent={0}
-                  rating={5}
-                  reviewCount={p.sold}
+                  rating={p.ratingAverage ?? 0}
+                  reviewCount={p.ratingCount ?? 0}
                   isWishlisted={wishlistIds.has(p.variantId)}
                   onToggleWishlist={(added) => {
                     setWishlistIds((prev) => {
@@ -359,7 +359,6 @@ export const DSHStoreHome: React.FC = () => {
                 />
               ))}
             </div>
-
             {/* Pagination đẹp hơn */}
             {(() => {
               const totalPages = Math.max(
