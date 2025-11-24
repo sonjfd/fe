@@ -86,8 +86,8 @@ export const fetchHomeProducts = async (
 };
 
 
-export const fetchVariantByCategory = (id: number) => {
-  return axios.get<IBackendRes<IModelPaginate<VariantFilter>>>(`api/v1/category/${id}`)
+export const fetchVariantByCategory = (id: number, query: string) => {
+  return axios.get<IBackendRes<IModelPaginate<VariantFilter>>>(`api/v1/category/${id}?${query}`)
 }
 
 export const fetchSearchProducts = async (
@@ -110,3 +110,16 @@ export const fetchSearchProducts = async (
     }
   );
 };
+export const fetchCategoryAttributes = (id: number) => {
+  return axios.get<IBackendRes<AttributeFilter[]>>(
+    `/api/v1/category/${id}/attributes`
+  );
+};
+
+
+export const fetchProductDetail = (id: number, sku: string) => {
+  return axios.get<IBackendRes<ProductDetailDTO>>(
+    `/api/v1/products/${id}?sku=${sku}`
+  );
+}
+

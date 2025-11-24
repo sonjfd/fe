@@ -1,5 +1,11 @@
+import TableOrder from "@/components/admin/order/TableOrder";
+
 const OrderList = () => {
-  return <div>OrderList</div>;
+  return (
+    <>
+      <TableOrder />
+    </>
+  );
 };
 
 export default OrderList;

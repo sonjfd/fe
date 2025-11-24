@@ -114,6 +114,8 @@ export const SearchPage: React.FC = () => {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
               {result.items.map((p) => (
                 <ProductCard
+                  productId={p.productId}
+                  sku={p.sku}
                   key={p.variantId}
                   productVariantId={p.variantId}
                   name={p.productName}

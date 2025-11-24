@@ -5,7 +5,6 @@ import UserList from "./pages/admin/UserList";
 
 import CategoryList from "./pages/admin/CategoryList";
 import OrderList from "./pages/admin/OrderList";
-import OrderDetail from "./pages/admin/OrderDetail";
 
 import { ContactPage } from "./pages/users/ContactPage";
 import ProductList from "./pages/admin/ProductList";
@@ -33,9 +32,12 @@ import UpdatePasswordPage from "./pages/auth/UpdatePasswordPage";
 import AboutPage from "./pages/users/AboutPage";
 import CategoryPage from "./pages/users/FilterPage";
 import { CartPage } from "./pages/users/client/CardPage";
-import { CheckoutPage } from "./pages/users/client/CheckoutPage";
-import OrderSuccess from "./pages/users/client/OrderSuccess";
 import { SearchPage } from "./pages/users/SearchPage";
+import ProductDetailPage from "./pages/users/ProductDetailPage";
+import OrderSuccess from "./pages/users/OrderSuccess";
+import VoucherListPage from "pages/admin/VoucherList.tsx";
+import { CheckoutPage } from "./pages/users/CheckoutPage";
+import UserOrderPage from "./pages/users/UserOrderPage";
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
@@ -54,17 +56,19 @@ export const ROUTER = createBrowserRouter([
         element: <ContactPage />,
       },
       {
-        path: "/tim-kiem", 
+        path: "/tim-kiem",
         element: <SearchPage />
       },
       { path: "/oauth2/callback", element: <GoogleOAuthHandler /> },
       { path: "/update-password", element: <UpdatePasswordPage /> },
       { path: "/category/:id", element: <CategoryPage /> },
+      { path: "/products/:id", element: <ProductDetailPage /> },
+      { path: "/checkout", element: <CheckoutPage /> },
+      { path: "/thanks", element: <OrderSuccess /> },
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
       { path: "gioi-thieu", element: <AboutPage /> },
       { path: "cart", element: <CartPage /> },
-      { path: "order-success", element: <OrderSuccess /> },
       { path: "wishlist", element: <WishlistPage /> },
     ],
   },
@@ -84,6 +88,7 @@ export const ROUTER = createBrowserRouter([
           { path: "ho-so", element: <ProfilePage /> },
           { path: "dia-chi", element: <AddressPage /> },
           { path: "doi-mat-khau", element: <ChangePasswordPage /> },
+          { path: "don-mua", element: <UserOrderPage /> },
         ],
       },
     ],
@@ -110,7 +115,6 @@ export const ROUTER = createBrowserRouter([
       { path: "categories", element: <CategoryList /> },
 
       { path: "orders", element: <OrderList /> },
-      { path: "orders/:id", element: <OrderDetail /> },
       { path: "roles", element: <RoleManagementPage /> },
       { path: "contact-message", element: <AdminContactsPage /> },
       // active only
@@ -122,6 +126,8 @@ export const ROUTER = createBrowserRouter([
 
       { path: "sliders", element: <AdminSlidersPage /> },
       // { path: "sliders/:id", element: <SliderDetail /> },     // active only
+      // { path: "sliders/:id", element: <SliderDetail /> },     // active only
+      { path: "vouchers", element: <VoucherListPage /> },
     ],
   },
   { path: "*", element: <NotFoundPage /> },

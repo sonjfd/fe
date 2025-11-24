@@ -10,5 +10,10 @@ export default defineConfig({
   plugins: [react(), tsconfigPaths(), svgr({ svgrOptions: { icon: true } })],
   server: {
     port: 3000
+  }, define: {
+    global: "window",
+  },
+  optimizeDeps: {
+    include: ["@stomp/stompjs", "sockjs-client"],
   },
 })

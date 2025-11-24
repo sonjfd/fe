@@ -7,8 +7,10 @@ interface VariantAttributes {
   name: string;
   value: string;
 }
+
 interface Variant {
   id: number;
+  name: string;
   sku: string;
   price: number;
   stock: number;
@@ -25,6 +27,7 @@ export default function UpdateVariantModal({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const [name, setName] = useState<string>(value.name);
   const [price, setPrice] = useState<number | string>(value.price);
   const [stock, setStock] = useState<number | string>(value.stock);
   const [saving, setSaving] = useState(false);
@@ -34,11 +37,13 @@ export default function UpdateVariantModal({
   const submit = async () => {
     try {
       setSaving(true);
-      // Gọi trực tiếp PUT kèm body (phù hợp với nhu cầu cập nhật price/stock)
+
       await axios.put(`/api/v1/admin/variants/${value.id}`, {
+        name: name,
         price: Number(price) || 0,
         stock: Number(stock) || 0,
       });
+
       toast.success("Đã cập nhật biến thể");
       onSaved();
       onClose();
@@ -59,8 +64,20 @@ export default function UpdateVariantModal({
         <div className="mb-3 text-sm">
           <div className="text-neutral-500">Combination</div>
           <div className="font-medium">{combination}</div>
+
           <div className="text-neutral-500 mt-1">SKU</div>
           <div className="font-mono text-[13px]">{value.sku}</div>
+        </div>
+
+        {/* 🆕 FIELD TÊN BIẾN THỂ */}
+        <div className="mb-3">
+          <label className="block text-sm font-medium">Tên biến thể</label>
+          <input
+            className="mt-1 w-full rounded border border-neutral-300 px-3 py-2"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Nhập tên biến thể"
+          />
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">
@@ -74,6 +91,7 @@ export default function UpdateVariantModal({
               onChange={(e) => setPrice(e.target.value)}
             />
           </div>
+
           <div>
             <label className="block text-sm font-medium">Tồn kho</label>
             <input
