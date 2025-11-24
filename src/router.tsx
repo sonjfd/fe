@@ -35,6 +35,11 @@ import CategoryPage from "./pages/users/FilterPage";
 import { CartPage } from "./pages/users/client/CardPage";
 import { CheckoutPage } from "./pages/users/client/CheckoutPage";
 import VoucherListPage from "pages/admin/VoucherList.tsx";
+import InventoryPage from "pages/admin/InventoryPage.tsx";
+import PurchaseOrderListPage from "pages/admin/PurchaseOrderListPage.tsx";
+import PurchaseOrderDetailPage from "pages/admin/PurchaseOrderDetailPage";
+import CreatePurchaseOrderPage from "pages/admin/CreatePurchaseOrderPage";
+
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
@@ -110,10 +115,24 @@ export const ROUTER = createBrowserRouter([
       { path: "contact-message", element: <AdminContactsPage /> },
       // active only
 
-      // { path: "warehouses", element: <WarehouseList /> },
-      // { path: "inventory", element: <InventoryByVariant /> },
-      // { path: "purchase-orders", element: <PurchaseOrderList /> },
-      // { path: "purchase-orders/:id", element: <PurchaseOrderDetail /> }, // active only
+      { path: "warehouses", element: <InventoryPage /> },
+      // { path: "inventory", element: <InventoryPage /> },
+      { path: "purchase-orders",
+      children: [
+          {
+              index:true,
+              element: <PurchaseOrderListPage/>
+          },
+          {
+              path: "create",
+              element: <CreatePurchaseOrderPage/>
+          },
+          {
+              path:":id",
+              element: <PurchaseOrderDetailPage/>
+          }
+      ]
+      },
 
       { path: "sliders", element: <AdminSlidersPage /> },
       // { path: "sliders/:id", element: <SliderDetail /> },     // active only
