@@ -37,7 +37,7 @@ const InventoryPage= () => {
                         Lịch sử nhập hàng
                     </Link>
                     <Link to="/admin/purchase-orders/create" className="px-4 py-2 bg-black text-white rounded shadow">
-                        + Nhập kho mới
+                        + Tạo đơn mới
                     </Link>
                 </div>
             </div>
