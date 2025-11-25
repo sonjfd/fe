@@ -27,5 +27,5 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
-    - run: sudo docker build -t fe . --build-arg VITE_BACKEND_URL="http://localhost:8080" --build-arg VITE_GOOGLE_CLIENT_ID="633655029851-o3speubclis9u3219d9rh3b4abvvhqlr.apps.googleusercontent.com" --build-arg VITE_GOOGLE_REDIRECT_URI="http://localhost:8080/login/oauth2/code/google"
+    - run: docker build -t fe . --build-arg VITE_BACKEND_URL="http://localhost:8080" --build-arg VITE_GOOGLE_CLIENT_ID="633655029851-o3speubclis9u3219d9rh3b4abvvhqlr.apps.googleusercontent.com" --build-arg VITE_GOOGLE_REDIRECT_URI="http://localhost:8080/login/oauth2/code/google"
     - run: docker run --rm --name fe --network fsa -d -p 80:80 fe
