@@ -38,6 +38,7 @@ import OrderSuccess from "./pages/users/OrderSuccess";
 import VoucherListPage from "pages/admin/VoucherList.tsx";
 import { CheckoutPage } from "./pages/users/CheckoutPage";
 import UserOrderPage from "./pages/users/UserOrderPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
@@ -64,6 +65,7 @@ export const ROUTER = createBrowserRouter([
       { path: "/category/:id", element: <CategoryPage /> },
       { path: "/products/:id", element: <ProductDetailPage /> },
       { path: "/checkout", element: <CheckoutPage /> },
+      { path: "/forgot-password", element: <ForgotPasswordPage /> },
       { path: "/thanks", element: <OrderSuccess /> },
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
