@@ -38,7 +38,9 @@ import OrderSuccess from "./pages/users/OrderSuccess";
 import VoucherListPage from "pages/admin/VoucherList.tsx";
 import { CheckoutPage } from "./pages/users/CheckoutPage";
 import UserOrderPage from "./pages/users/UserOrderPage";
-import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+
+import ResetPasswordPage from "pages/auth/ResetPasswordPage.tsx";
+import ForgotPasswordPage from "pages/auth/ForgotPasswordPage.tsx";
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
@@ -72,6 +74,8 @@ export const ROUTER = createBrowserRouter([
       { path: "gioi-thieu", element: <AboutPage /> },
       { path: "cart", element: <CartPage /> },
       { path: "wishlist", element: <WishlistPage /> },
+        {path: "forgot-password",element : <ForgotPasswordPage />},
+        { path:"reset-password", element:<ResetPasswordPage />}
     ],
   },
   {
