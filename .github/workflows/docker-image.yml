@@ -1,5 +1,3 @@
-name: Docker Image CI
-
 on:
   push:
     branches: ["main"]
@@ -13,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: "Create env file"
+      - name: Create env file
         run: echo -e "${{ secrets.PHONE_STORE_FE_ENV }}" > .env.production
 
       - name: Build Docker image
@@ -29,20 +27,21 @@ jobs:
 
       - name: Push Docker image
         run: docker push sondiec121/fe:v1
-deploy:
-  runs-on: ubuntu-latest
-  needs: build
-  steps:
-    - name: Executing remote ssh commands using password
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.HOST_USERNAME }}
-        password: ${{ secrets.HOST_PASSWORD }}
-        port: ${{ secrets.PORT }}
-        script: |
-          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
-          docker pull sondiec121/fe:v1
-          docker stop fe
-          docker rm fe
-          docker run -d --name fe --network phone-network -p 3000:80 --restart unless-stopped sondiec121/fe:v1
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: SSH Deploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.HOST_USERNAME }}
+          password: ${{ secrets.HOST_PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+            docker pull sondiec121/fe:v1
+            docker stop fe || true
+            docker rm fe || true
+            docker run -d --name fe -p 3000:80 --restart unless-stopped sondiec121/fe:v1
