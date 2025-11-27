@@ -2,17 +2,30 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - uses: actions/checkout@v3
+
+      - name: "Create env file"
+        run: echo -e "${{ secrets.PHONE_STORE_FE_ENV }}" > .env.production
+
+      - name: Build Docker image
+        run: |
+          docker build \
+          --build-arg VITE_BACKEND_URL=$(grep VITE_BACKEND_URL .env.production | cut -d '=' -f2) \
+          --build-arg VITE_GOOGLE_CLIENT_ID=$(grep VITE_GOOGLE_CLIENT_ID .env.production | cut -d '=' -f2) \
+          --build-arg VITE_GOOGLE_REDIRECT_URI=$(grep VITE_GOOGLE_REDIRECT_URI .env.production | cut -d '=' -f2) \
+          -t sondiec121/fe:v1 .
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Push Docker image
+        run: docker push sondiec121/fe:v1
