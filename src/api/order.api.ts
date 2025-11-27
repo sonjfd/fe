@@ -1,5 +1,23 @@
 import axios from "@/services/axios.customize";
+export interface ApplicableVoucher {
+    id: number;
+    code: string;
+    discountType: "PERCENT" | "FIXED";
+    discountValue: number;
+    maxDiscountAmount?: number | null;
+    minOrderValue?: number | null;
+    imageUrl?: string | null;
+    description?: string | null;
+    startDate?: string | null;
+    endDate?: string | null;
+}
 
+export const getAvailableVouchers = (orderAmount: number) => {
+    const backEnd = "/api/v1/vouchers/available";
+    return axios.get<IBackendRes<ApplicableVoucher[]>>(backEnd, {
+        params: { orderAmount },
+    });
+};
 export const getShippingFree = (addressId: number) => {
     const backEnd = `/shipping/quote`
     return axios.post<ShippingQuote>(backEnd, { addressId })
