@@ -31,14 +31,14 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     const value = keyword.trim();
 
     if (onSubmit) {
-  onSubmit(value);
-} else {
-  if (!value) {
-    navigate(`/tim-kiem?page=1`);
-  } else {
-    navigate(`/tim-kiem?q=${encodeURIComponent(value)}&page=1`);
-  }
-}
+      onSubmit(value);
+    } else {
+      if (!value) {
+        navigate(`/tim-kiem?page=1`);
+      } else {
+        navigate(`/tim-kiem?q=${encodeURIComponent(value)}&page=1`);
+      }
+    }
   };
 
   const commonInputProps = {
@@ -54,41 +54,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
   if (variant === "hero") {
     // Ô tìm kiếm to ở trang /tim-kiem
-    return (
-      <form
-        onSubmit={handleSubmit}
-        className={cn(
-          "w-full max-w-3xl mx-auto rounded-full bg-indigo-900/80 flex items-stretch shadow-xl overflow-hidden",
-          className
-        )}
-      >
-        <div className="px-5 flex items-center text-white">
-          <svg
-            width="26"
-            height="26"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            aria-hidden
-          >
-            <circle cx="11" cy="11" r="7" />
-            <path d="M21 21l-4.35-4.35" />
-          </svg>
-        </div>
-        <input
-          {...commonInputProps}
-          placeholder="Tìm kiếm sản phẩm..."
-          aria-label="Tìm kiếm sản phẩm"
-          className="flex-1 bg-transparent text-white placeholder:text-indigo-200 text-sm sm:text-base outline-none px-2 sm:px-3"
-        />
-        <button
-          type="submit"
-          className="px-5 sm:px-7 bg-white text-indigo-900 text-sm sm:text-base font-semibold hover:bg-slate-100"
-        >
-          Tìm kiếm
-        </button>
-      </form>
-    );
+    return <></>;
   }
 
   // Variant header (nhỏ gọn trên AppHeader)

@@ -67,6 +67,7 @@ export const ROUTER = createBrowserRouter([
       { path: "/category/:id", element: <CategoryPage /> },
       { path: "/products/:id", element: <ProductDetailPage /> },
       { path: "/checkout", element: <CheckoutPage /> },
+      { path: "/forgot-password", element: <ForgotPasswordPage /> },
       { path: "/thanks", element: <OrderSuccess /> },
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
