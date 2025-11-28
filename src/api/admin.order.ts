@@ -31,14 +31,14 @@ export const getAdminShippingOrderDetail = (
 export const getGhnServicesApi = () => {
   // hoặc nếu BE không cần orderId thì bỏ param
   return axios.get<IBackendRes<GhnService[]>>(
-    `/shipping/services`
+    `/api/v1/shipping/services`
   );
 };
 
 // Lấy danh sách ca lấy hàng GHN
 export const getGhnPickupShiftsApi = () => {
   return axios.get<IBackendRes<GhnPickupShift[]>>(
-    `shipping/pickup-shifts`
+    `/api/v1/shipping/pickup-shifts`
   );
 };
 
@@ -249,6 +249,6 @@ export const rejectCancelOrder = (orderId: number, reason: string) =>
     { params: { orderId, reason } }
   );
 export const getServiceFee = (payload: { districtId: number; wardId:number,service_id: number,service_type_id: number }) => {
-const backEnd = `/shipping/quote`
+const backEnd = `/api/v1/shipping/quote`
     return axios.post<ShippingQuote>(backEnd, payload)
 }

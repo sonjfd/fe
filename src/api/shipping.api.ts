@@ -21,7 +21,7 @@ export interface ShippingQuoteResponse {
 
 export const getShippingQuoteApi = (payload: ShippingQuoteRequest) => {
   return axios.post<IBackendRes<ShippingQuoteResponse>>(
-    "/api/shipping/quote",
+    "/api/v1/shipping/quote",
     payload
   );
 };
