@@ -52,8 +52,9 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    const API_URL = import.meta.env.VITE_BACKEND_URL;
-    window.location.href = `${API_URL}/oauth2/authorization/google`;
+    const handleGoogleLogin = () => {
+    window.location.href = `http://dshstore.io.vn/api/oauth2/authorization/google`;
+  };
   };
 
   return (
