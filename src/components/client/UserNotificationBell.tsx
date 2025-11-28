@@ -1,15 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { connectAdminWs, disconnectAdminWs } from "@/api/admin.stocket";
 import {
-  getAllNotificationOfAdmin,
-  updateNotificationOfAdmin,
+  getAllNotificationOfUser,
+  updateNotificationOfUser,
 } from "@/api/notification.api";
+import { connectUserWs, disconnectUserWs } from "@/api/user.socket";
 
-const AdminNotificationBell: React.FC = () => {
+const UserNotificationBell: React.FC = () => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
 
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -18,6 +16,12 @@ const AdminNotificationBell: React.FC = () => {
   const [initialLoading, setInitialLoading] = useState(false);
 
   const hasFetchedRef = useRef(false);
+
+  // Popup chi tiết thông báo
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selectedNoti, setSelectedNoti] = useState<AdminNotification | null>(
+    null
+  );
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
@@ -43,7 +47,7 @@ const AdminNotificationBell: React.FC = () => {
   const loadData = async (p: number) => {
     if (p === 1) setInitialLoading(true);
     try {
-      const res = await getAllNotificationOfAdmin(`page=${p}&size=10`);
+      const res = await getAllNotificationOfUser(`page=${p}&size=10`);
       if (!res?.data) return;
 
       const items = res.data.items ?? [];
@@ -73,31 +77,31 @@ const AdminNotificationBell: React.FC = () => {
     loadData(1);
   }, []);
 
-  // WS realtime
+  // WS realtime cho user
   useEffect(() => {
-    connectAdminWs({
-        onNotification: (noti) => {
-            setNotifications((prev) => {
-                const newNoti: AdminNotification = {
-                    ...noti,
-                    createdAt: noti.createdAt || new Date().toISOString(),
-                };
-                const merged = [newNoti, ...prev];
-                const map = new Map<number, AdminNotification>();
-                merged.forEach((n) => map.set(n.id, n));
-                return Array.from(map.values());
-            });
+    connectUserWs({
+      onNotification: (noti) => {
+        setNotifications((prev) => {
+          const newNoti: AdminNotification = {
+            ...noti,
+            createdAt: noti.createdAt || new Date().toISOString(),
+          };
+          const merged = [newNoti, ...prev];
+          const map = new Map<number, AdminNotification>();
+          merged.forEach((n) => map.set(n.id, n));
+          return Array.from(map.values());
+        });
 
-            setTotal((t) => t + 1);
-        }
+        setTotal((t) => t + 1);
+      },
     });
 
     return () => {
-        disconnectAdminWs();
+      disconnectUserWs();
     };
-}, []);
+  }, []);
 
-
+  // Click outside để đóng dropdown
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -121,20 +125,21 @@ const AdminNotificationBell: React.FC = () => {
   };
 
   const handleClickNotification = async (noti: AdminNotification) => {
+    // Đánh dấu đã đọc
     if (!noti.isRead) {
-      await updateNotificationOfAdmin(noti.id);
+      try {
+        await updateNotificationOfUser(noti.id);
+      } catch {
+        // bỏ qua lỗi nhỏ, vẫn update UI
+      }
       setNotifications((prev) =>
         prev.map((n) => (n.id === noti.id ? { ...n, isRead: true } : n))
       );
     }
 
-    if (noti.type === "ORDER") {
-      navigate(`/admin/orders?id=${noti.referenceId}`);
-    } else if (noti.type === "CONTACT") {
-      navigate(`/admin/contact-message?id=${noti.referenceId}`);
-    }
-
-    setOpen(false);
+    // Mở popup chi tiết, KHÔNG điều hướng
+    setSelectedNoti(noti);
+    setDetailOpen(true);
   };
 
   const handleOpen = () => {
@@ -168,7 +173,7 @@ const AdminNotificationBell: React.FC = () => {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-11 w-[430px] rounded-xl border border-neutral-200 bg-white shadow-xl">
+        <div className="absolute right-0 top-11 w-[430px] rounded-xl border border-neutral-200 bg-white shadow-xl z-20">
           <div className="flex items-center justify-between border-b px-4 py-3">
             <div>
               <div className="text-sm font-semibold text-neutral-900">
@@ -252,19 +257,11 @@ const AdminNotificationBell: React.FC = () => {
                         {mapTypeLabel(n.type)}
                       </span>
 
+                      {/* referenceId giờ bạn dùng để tham chiếu theo user, 
+                          có thể giữ lại hiển thị hoặc bỏ hẳn nếu không cần */}
                       <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-neutral-600">
                         Mã tham chiếu: #{n.referenceId}
                       </span>
-
-                      <span className="rounded-full bg-neutral-50 px-2 py-0.5 text-neutral-500">
-                        Người nhận: {n.receiver}
-                      </span>
-
-                      {!n.isRead && (
-                        <span className="rounded-full bg-orange-50 px-2 py-0.5 text-[11px] font-medium text-orange-600">
-                          Chưa đọc
-                        </span>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -278,8 +275,66 @@ const AdminNotificationBell: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* POPUP CHI TIẾT THÔNG BÁO */}
+      {detailOpen && selectedNoti && (
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-md rounded-xl bg-white p-4 shadow-xl">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="text-sm font-semibold text-neutral-900">
+                {selectedNoti.title}
+              </h3>
+              <button
+                onClick={() => setDetailOpen(false)}
+                className="text-neutral-400 hover:text-neutral-700"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-1 text-[11px] text-neutral-500">
+              {formatTime(selectedNoti.createdAt)}
+            </div>
+
+            <div className="mt-3 text-sm text-neutral-800">
+              {selectedNoti.message}
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px]">
+              <span
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                  selectedNoti.type === "ORDER"
+                    ? "bg-blue-50 text-blue-700"
+                    : selectedNoti.type === "CONTACT"
+                    ? "bg-emerald-50 text-emerald-700"
+                    : "bg-neutral-100 text-neutral-700"
+                }`}
+              >
+                {mapTypeLabel(selectedNoti.type)}
+              </span>
+
+              <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-neutral-600">
+                Mã tham chiếu: #{selectedNoti.referenceId}
+              </span>
+
+              <span className="rounded-full bg-neutral-50 px-2 py-0.5 text-neutral-500">
+                Người nhận: {selectedNoti.receiver}
+              </span>
+            </div>
+
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={() => setDetailOpen(false)}
+                className="rounded border px-3 py-1.5 text-xs text-neutral-700 hover:bg-neutral-50"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default AdminNotificationBell;
+export default UserNotificationBell;

@@ -1,8 +1,8 @@
 import axios from "@/services/axios.customize";
 
-export const getShippingFree = (addressId: number) => {
+export const getShippingFree = (addressId: number,service_id: number = 53320,service_type_id: number = 2) => {
     const backEnd = `/shipping/quote`
-    return axios.post<ShippingQuote>(backEnd, { addressId })
+    return axios.post<ShippingQuote>(backEnd, { addressId,service_id,service_type_id })
 }
 
 
@@ -43,3 +43,8 @@ export const cancelUrl = (id: number) => {
     const backendUrl = `/api/v1/orders/${id}`
     return axios.delete(backendUrl)
 }
+
+export const cancelOrderRequest = (payload: { orderId: number; reason: string }) => {
+  return axios.post<IBackendRes<string>>("/api/v1/orders/cancel", payload);
+};
+

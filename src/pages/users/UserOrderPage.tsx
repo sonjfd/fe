@@ -1,7 +1,8 @@
-import { cancelUrl, getUserOrder } from "@/api/order.api";
+import { getUserOrder } from "@/api/order.api";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import UserOrderDetail from "./UserOrderDetail";
+import { CancelOrderPopup } from "@/components/client/PopupCancel";
 
 export default function UserOrderPage() {
   const [rows, setRows] = useState<Order[]>([]);
@@ -109,50 +110,32 @@ export default function UserOrderPage() {
         return "Đơn hàng mới tạo";
       case "CONFIRMED":
         return "Chuẩn bị giao";
+      case "CANCEL_REQUESTED":
+        return "Chờ duyệt huỷ";
       default:
         return s;
     }
   };
 
-  const handleCancelOrder = async (o: Order) => {
-    if (o.orderStatus === "CANCELLED" || o.orderStatus === "COMPLETED") {
-      return;
+  const handleCancelOrder = (o: Order) => {
+  if (o.orderStatus === "CANCELLED" || o.orderStatus === "COMPLETED") return;
+
+  toast(
+    ({ closeToast }) => (
+      <CancelOrderPopup
+        order={o}
+        closeToast={closeToast}
+        onSuccess={load} // gọi lại API load list đơn
+      />
+    ),
+    {
+      autoClose: false,
+      closeOnClick: false,
+      draggable: false,
     }
-    toast(
-      ({ closeToast }) => (
-        <div className="space-y-2">
-          <p>Bạn có chắc muốn huỷ đơn hàng này?</p>
-          <div className="flex gap-2">
-            <button
-              className="px-3 py-1 rounded bg-red-600 text-white"
-              onClick={async () => {
-                const res = await cancelUrl(o.id);
-                if (res.data === null) {
-                  toast.error(res.message);
-                  closeToast();
-                  load();
-                  return;
-                }
-                load();
-                toast.success("Đã huỷ đơn!");
-                closeToast();
-              }}
-            >
-              Xóa
-            </button>
-            <button className="px-3 py-1 rounded border" onClick={closeToast}>
-              Hủy
-            </button>
-          </div>
-        </div>
-      ),
-      {
-        autoClose: false,
-        closeOnClick: false,
-        draggable: false,
-      }
-    );
-  };
+  );
+};
+
 
   return (
     <>
@@ -293,16 +276,15 @@ export default function UserOrderPage() {
                     Xem chi tiết
                   </button>
 
-                  {o.orderStatus !== "CANCELLED" &&
-                    o.orderStatus !== "COMPLETED" &&
-                    o.orderStatus !== "DELIVERED" && (
+                 { (o.orderStatus === "PENDING" || o.orderStatus === "CONFIRMED") && (
                       <button
                         className="rounded border border-red-500 px-3 py-1.5 text-xs font-semibold text-red-500 hover:bg-red-50 md:text-sm"
                         onClick={() => handleCancelOrder(o)}
                       >
                         Huỷ đơn
                       </button>
-                    )}
+                  )}
+
                 </div>
               </div>
             ))}

@@ -12,7 +12,7 @@ export function confirmToast(message: string): Promise<boolean> {
                 resolve(true);
                 closeToast();
               }}
-              className="px-3 py-1 bg-green-600 text-white rounded"
+              className="px-3 py-1 bg-red-600 text-white rounded"
             >
               Đồng ý
             </button>

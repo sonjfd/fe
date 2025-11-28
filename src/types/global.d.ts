@@ -354,16 +354,6 @@ declare global {
   }
 
 
-  interface Order {
-    id: number;
-    totalPrice: number;
-    paymentMethod: string;
-    paymentStatus: string;
-    ghnOrderCode: string;
-    ghnFee: number;
-    ghnExpectedDelivery: string;
-    orderStatus: string;
-  }
   interface OrderCreateResponse {
     order: Order;
     paymentUrl?: string;
@@ -446,6 +436,8 @@ declare global {
     ward: string;
     addressDetail: string;
     user: OrderUser;
+    updatedAt: string;
+    ghnOrderCode?: string;
   }
 
 
@@ -501,5 +493,88 @@ declare global {
     referenceId: number;
   }
 
+  export interface AdminShippingOrderItem {
+  orderDetailId: number;
+  variantId: number;
+  productName: string;
+  sku: string;
+  quantity: number;
+  price: number;
+}
 
+export interface AdminShippingOrderDetail {
+  orderId: number;
+  uuid: string;
+  customerName: string;
+  customerPhone: string;
+
+  province: string;
+  district: string;
+  ward: string;
+  addressDetail: string;
+
+  provinceId: number;
+  districtId: number;
+  wardId: number;
+
+  shopProvinceId: number;
+  shopDistrictId: number;
+  shopWardId: number;
+  shopAddressDetail: string;
+  shopName: string;
+  shopPhone: string;
+
+  codAmount: number;
+  goodsValue: number | null;
+
+  weight: number; // gram
+  length: number; // cm
+  width: number;  // cm
+  height: number; // cm
+
+  items: AdminShippingOrderItem[];
+}
+
+interface AdminCreateGhnOrderPayload {
+  orderId: number;
+
+  // Bên nhận
+  receiverName: string;
+  receiverPhone: string;
+  addressDetail: string;
+  provinceId: number;
+  districtId: number;
+  wardId: number;
+
+  // Hàng hoá
+  weight: number; // gram
+  length: number; // cm
+  width: number;  // cm
+  height: number; // cm
+  codAmount: number;
+  goodsValue: number; // insurance_value
+
+  // Dịch vụ & ca ship
+  serviceId: number;
+  serviceTypeId: number; // 2 | 5
+  pickShiftId: number;
+
+  // Thanh toán & note
+  paymentTypeId: 1 | 2; // 1: người gửi trả, 2: người nhận trả
+  requiredNote: string;  // "KHONGCHOXEMHANG" | ...
+  note: string;
+}
+
+interface GhnService {
+  service_id: number;
+  short_name: string;
+  service_type_id: number;
+}
+
+interface GhnPickupShift {
+  id: number;
+  title: string;
+  from_time: number;
+  to_time: number;
+}
 }
