@@ -44,4 +44,4 @@ jobs:
             docker pull sondiec121/fe:v1
             docker stop fe || true
             docker rm fe || true
-            docker run -d --name fe -p 3000:80 --network phone_store_net --restart unless-stopped sondiec121/fe:v1
+            docker run -d --name fe -p 3000:3000 --network phone_store_net --restart unless-stopped sondiec121/fe:v1
