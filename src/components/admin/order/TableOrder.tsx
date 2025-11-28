@@ -480,7 +480,7 @@ export default function TableOrder() {
 
                       <td className="px-4 py-3 font-semibold">
                         {formatCurrency(
-                          (o.totalPrice || 0) + (o.ghnFee || 0)
+                          (o.totalPrice || 0) + (o.ghnFee || 0) - (o.voucherDiscount || 0)
                         )}
                       </td>
 

@@ -1,276 +1,304 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import { getOrderDetail } from "@/api/admin.order"; // đổi path nếu cần
+import { getOrderDetail } from "@/api/order.api";
 
 interface UserOrderDetailProps {
-  id: number;
-  onClose?: () => void;
+    id: number;
+    onClose?: () => void;
 }
 
 export default function UserOrderDetail({ id, onClose }: UserOrderDetailProps) {
-  const [order, setOrder] = useState<OneOrder | null>(null);
-  const [loading, setLoading] = useState(false);
+    const [order, setOrder] = useState<OneOrder | null>(null);
+    const [loading, setLoading] = useState(false);
 
-  const formatCurrency = (n: number) =>
-    n?.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
+    const formatCurrency = (n: number) =>
+        n?.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
 
-  const mapPaymentMethod = (m: string) => {
-    switch (m) {
-      case "VN_PAY":
-        return "Thanh toán online";
-      case "CASH":
-        return "Thanh toán khi nhận";
-      default:
-        return m;
-    }
-  };
+    const mapPaymentMethod = (m: string) => {
+        switch (m) {
+            case "VN_PAY":
+                return "Thanh toán online";
+            case "CASH":
+                return "Thanh toán khi nhận";
+            default:
+                return m;
+        }
+    };
 
-  const mapPaymentStatus = (s: string) => {
-    switch (s) {
-      case "PAID":
-        return "Đã thanh toán";
-      case "PENDING":
-        return "Chờ thanh toán";
-      case "FAILED":
-        return "Thất bại";
-      case "CANCELLED":
-        return "Đã hủy";
-      case "REFUNDED":
-        return "Đã hoàn tiền";
-      default:
-        return s;
-    }
-  };
+    const mapPaymentStatus = (s: string) => {
+        switch (s) {
+            case "PAID":
+                return "Đã thanh toán";
+            case "PENDING":
+                return "Chờ thanh toán";
+            case "FAILED":
+                return "Thất bại";
+            case "CANCELLED":
+                return "Đã hủy";
+            case "REFUNDED":
+                return "Đã hoàn tiền";
+            default:
+                return s;
+        }
+    };
 
-  const mapOrderStatus = (s: string) => {
-    switch (s) {
-      case "COMPLETED":
-        return "Đã hoàn thành";
-      case "PROCESSING":
-        return "Đang xử lý";
-      case "SHIPPING":
-        return "Đang giao";
-      case "DELIVERED":
-        return "Đã giao";
-      case "CANCELLED":
-        return "Đã hủy";
-      default:
-        return s;
-    }
-  };
+    const mapOrderStatus = (s: string) => {
+        switch (s) {
+            case "COMPLETED":
+                return "Đã hoàn thành";
+            case "PROCESSING":
+                return "Đang xử lý";
+            case "SHIPPING":
+                return "Đang giao";
+            case "DELIVERED":
+                return "Đã giao";
+            case "CANCELLED":
+                return "Đã hủy";
+            default:
+                return s;
+        }
+    };
 
-  const expectedDeliveryStr = useMemo(() => {
-    if (!order?.ghnExpectedDelivery) return "-";
-    return new Date(order.ghnExpectedDelivery).toLocaleString("vi-VN");
-  }, [order]);
+    const expectedDeliveryStr = useMemo(() => {
+        if (!order?.ghnExpectedDelivery) return "-";
+        return new Date(order.ghnExpectedDelivery).toLocaleString("vi-VN");
+    }, [order]);
 
-  const productTotal = useMemo(() => {
-    if (!order?.details) return 0;
-    return order.details.reduce((sum, d) => sum + d.price * d.quantity, 0);
-  }, [order]);
+    const voucherDiscount = useMemo(() => {
+        if (!order) return 0;
+        const raw = (order as any).voucherDiscount as number | undefined;
+        return raw && raw > 0 ? raw : 0;
+    }, [order]);
 
-  const loadDetail = async () => {
-    try {
-      setLoading(true);
-      const res = await getOrderDetail(id);
-      setOrder(res.data as OneOrder);
-    } catch (e: any) {
-      toast.error(e?.message || "Không tải được chi tiết đơn hàng");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const productTotal = useMemo(() => {
+        if (!order) return 0;
+        return order.totalPrice;
+    }, [order]);
 
-  useEffect(() => {
-    loadDetail();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+    const totalPayment = useMemo(() => {
+        if (!order) return 0;
+        const fee = order.ghnFee ?? 0;
+        return order.totalPrice + fee;
+    }, [order]);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white shadow-lg">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b p-4">
-          <div>
-            <h2 className="text-lg font-semibold">
-              Chi tiết đơn hàng #{order?.id ?? id}
-            </h2>
-            {order && (
-              <p className="mt-1 text-xs text-neutral-500">
-                Trạng thái:{" "}
-                <span className="font-semibold">
+    const loadDetail = async () => {
+        try {
+            setLoading(true);
+            const res = await getOrderDetail(id);
+            setOrder(res.data as OneOrder);
+        } catch (e: any) {
+            toast.error(e?.message || "Không tải được chi tiết đơn hàng");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadDetail();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id]);
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white shadow-lg">
+                {/* Header */}
+                <div className="flex items-center justify-between border-b p-4">
+                    <div>
+                        <h2 className="text-lg font-semibold">
+                            Chi tiết đơn hàng #{order?.id ?? id}
+                        </h2>
+                        {order && (
+                            <p className="mt-1 text-xs text-neutral-500">
+                                Trạng thái:{" "}
+                                <span className="font-semibold">
                   {mapOrderStatus(order.orderStatus)}
                 </span>
-              </p>
-            )}
-          </div>
+                            </p>
+                        )}
+                    </div>
 
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="rounded border px-3 py-1.5 text-xs hover:bg-neutral-50"
-            >
-              Đóng
-            </button>
-          )}
-        </div>
-
-        {loading && (
-          <div className="p-4 text-sm">Đang tải chi tiết đơn hàng...</div>
-        )}
-
-        {!loading && !order && (
-          <div className="p-4 text-sm">Không tìm thấy đơn hàng</div>
-        )}
-
-        {!loading && order && (
-          <>
-            {/* Thông tin khách + địa chỉ */}
-            <div className="grid gap-4 border-b p-4 md:grid-cols-2">
-              <div className="space-y-2 text-sm">
-                <h3 className="text-sm font-semibold">Thông tin khách hàng</h3>
-                <div className="text-neutral-700">
-                  <div>
-                    <span className="font-medium">Tên: </span>
-                    {order.user?.fullName || "-"}
-                  </div>
-                  <div>
-                    <span className="font-medium">Email: </span>
-                    {order.user?.email || "-"}
-                  </div>
-                  <div>
-                    <span className="font-medium">Số điện thoại: </span>
-                    {order.user?.phone || "-"}
-                  </div>
+                    {onClose && (
+                        <button
+                            onClick={onClose}
+                            className="rounded border px-3 py-1.5 text-xs hover:bg-neutral-50"
+                        >
+                            Đóng
+                        </button>
+                    )}
                 </div>
-              </div>
 
-              <div className="space-y-2 text-sm">
-                <h3 className="text-sm font-semibold">Địa chỉ giao hàng</h3>
-                <div className="text-neutral-700">
-                  <div>
-                    <span className="font-medium">Tỉnh/TP: </span>
-                    {order.province}
-                  </div>
-                  <div>
-                    <span className="font-medium">Quận/Huyện: </span>
-                    {order.district}
-                  </div>
-                  <div>
-                    <span className="font-medium">Phường/Xã: </span>
-                    {order.ward}
-                  </div>
-                  <div>
-                    <span className="font-medium">Địa chỉ chi tiết: </span>
-                    {order.addressDetail}
-                  </div>
-                  <div className="mt-1 text-xs text-neutral-500">
-                    Dự kiến GHN giao: {expectedDeliveryStr}
-                  </div>
-                </div>
-              </div>
-            </div>
+                {loading && (
+                    <div className="p-4 text-sm">Đang tải chi tiết đơn hàng...</div>
+                )}
 
-            {/* Thanh toán + tổng tiền */}
-            <div className="grid gap-4 border-b p-4 md:grid-cols-3">
-              <div className="space-y-2 text-sm">
-                <h3 className="text-sm font-semibold">Thanh toán</h3>
-                <div className="text-neutral-700">
-                  <div className="mb-1">
-                    <span className="font-medium">Phương thức: </span>
-                    <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">
+                {!loading && !order && (
+                    <div className="p-4 text-sm">Không tìm thấy đơn hàng</div>
+                )}
+
+                {!loading && order && (
+                    <>
+                        {/* Thông tin khách + địa chỉ */}
+                        <div className="grid gap-4 border-b p-4 md:grid-cols-2">
+                            <div className="space-y-2 text-sm">
+                                <h3 className="text-sm font-semibold">Thông tin khách hàng</h3>
+                                <div className="text-neutral-700">
+                                    <div>
+                                        <span className="font-medium">Tên: </span>
+                                        {order.user?.fullName || "-"}
+                                    </div>
+                                    <div>
+                                        <span className="font-medium">Email: </span>
+                                        {order.user?.email || "-"}
+                                    </div>
+                                    <div>
+                                        <span className="font-medium">Số điện thoại: </span>
+                                        {order.user?.phone || "-"}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2 text-sm">
+                                <h3 className="text-sm font-semibold">Địa chỉ giao hàng</h3>
+                                <div className="text-neutral-700">
+                                    <div>
+                                        <span className="font-medium">Tỉnh/TP: </span>
+                                        {order.province}
+                                    </div>
+                                    <div>
+                                        <span className="font-medium">Quận/Huyện: </span>
+                                        {order.district}
+                                    </div>
+                                    <div>
+                                        <span className="font-medium">Phường/Xã: </span>
+                                        {order.ward}
+                                    </div>
+                                    <div>
+                                        <span className="font-medium">Địa chỉ chi tiết: </span>
+                                        {order.addressDetail}
+                                    </div>
+                                    <div className="mt-1 text-xs text-neutral-500">
+                                        Dự kiến GHN giao: {expectedDeliveryStr}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Thanh toán + tổng tiền */}
+                        <div className="grid gap-4 border-b p-4 md:grid-cols-3">
+                            <div className="space-y-2 text-sm">
+                                <h3 className="text-sm font-semibold">Thanh toán</h3>
+                                <div className="text-neutral-700">
+                                    <div className="mb-1">
+                                        <span className="font-medium">Phương thức: </span>
+                                        <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">
                       {mapPaymentMethod(order.paymentMethod)}
                     </span>
-                  </div>
-                  <div className="mb-1">
-                    <span className="font-medium">Trạng thái: </span>
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold
+                                    </div>
+                                    <div className="mb-1">
+                                        <span className="font-medium">Trạng thái: </span>
+                                        <span
+                                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold
                         ${
-                          order.paymentStatus === "PAID"
-                            ? "bg-green-100 text-green-700"
-                            : order.paymentStatus === "PENDING"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : order.paymentStatus === "REFUNDED"
-                            ? "bg-indigo-100 text-indigo-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
-                    >
+                                                order.paymentStatus === "PAID"
+                                                    ? "bg-green-100 text-green-700"
+                                                    : order.paymentStatus === "PENDING"
+                                                        ? "bg-yellow-100 text-yellow-700"
+                                                        : order.paymentStatus === "REFUNDED"
+                                                            ? "bg-indigo-100 text-indigo-700"
+                                                            : "bg-red-100 text-red-700"
+                                            }`}
+                                        >
                       {mapPaymentStatus(order.paymentStatus)}
                     </span>
-                  </div>
-                </div>
-              </div>
+                                    </div>
+                                </div>
+                            </div>
 
-              <div className="space-y-1 text-sm md:col-span-2">
-                <h3 className="text-sm font-semibold">Tổng quan giá</h3>
-                <div className="flex justify-between text-neutral-700">
-                  <span>Tổng tiền sản phẩm</span>
-                  <span>{formatCurrency(productTotal)}</span>
-                </div>
-                <div className="flex justify-between text-neutral-700">
-                  <span>Phí vận chuyển (GHN)</span>
-                  <span>{formatCurrency(order.ghnFee)}</span>
-                </div>
-                <div className="mt-1 border-t pt-2 text-sm font-semibold">
-                  <div className="flex justify-between">
-                    <span>Tổng thanh toán</span>
+                            <div className="space-y-1 text-sm md:col-span-2">
+                                <h3 className="text-sm font-semibold">Tổng quan giá</h3>
+                                <div className="flex justify-between text-neutral-700">
+                                    <span>Tổng tiền sản phẩm</span>
+                                    <span>{formatCurrency(productTotal)}</span>
+                                </div>
+                                <div className="flex justify-between text-neutral-700">
+                                    <span>Phí vận chuyển (GHN)</span>
+                                    <span>{formatCurrency(order.ghnFee)}</span>
+                                </div>
+
+                                {/* Giảm giá từ voucher nếu có */}
+                                {voucherDiscount > 0 && (
+                                    <div className="flex justify-between text-neutral-700">
                     <span>
-                      {formatCurrency(order.totalPrice + order.ghnFee)}
+                      Giảm giá từ voucher
+                        {(order as any).voucherCode
+                            ? ` (${(order as any).voucherCode})`
+                            : ""}
                     </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+                                        <span>-{formatCurrency(voucherDiscount)}</span>
+                                    </div>
+                                )}
 
-            {/* Sản phẩm */}
-            <div className="p-4">
-              <h3 className="mb-3 text-sm font-semibold">Sản phẩm trong đơn</h3>
-              <div className="space-y-3 text-sm">
-                {order.details?.map((d, idx) => (
-                  <div
-                    key={d.id}
-                    className="flex items-center justify-between gap-3 border-b pb-3 last:border-b-0"
-                  >
-                    <div className="flex flex-1 items-center gap-3">
-                      {d.variant?.thumbnail && (
-                        <img
-                          src={d.variant.thumbnail}
-                          alt={d.variant.name}
-                          className="h-14 w-14 rounded object-cover"
-                        />
-                      )}
-                      <div>
-                        <div className="text-sm font-medium">
-                          {d.variant?.name || `Sản phẩm #${idx + 1}`}
+                                <div className="mt-1 border-t pt-2 text-sm font-semibold">
+                                    <div className="flex justify-between">
+                                        <span>Tổng thanh toán</span>
+                                        <span>{formatCurrency(totalPayment -(order.voucherDiscount ?? 0) )}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="text-xs text-neutral-500">
-                          Số lượng: {d.quantity}
+
+                        {/* Sản phẩm */}
+                        <div className="p-4">
+                            <h3 className="mb-3 text-sm font-semibold">
+                                Sản phẩm trong đơn
+                            </h3>
+                            <div className="space-y-3 text-sm">
+                                {order.details?.map((d, idx) => (
+                                    <div
+                                        key={d.id}
+                                        className="flex items-center justify-between gap-3 border-b pb-3 last:border-b-0"
+                                    >
+                                        <div className="flex flex-1 items-center gap-3">
+                                            {d.variant?.thumbnail && (
+                                                <img
+                                                    src={d.variant.thumbnail}
+                                                    alt={d.variant.name}
+                                                    className="h-14 w-14 rounded object-cover"
+                                                />
+                                            )}
+                                            <div>
+                                                <div className="text-sm font-medium">
+                                                    {d.variant?.name || `Sản phẩm #${idx + 1}`}
+                                                </div>
+                                                <div className="text-xs text-neutral-500">
+                                                    Số lượng: {d.quantity}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="text-right">
+                                            <div className="text-xs text-neutral-500">Đơn giá</div>
+                                            <div>{formatCurrency(d.price)}</div>
+                                            <div className="text-xs text-neutral-500">
+                                                Thành tiền
+                                            </div>
+                                            <div className="font-semibold">
+                                                {formatCurrency(d.price * d.quantity)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {(!order.details || order.details.length === 0) && (
+                                    <div className="py-2 text-center text-neutral-500">
+                                        Không có sản phẩm trong đơn hàng
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      <div className="text-xs text-neutral-500">Đơn giá</div>
-                      <div>{formatCurrency(d.price)}</div>
-                      <div className="text-xs text-neutral-500">Thành tiền</div>
-                      <div className="font-semibold">
-                        {formatCurrency(d.price * d.quantity)}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {(!order.details || order.details.length === 0) && (
-                  <div className="py-2 text-center text-neutral-500">
-                    Không có sản phẩm trong đơn hàng
-                  </div>
+                    </>
                 )}
-              </div>
             </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
+        </div>
+    );
 }

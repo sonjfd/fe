@@ -41,6 +41,8 @@ import UserOrderPage from "./pages/users/UserOrderPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import AdminCreateGhnOrderPage from "./pages/admin/AdminCreateGhnOrderPage";
 import AdminGhnTrackingPage from "./pages/admin/AdminTrackingOrderPage";
+
+import ResetPasswordPage from "pages/auth/ResetPasswordPage.tsx";
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
@@ -74,6 +76,8 @@ export const ROUTER = createBrowserRouter([
       { path: "gioi-thieu", element: <AboutPage /> },
       { path: "cart", element: <CartPage /> },
       { path: "wishlist", element: <WishlistPage /> },
+        {path: "forgot-password",element : <ForgotPasswordPage />},
+        { path:"reset-password", element:<ResetPasswordPage />}
     ],
   },
   {

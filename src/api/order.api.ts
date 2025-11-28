@@ -48,3 +48,22 @@ export const cancelOrderRequest = (payload: { orderId: number; reason: string })
   return axios.post<IBackendRes<string>>("/api/v1/orders/cancel", payload);
 };
 
+export interface ApplicableVoucher {
+    id: number;
+    code: string;
+    discountType: "PERCENT" | "FIXED";
+    discountValue: number;
+    maxDiscountAmount?: number | null;
+    minOrderValue?: number | null;
+    imageUrl?: string | null;
+    description?: string | null;
+    startDate?: string | null;
+    endDate?: string | null;
+}
+
+export const getAvailableVouchers = (orderAmount: number) => {
+    const backEnd = "/api/v1/vouchers/available";
+    return axios.get<IBackendRes<ApplicableVoucher[]>>(backEnd, {
+        params: { orderAmount },
+    });
+};

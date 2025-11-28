@@ -35,8 +35,8 @@ export default function ProfilePage() {
     const [avatarFile, setAvatarFile] = React.useState<File | null>(null);
     const [errors, setErrors] = React.useState<Record<string, string>>({});
     const [saving, setSaving] = React.useState(false);
-
-    // ✅ Load dữ liệu ban đầu từ user context
+    const isGoogle = user?.provider === "GOOGLE";
+    // Load dữ liệu ban đầu từ user context
     React.useEffect(() => {
         if (user) {
             setForm({
@@ -48,7 +48,7 @@ export default function ProfilePage() {
         }
     }, [user]);
 
-    // ✅ Validate dữ liệu trước khi gửi
+    //  Validate dữ liệu trước khi gửi
     function validate() {
         const e: Record<string, string> = {};
 
@@ -72,20 +72,24 @@ export default function ProfilePage() {
         return Object.keys(e).length === 0;
     }
 
-    // ✅ Hàm xử lý khi nhấn Lưu
+    // Hàm xử lý khi nhấn Lưu
     async function onSave() {
+        if (isGoogle) {
+            toast.warn("Tài khoản đăng nhập bằng Google không thể chỉnh sửa hồ sơ tại đây");
+            return;
+        }
         if (!validate() || !user) return;
         try {
             setSaving(true);
 
             let avatarUrl = form.avatar;
 
-            // 🔸 Nếu user chọn file mới → upload lên Cloudinary
+            //  Nếu user chọn file mới → upload lên Cloudinary
             if (avatarFile) {
                 const res = await uploadAvatar(user.id, avatarFile);
                 avatarUrl = res.data;   // API trả ApiResponse<String>
             }
-            // 🔸 Gọi API cập nhật hồ sơ
+            //  Gọi API cập nhật hồ sơ
             const payload: IUpdateProfileReq = {
                 fullName: form.fullName.trim(),
                 phone: form.phone.trim(),
@@ -94,7 +98,7 @@ export default function ProfilePage() {
             };
             const updated = await updateMe(payload);
 
-            // 🔸 Cập nhật context để sync header/sidebar
+            //  Cập nhật context để sync header/sidebar
             setUser?.({
                 ...user,
                 ...updated,
@@ -105,7 +109,7 @@ export default function ProfilePage() {
             });
             setAvatarFile(null);
             toast.success("Cập nhật hồ sơ thành công");
-            
+
         } catch (e: any) {
             toast.error(e?.message || "Đã xảy ra lỗi khi cập nhật hồ sơ");
 
@@ -122,6 +126,12 @@ export default function ProfilePage() {
             <section className="rounded-2xl border bg-white p-6 shadow-sm">
                 <h1 className="text-xl font-semibold mb-2">Hồ Sơ Của Tôi</h1>
 
+                {isGoogle && (
+                    <p className="mb-3 text-xs text-amber-600">
+                        Bạn đang đăng nhập bằng Google, các thông tin này chỉ đọc và
+                        không thể chỉnh sửa từ hệ thống.
+                    </p>
+                )}
 
                 <Row label={<Req>Email</Req>}>
                     <div>{user.email}</div>
@@ -132,8 +142,13 @@ export default function ProfilePage() {
                         type="text"
                         placeholder="Nguyễn Văn A"
                         value={form.fullName}
-                        onChange={(e) => setForm((s) => ({...s, fullName: e.target.value}))}
-                        className={`h-10 w-full md:w-[420px] rounded-md border px-3 text-[15px] outline-none focus:ring-2 focus:ring-slate-700/30 ${
+                        onChange={(e) =>
+                            setForm((s) => ({...s, fullName: e.target.value}))
+                        }
+                        readOnly={isGoogle}
+                        className={`h-10 w-full md:w-[420px] rounded-md border px-3 text-[15px] outline-none
+                            ${isGoogle ? "bg-gray-100 cursor-not-allowed" : ""}
+                            ${
                             errors.fullName
                                 ? "border-red-500 focus:border-red-500"
                                 : "border-gray-300 focus:border-slate-700"
@@ -147,8 +162,13 @@ export default function ProfilePage() {
                         type="text"
                         placeholder="0912345678"
                         value={form.phone}
-                        onChange={(e) => setForm((s) => ({...s, phone: e.target.value}))}
-                        className={`h-10 w-full md:w-[420px] rounded-md border px-3 text-[15px] outline-none focus:ring-2 focus:ring-slate-700/30 ${
+                        onChange={(e) =>
+                            setForm((s) => ({...s, phone: e.target.value}))
+                        }
+                        readOnly={isGoogle}
+                        className={`h-10 w-full md:w-[420px] rounded-md border px-3 text-[15px] outline-none
+                            ${isGoogle ? "bg-gray-100 cursor-not-allowed" : ""}
+                            ${
                             errors.phone
                                 ? "border-red-500 focus:border-red-500"
                                 : "border-gray-300 focus:border-slate-700"
@@ -164,7 +184,10 @@ export default function ProfilePage() {
                                 type="radio"
                                 name="gender"
                                 checked={form.gender === "MALE"}
-                                onChange={() => setForm((s) => ({...s, gender: "MALE"}))}
+                                onChange={() =>
+                                    setForm((s) => ({...s, gender: "MALE"}))
+                                }
+                                disabled={isGoogle}
                                 className="h-4 w-4 accent-slate-800"
                             />
                             <span>Nam</span>
@@ -174,7 +197,10 @@ export default function ProfilePage() {
                                 type="radio"
                                 name="gender"
                                 checked={form.gender === "FEMALE"}
-                                onChange={() => setForm((s) => ({...s, gender: "FEMALE"}))}
+                                onChange={() =>
+                                    setForm((s) => ({...s, gender: "FEMALE"}))
+                                }
+                                disabled={isGoogle}
                                 className="h-4 w-4 accent-slate-800"
                             />
                             <span>Nữ</span>
@@ -188,7 +214,7 @@ export default function ProfilePage() {
                     <div className="col-span-12 md:col-span-9">
                         <button
                             onClick={onSave}
-                            disabled={saving}
+                            disabled={saving || isGoogle}
                             className="rounded-md bg-slate-800 px-6 py-2 text-white hover:bg-slate-900 disabled:opacity-60"
                         >
                             {saving ? "Đang lưu..." : "Lưu"}
@@ -197,7 +223,6 @@ export default function ProfilePage() {
                 </div>
             </section>
 
-            {/* --- Avatar Preview & Upload --- */}
             <aside className="bg-white border rounded-2xl p-6 shadow-sm flex flex-col items-center gap-4">
                 <img
                     src={
@@ -212,11 +237,15 @@ export default function ProfilePage() {
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
+                    disabled={isGoogle}
+                    onChange={(e) =>
+                        setAvatarFile(e.target.files?.[0] || null)
+                    }
                 />
                 <label
                     htmlFor="avatar"
-                    className="cursor-pointer border border-gray-300 px-4 py-2 rounded-md text-sm hover:bg-gray-50"
+                    className={`border border-gray-300 px-4 py-2 rounded-md text-sm
+                        ${isGoogle ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:bg-gray-50"}`}
                 >
                     Chọn Ảnh
                 </label>
@@ -229,3 +258,6 @@ export default function ProfilePage() {
         </div>
     );
 }
+
+
+

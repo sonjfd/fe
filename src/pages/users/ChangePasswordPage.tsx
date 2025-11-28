@@ -16,10 +16,9 @@ export default function ChangePasswordPage() {
     const [confirm, setConfirm] = React.useState("");
     const [errors, setErrors] = React.useState<Record<string, string>>({});
     const [saving, setSaving] = React.useState(false);
-
-    const { setUser, setIsAuthenticated } = useCurrentApp();
+    const { user, setUser, setIsAuthenticated } = useCurrentApp();
     const navigate = useNavigate();
-
+    const isGoogle = user?.provider === "GOOGLE";
     function validate() {
         const e: Record<string, string> = {};
 
@@ -51,7 +50,7 @@ export default function ChangePasswordPage() {
         try {
             setSaving(true);
 
-            // ✅ Nếu mật khẩu cũ sai -> BE trả 4xx -> axios THROW -> nhảy xuống catch
+            //  Nếu mật khẩu cũ sai -> BE trả 4xx -> axios THROW -> nhảy xuống catch
             const res = await changePassword(form);
             if(!res.data) {
                 // Thành công thật sự
@@ -81,6 +80,18 @@ export default function ChangePasswordPage() {
         } finally {
             setSaving(false);
         }
+    }
+    if (isGoogle) {
+        // Không render form, chỉ thông báo
+        return (
+            <div className="max-w-2xl rounded-2xl border bg-white p-6 shadow-sm">
+                <h2 className="mb-2 text-lg font-semibold">Đổi mật khẩu</h2>
+                <p className="text-sm text-gray-600">
+                    Bạn đang đăng nhập bằng tài khoản Google nên không thể đổi mật khẩu
+                    tại đây. Mật khẩu được quản lý bởi Google.
+                </p>
+            </div>
+        );
     }
 
     return (

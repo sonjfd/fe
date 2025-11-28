@@ -60,7 +60,7 @@ const AdminCreateGhnOrderPage: React.FC = () => {
   const [provinces, setProvinces] = useState<LocationItem[]>([]);
   const [districts, setDistricts] = useState<LocationItem[]>([]);
   const [wards, setWards] = useState<LocationItem[]>([]);
-  
+
 
   const {
     register,
@@ -106,6 +106,8 @@ const AdminCreateGhnOrderPage: React.FC = () => {
   const watchDistrictId = watch("districtId");
   const watchWardId = watch("wardId");
   const watchServiceId = watch("serviceId");
+  const watchPaymentTypeId = watch("paymentTypeId");
+
 
   const [serviceFee, setServiceFee] = useState<number | null>(null);
   const [feeLoading, setFeeLoading] = useState(false);
@@ -219,6 +221,24 @@ const AdminCreateGhnOrderPage: React.FC = () => {
 
   fetchFee();
 }, [watchDistrictId, watchWardId, watchServiceId, services]);
+
+useEffect(() => {
+  if (!detail) return;
+
+  // Tiền hàng gốc: ưu tiên codAmount từ đơn, fallback sang itemsTotal
+  const baseCod = detail.codAmount ?? itemsTotal;
+
+  // paymentTypeId: 2 = bên nhận trả phí, 1 = bên gửi trả phí
+  if (watchPaymentTypeId === 2) {
+    // Bên nhận trả ship -> COD = tiền hàng + phí dịch vụ
+    const fee = serviceFee ?? 0;
+    setValue("codAmount", baseCod + fee);
+  } else {
+    // Bên gửi trả ship -> chỉ thu tiền hàng
+    setValue("codAmount", 0);
+  }
+}, [watchPaymentTypeId, serviceFee, detail, itemsTotal, setValue]);
+
 
 
   // ===== handler đổi Tỉnh / Quận =====

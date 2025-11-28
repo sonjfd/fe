@@ -32,7 +32,7 @@ export const AddressModal: React.FC<AddressModalProps> = ({
     initial?.addressDetail ?? ""
   );
 
-  // 🔄 Dùng ID thay vì code
+  //  Dùng ID thay vì code
   const [provinceId, setProvinceId] = React.useState<number | "">("");
   const [districtId, setDistrictId] = React.useState<number | "">("");
   const [wardId, setWardId] = React.useState<number | "">("");
@@ -52,7 +52,7 @@ export const AddressModal: React.FC<AddressModalProps> = ({
         setFullName(initial.fullName);
         setPhone(initial.phone);
         setAddressDetail(initial.addressDetail);
-        // ⚠️ Hiện tại BE chỉ trả name nên không pre-select được tỉnh/huyện/xã
+        //  Hiện tại BE chỉ trả name nên không pre-select được tỉnh/huyện/xã
         // => giữ behavior cũ: user phải chọn lại location
       } else {
         setFullName("");

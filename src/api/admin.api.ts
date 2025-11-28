@@ -6,6 +6,8 @@ export const fetchChildCategories = async (): Promise<IChildCategory[]> => {
     return res.data!;
 };
 
+// abc
+
 export const createProduct = (payload: {
     code: string;
     name: string;

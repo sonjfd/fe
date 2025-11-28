@@ -351,6 +351,8 @@ declare global {
     itemsValue: number;
     items: OrderItem[];
     paymentMethod: string;
+    voucherId?: number | null;
+    voucherDiscount?: number | null;
   }
 
 
@@ -438,6 +440,9 @@ declare global {
     user: OrderUser;
     updatedAt: string;
     ghnOrderCode?: string;
+    voucherId?: number | null;
+    voucherDiscount?: number | null;
+    voucherCode?: string | null;
   }
 
 
@@ -476,6 +481,9 @@ declare global {
 
     user: OrderUser;
     details: IOrderDetailItem[];
+    voucherId?: number | null;
+    voucherDiscount?: number | null;
+    voucherCode?: string | null;
   }
 
   interface VNPayResponse {
