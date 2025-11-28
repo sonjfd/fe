@@ -43,8 +43,8 @@ declare global {
     avatar: string;
     status: IUserStatus;
     gender: IGender;
-    role: string
-
+    role: string;
+    provider: string;
   }
 
   export interface IAccount {
