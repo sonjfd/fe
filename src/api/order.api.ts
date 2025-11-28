@@ -1,26 +1,8 @@
 import axios from "@/services/axios.customize";
-export interface ApplicableVoucher {
-    id: number;
-    code: string;
-    discountType: "PERCENT" | "FIXED";
-    discountValue: number;
-    maxDiscountAmount?: number | null;
-    minOrderValue?: number | null;
-    imageUrl?: string | null;
-    description?: string | null;
-    startDate?: string | null;
-    endDate?: string | null;
-}
 
-export const getAvailableVouchers = (orderAmount: number) => {
-    const backEnd = "/api/v1/vouchers/available";
-    return axios.get<IBackendRes<ApplicableVoucher[]>>(backEnd, {
-        params: { orderAmount },
-    });
-};
-export const getShippingFree = (addressId: number) => {
+export const getShippingFree = (addressId: number,service_id: number = 53320,service_type_id: number = 2) => {
     const backEnd = `/shipping/quote`
-    return axios.post<ShippingQuote>(backEnd, { addressId })
+    return axios.post<ShippingQuote>(backEnd, { addressId,service_id,service_type_id })
 }
 
 
@@ -61,3 +43,27 @@ export const cancelUrl = (id: number) => {
     const backendUrl = `/api/v1/orders/${id}`
     return axios.delete(backendUrl)
 }
+
+export const cancelOrderRequest = (payload: { orderId: number; reason: string }) => {
+  return axios.post<IBackendRes<string>>("/api/v1/orders/cancel", payload);
+};
+
+export interface ApplicableVoucher {
+    id: number;
+    code: string;
+    discountType: "PERCENT" | "FIXED";
+    discountValue: number;
+    maxDiscountAmount?: number | null;
+    minOrderValue?: number | null;
+    imageUrl?: string | null;
+    description?: string | null;
+    startDate?: string | null;
+    endDate?: string | null;
+}
+
+export const getAvailableVouchers = (orderAmount: number) => {
+    const backEnd = "/api/v1/vouchers/available";
+    return axios.get<IBackendRes<ApplicableVoucher[]>>(backEnd, {
+        params: { orderAmount },
+    });
+};

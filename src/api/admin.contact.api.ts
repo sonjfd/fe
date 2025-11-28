@@ -21,6 +21,7 @@ function buildQuery(params?: {
   sortDir?: "asc" | "desc";
   startDate?: string; // YYYY-MM-DD
   endDate?: string; // YYYY-MM-DD
+  id?: number;
 }) {
   const p = new URLSearchParams();
   p.set("page", String(params?.page ?? 0));
@@ -31,6 +32,7 @@ function buildQuery(params?: {
   if (params?.search?.trim()) p.set("search", params.search.trim());
   if (params?.startDate) p.set("startDate", params.startDate);
   if (params?.endDate) p.set("endDate", params.endDate);
+  if (params?.id != null) p.set("id", String(params.id));
   return p.toString();
 }
 
@@ -72,6 +74,7 @@ export async function listContactMessages(params?: {
   sortDir?: "asc" | "desc";
   startDate?: string;
   endDate?: string;
+  id?: number;
 }): Promise<IModelPaginate<ContactMessage>> {
   const qs = buildQuery(params);
   // nếu BE dùng POST cho search/filter thì giữ .post, nếu không thì đổi sang .get
@@ -93,7 +96,7 @@ export async function getContactMessage(id: number): Promise<ContactMessage> {
   }
 
   const payload = pickPayload<any>(res.data);
-  const raw = payload?.item ?? payload; // dự phòng nếu BE bọc { item: ... }
+  const raw = payload?.item ?? payload;
   return raw as ContactMessage;
 }
 

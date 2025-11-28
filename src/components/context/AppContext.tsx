@@ -23,7 +23,7 @@ interface IAppContext {
   setWishlistCount: (v: number) => void;
   reloadWishlistCount: () => Promise<void>;
 
-  // 👇 Cart
+  // Cart
   cart: ICartResponse | null;
   cartCount: number;
   isCartLoading: boolean;
@@ -51,7 +51,6 @@ export const AppProvider = (props: TProps) => {
 
   /* ---------- WISHLIST ---------- */
   const reloadWishlistCount = useCallback(async () => {
-    // Chỉ cho role USER dùng wishlist
     if (!isAuthenticated || user?.role !== "USER") {
       setWishlistCount(0);
       return;
@@ -66,14 +65,13 @@ export const AppProvider = (props: TProps) => {
 
   /* ---------- CART ---------- */
   const reloadCart = useCallback(async () => {
-    // Chỉ cho role USER dùng cart
     if (!isAuthenticated || user?.role !== "USER") {
       setCart(null);
       return;
     }
     try {
       setIsCartLoading(true);
-      const res = await getCartApi(); // { message, data }
+      const res = await getCartApi();
       setCart(res.data ?? null);
     } catch (e) {
       console.error("Failed to load cart", e);
@@ -103,15 +101,14 @@ export const AppProvider = (props: TProps) => {
   /* ---------- MỖI KHI LOGIN / LOGOUT ---------- */
   useEffect(() => {
     if (isAuthenticated && user?.role === "USER") {
-      // Chỉ role USER mới load data
       reloadWishlistCount();
       reloadCart();
     } else {
-      // Các role khác hoặc chưa login -> clear
       setWishlistCount(0);
       setCart(null);
     }
   }, [isAuthenticated, user, reloadWishlistCount, reloadCart]);
+
 
   if (isAppLoading) {
     return <CenterSpinner />;

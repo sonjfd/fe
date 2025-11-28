@@ -199,7 +199,7 @@ export const CheckoutPage: React.FC = () => {
                     price: item.price,
                 })),
                 paymentMethod,
-                voucherId: selectedVoucher ? selectedVoucher.id : null,   
+                voucherId: selectedVoucher ? selectedVoucher.id : null,
                 voucherDiscount: voucherDiscount || 0,
             };
 

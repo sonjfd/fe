@@ -1,503 +1,588 @@
-export {};
+export { };
 
 declare global {
 
-    interface Window {
-        global: any;
+  interface Window {
+    global: any;
+  }
+  interface IBackendRes<T> {
+    message?: string;
+    data?: T;
+  }
+
+  interface IChildCategory {
+    id: number;
+    name: string;
+  }
+
+  interface IModelPaginate<T> {
+    page: number;
+    size: number;
+    total: number;
+    items: T[];
+  }
+
+
+  export interface IUser {
+    id: number;
+    fullName: string;
+    email: string;
+    phone: string;
+    avatar: string;
+    status: IUserStatus;
+    gender: IGender;
+    role: { id: number };
+  }
+
+
+  export interface IContext {
+    id: number;
+    fullName: string;
+    email: string;
+    phone: string;
+    avatar: string;
+    status: IUserStatus;
+    gender: IGender;
+    role: string;
+    provider: string;
+  }
+
+  export interface IAccount {
+    user: {
+      id: number;
+      fullName: string;
+      email: string;
+      phone: string;
+      avatar: string;
+      status: IUserStatus;
+      gender: IGender;
+      role: string
+      provider: string
     }
+  }
 
-    interface IBackendRes<T> {
-        message?: string;
-        data?: T;
+  interface ILogin {
+    access_token: string;
+    user: {
+      id: string;
+      email: string;
+      fullName: string;
+      phone: string;
+      avatar: string;
+      role: string
+      status: string
     }
+  }
 
-    interface IChildCategory {
-        id: number;
-        name: string;
+
+  interface ICreateProduct {
+    id: number;
+    name: string;
+    code: string;
+    category: {
+      id: number
     }
+  }
 
-    interface IModelPaginate<T> {
-        page: number;
-        size: number;
-        total: number;
-        items: T[];
-    }
-
-
-    export interface IUser {
-        id: number;
-        fullName: string;
-        email: string;
-        phone: string;
-        avatar: string;
-        status: IUserStatus;
-        gender: IGender;
-        role: { id: number };
-    }
-
-
-    export interface IContext {
-        id: number;
-        fullName: string;
-        email: string;
-        phone: string;
-        avatar: string;
-        status: IUserStatus;
-        gender: IGender;
-        role: string
-        provider: string
-
-    }
-
-    export interface IAccount {
-        user: {
-            id: number;
-            fullName: string;
-            email: string;
-            phone: string;
-            avatar: string;
-            status: IUserStatus;
-            gender: IGender;
-            role: string
-            provider: string
-        }
-    }
-
-    interface ILogin {
-        access_token: string;
-        user: {
-            id: string;
-            email: string;
-            fullName: string;
-            phone: string;
-            avatar: string;
-            role: string
-            status: string
-        }
-    }
-
-
-    interface ICreateProduct {
-        id: number;
-        name: string;
-        code: string;
-        category: {
-            id: number
-        }
-    }
-
-    export interface IProductTable {
-        id: number;
-        code: string;
-        name: string;
-        category: {
-            id: number;
-        };
-    }
-
-    type IUserStatus = "ACTIVE" | "NOT_ACTIVE" | "BAN";
-    type IGender = "MALE" | "FEMALE" | "OTHER" | null;
-
-
-    interface ICreateUserReq {
-        fullName: string;
-        email: string;
-        phone: string;
-        password: string;
-        status: IUserStatus;
-        gender: IGender;
-        role: { id: number };
-    }
-
-    interface IUpdateUserReq {
-        id: string | number;
-        fullName: string;
-        phone: string;
-        gender: IGender;
-        status: IUserStatus;
-    }
-
-    interface ICategoryRow {
-        id: number;
-        name: string;
-        description?: string | null;
-        parentId: number | null;
-    }
-
-    //CONTACT
-    type ContactStatus = 'PENDING' | 'READ' | 'RESOLVED';
-
-
-    interface ContactMessage {
-        id: number;
-        fullName: string;
-        email: string;
-        phone?: string | null;
-        subject?: string | null;
-        message: string;
-        status: ContactStatus;
-        ipAddress?: string | null;
-        userAgent?: string | null;
-        createdAt: string;
-        updatedAt: string;
-    }
-
-    //Profile
-    export interface IUserProfile {
-        id: number;                 // cùng kiểu với IUser.id của bạn
-        fullName: string;           // TÊN ĐĂNG NHẬP = Fullname (không cho sửa)
-        email: string;              // không cho sửa
-        phone: string;              // bắt buộc khi cập nhật
-        avatar: string;             // URL ảnh (Cloudinary)
-        status: IUserStatus;        // "ACTIVE" | "NOT_ACTIVE" | "BAN"
-        gender: IGender;            // "MALE" | "FEMALE" | "OTHER" | null
-        role: { id: number };
-    }
-
-    // Payload cập nhật hồ sơ
-    export interface IUpdateProfileReq {
-        fullName: string;           // * bắt buộc
-        phone: string;              // * bắt buộc
-        gender: IGender;            // * bắt buộc
-        avatar?: string;            // URL ảnh sau khi upload (tùy chọn)
-    }
-
-    // Payload đổi mật khẩu
-    export interface IChangePasswordReq {
-        currentPassword: string;    // * bắt buộc
-        newPassword: string;        // * bắt buộc (≥8, có hoa/thường/ký tự đặc biệt)
-    }
-
-
-    // HOME CATEGORY
-    interface IHomeCategory {
-        id: number;
-        name: string;
-        description?: string | null;
-        deleted: boolean;
-        parentId: number | null;
-        children: IChildCategory[];
-
-        createdAt: string;
-        updatedAt: string | null;
-        createdBy: string;
-        updatedBy: string | null;
-    }
-
-    interface ISlider {
-        id: number;
-        title: string;
-        description: string;
-        imageUrl: string;
-        redirectUrl: string;
-        position: number;
-        active: boolean;
-        createdAt: string;
-        updatedAt: string;
-    }
-
-    interface IHomeProductVariant {
-        variantId: number;
-        variantName: string;
-        productName: string;
-        productId: number;
-        sku: string;
-        price: number;
-        stock: number;
-        sold: number;
-        thumbnailUrl: string | null;
-        ratingAverage: number | null;
-        ratingCount: number | null;
-    }
-
-    interface IWishlistProductVariant extends IHomeProductVariant {
-        wishlistId: number;
-    }
-
-    interface VariantFilter {
-        id: number;
-        name: string;
-        sku: string;
-        price: number;
-        sold: number
-        stock: number;
-        thumbnail: string;
-        productId: number;
-    }
-
-
-    interface IAddress {
-        id: number;
-        fullName: string;
-        phone: string;
-        province: string;
-        district: string;
-        ward: string;
-        addressDetail: string;
-        default: boolean;
-        createdAt: string;
-    }
-
-    interface IUpsertAddressReq {
-        fullName: string;
-        phone: string;
-        provinceId: number;
-        districtId: number;
-        wardId: number;
-        addressDetail: string;
-        isDefault?: boolean;
-    }
-
-
-    interface AttributeValueFilter {
-        id: number;
-        value: string;
-    }
-
-    interface AttributeFilter {
-        id: number;
-        name: string;
-        code: string;
-        values: AttributeValueFilter[];
-    }
-
-
-    type AttributeValueDTO = {
-        id: number;
-        value: string;
+  export interface IProductTable {
+    id: number;
+    code: string;
+    name: string;
+    category: {
+      id: number;
     };
+  }
 
-    interface AttributeDTO {
-        id: number;
-        code: string;
-        name: string;
-        values: AttributeValueDTO[];
-    };
-
-    interface VariantDTO {
-        id: number;
-        sku: string;
-        name: string;
-        price: number;
-        stock: number;
-        sold: number;
-        thumbnail: string;
-        valueIds: number[];
-    };
-
-    interface ProductDetailDTO {
-        id: number;
-        name: string;
-        code: string;
-        sku: string;
-        description: string;
-        images: string[];
-        attributes: AttributeDTO[];
-        variants: VariantDTO[];
-        defaultVariantId: number;
-    };
+  type IUserStatus = "ACTIVE" | "NOT_ACTIVE" | "BAN";
+  type IGender = "MALE" | "FEMALE" | "OTHER" | null;
 
 
-    export interface ICartItem {
-        id: number;
-        variantId: number;
-        sku: string;
-        productName: string;
-        thumbnailUrl: string;
-        quantity: number;
-        price: number;
-        total: number;
-    }
+  interface ICreateUserReq {
+    fullName: string;
+    email: string;
+    phone: string;
+    password: string;
+    status: IUserStatus;
+    gender: IGender;
+    role: { id: number };
+  }
+
+  interface IUpdateUserReq {
+    id: string | number;
+    fullName: string;
+    phone: string;
+    gender: IGender;
+    status: IUserStatus;
+  }
+
+  interface ICategoryRow {
+    id: number;
+    name: string;
+    description?: string | null;
+    parentId: number | null;
+  }
+
+  //CONTACT
+  type ContactStatus = 'PENDING' | 'READ' | 'RESOLVED';
 
 
-    export interface ICartResponse {
-        cartId: number;
-        items: ICartItem[];
-        total: number;
-    }
+
+  interface ContactMessage {
+  id: number;
+  fullName: string;
+  email: string;
+  phone?: string | null;
+  subject?: string | null;
+  message: string;
+  status: ContactStatus;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+  //Profile
+  export interface IUserProfile {
+    id: number;                 // cùng kiểu với IUser.id của bạn
+    fullName: string;           // TÊN ĐĂNG NHẬP = Fullname (không cho sửa)
+    email: string;              // không cho sửa
+    phone: string;              // bắt buộc khi cập nhật
+    avatar: string;             // URL ảnh (Cloudinary)
+    status: IUserStatus;        // "ACTIVE" | "NOT_ACTIVE" | "BAN"
+    gender: IGender;            // "MALE" | "FEMALE" | "OTHER" | null
+    role: { id: number };
+  }
+
+  // Payload cập nhật hồ sơ
+  export interface IUpdateProfileReq {
+    fullName: string;           // * bắt buộc
+    phone: string;              // * bắt buộc
+    gender: IGender;            // * bắt buộc
+    avatar?: string;            // URL ảnh sau khi upload (tùy chọn)
+  }
+
+  // Payload đổi mật khẩu
+  export interface IChangePasswordReq {
+    currentPassword: string;    // * bắt buộc
+    newPassword: string;        // * bắt buộc (≥8, có hoa/thường/ký tự đặc biệt)
+  }
 
 
-    export interface AddToCartRequest {
-        variantId: number;
-        quantity: number;
-    }
-
-    export interface UpdateCartQuantityRequest {
-        cartDetailId: number;
-        quantity: number;
-    }
 
 
-    interface ShippingQuote {
-        fee: number;
-        serviceFee: number;
-        insuranceFee: number;
-        expectedDeliveryTime: string;
-    }
 
-    interface OrderItem {
-        variantId: number;
-        quantity: number;
-        price: number;
-    }
+  // HOME CATEGORY
+  interface IHomeCategory {
+    id: number;
+    name: string;
+    description?: string | null;
+    deleted: boolean;
+    parentId: number | null;
+    children: IChildCategory[];
 
-    interface CreateOrderRequest {
-        addressId: number;
-        codAmount: number;
-        itemsValue: number;
-        items: OrderItem[];
-        paymentMethod: string;
-        voucherId?: number | null;
-        voucherDiscount?: number | null;
-    }
+    createdAt: string;
+    updatedAt: string | null;
+    createdBy: string;
+    updatedBy: string | null;
+  }
 
+  interface ISlider {
+    id: number;
+    title: string;
+    description: string;
+    imageUrl: string;
+    redirectUrl: string;
+    position: number;
+    active: boolean;
+    createdAt: string;
+    updatedAt: string;
+  }
 
-    interface Order {
-        id: number;
-        totalPrice: number;
-        paymentMethod: string;
-        paymentStatus: string;
-        ghnOrderCode: string;
-        ghnFee: number;
-        ghnExpectedDelivery: string;
-        orderStatus: string;
-    }
+  interface IHomeProductVariant {
+    variantId: number;
+    variantName: string;
+    productName: string;
+    productId: number;
+    sku: string;
+    price: number;
+    stock: number;
+    sold: number;
+    thumbnailUrl: string | null;
+    ratingAverage: number | null;
+    ratingCount: number | null;
+  }
 
-    interface OrderCreateResponse {
-        order: Order;
-        paymentUrl?: string;
-    }
+  interface IWishlistProductVariant extends IHomeProductVariant {
+    wishlistId: number;
+  }
 
-
-    export interface UpdateCartQuantityRequest {
-        cartDetailId: number;
-        quantity: number;
-    }
-
-    // ========== Voucher types ==========
-    type VoucherDiscountType = "PERCENT" | "FIXED";
-    type VoucherStatus = "ACTIVE" | "INACTIVE" | "EXPIRED";
-    type VoucherApplyScope = "ALL" | "ASSIGNED";
-
-    interface IVoucher {
-        id: number;
-        code: string;
-        imageUrl?: string | null;
-        discountType: VoucherDiscountType;
-        discountValue: number;
-        maxDiscountAmount?: number | null;
-        minOrderValue?: number | null;
-        usageLimit?: number | null;
-        usedCount?: number | null;
-        userLimit?: number | null;
-        applyScope: VoucherApplyScope;
-        startDate: string; // ISO
-        endDate: string;   // ISO
-        status: VoucherStatus;
-    }
-
-    interface ICreateVoucherReq {
-        code: string;
-        imageUrl?: string | null;
-        discountType: VoucherDiscountType;
-        discountValue: number;
-        maxDiscountAmount?: number | null;
-        minOrderValue?: number | null;
-        usageLimit?: number | null;
-        userLimit?: number | null;
-        applyScope: VoucherApplyScope;
-        startDate: string; // datetime-local string -> backend parse
-        endDate: string;
-        assignedUserEmails?: string[];
-        status: VoucherStatus;
-        // dùng khi cần gửi danh sách email (nếu backend hỗ trợ)
-    }
-
-    interface IUpdateVoucherReq extends ICreateVoucherReq {
-        id: number;
-    }
-
-    interface IUserEmailLite {
-        id: number;
-        email: string;
-        fullName: string;
-    }
+  interface VariantFilter {
+    id: number;
+    name: string;
+    sku: string;
+    price: number;
+    sold: number
+    stock: number;
+    thumbnail: string;
+    productId: number;
+  }
 
 
-    export interface OrderUser {
-        id: number;
-        fullName: string;
-        email: string;
-        phone: string;
-    }
 
-    export interface Order {
-        id: number;
-        totalPrice: number;
-        paymentMethod: string;
-        paymentStatus: string;
-        orderStatus: string;
-        ghnExpectedDelivery: string;
-        ghnFee: number;
-        province: string;
-        district: string;
-        ward: string;
-        addressDetail: string;
-        user: OrderUser;
-        voucherId?: number | null;
-        voucherDiscount?: number | null;
-    }
+  interface IAddress {
+    id: number;
+    fullName: string;
+    phone: string;
+    province: string;
+    district: string;
+    ward: string;
+    addressDetail: string;
+    default: boolean;
+    createdAt: string;
+  }
 
-
-    interface IVariantOrder {
-        id: number;
-        name: string;
-        thumbnail: string;
-    }
-
-    interface IOrderDetailItem {
-        id: number;
-        quantity: number;
-        price: number;
-        variant: IVariantOrder;
-    }
-
-    interface OneOrder {
-        id: number;
-        totalPrice: number;
-        paymentMethod: "VN_PAY" | "CASH";
-        paymentStatus: "PAID" | "PENDING" | "FAILED" | "CANCELLED" | "REFUNDED";
-        orderStatus: "COMPLETED" | "PROCESSING" | "SHIPPING" | "DELIVERED" | "CANCELLED";
-
-        ghnExpectedDelivery: string;
-        ghnFee: number;
-
-        province: string;
-        district: string;
-        ward: string;
-        addressDetail: string;
-        voucherId?: number | null;
-        voucherCode?: string | null;
-        voucherDiscount?: number | null;
-        user: OrderUser;
-        details: IOrderDetailItem[];
-       
-    }
-
-    interface VNPayResponse {
-        paymentUrl: string
-    }
-
-    interface AdminNotification {
-        id: number;
-        title: string;
-        message: string;
-        createdAt: string;
-        isRead: boolean;
-        receiver: string;
-        type: "ORDER" | "CONTACT" | "OTHER";
-        referenceId: number;
-    }
+  interface IUpsertAddressReq {
+    fullName: string;
+    phone: string;
+    provinceId: number;
+    districtId: number;
+    wardId: number;
+    addressDetail: string;
+    isDefault?: boolean;
+  }
 
 
+  interface AttributeValueFilter {
+    id: number;
+    value: string;
+  }
+
+  interface AttributeFilter {
+    id: number;
+    name: string;
+    code: string;
+    values: AttributeValueFilter[];
+  }
+
+
+
+  type AttributeValueDTO = {
+    id: number;
+    value: string;
+  };
+
+  interface AttributeDTO {
+    id: number;
+    code: string;
+    name: string;
+    values: AttributeValueDTO[];
+  };
+
+  interface VariantDTO {
+    id: number;
+    sku: string;
+    name: string;
+    price: number;
+    stock: number;
+    sold: number;
+    thumbnail: string;
+    valueIds: number[];
+  };
+
+  interface ProductDetailDTO {
+    id: number;
+    name: string;
+    code: string;
+    sku: string;
+    description: string;
+    images: string[];
+    attributes: AttributeDTO[];
+    variants: VariantDTO[];
+    defaultVariantId: number;
+  };
+
+
+  export interface ICartItem {
+    id: number;
+    variantId: number;
+    sku: string;
+    productName: string;
+    thumbnailUrl: string;
+    quantity: number;
+    price: number;
+    total: number;
+  }
+
+
+  export interface ICartResponse {
+    cartId: number;
+    items: ICartItem[];
+    total: number;
+  }
+
+
+  export interface AddToCartRequest {
+    variantId: number;
+    quantity: number;
+  }
+
+  export interface UpdateCartQuantityRequest {
+    cartDetailId: number;
+    quantity: number;
+  }
+
+
+  interface ShippingQuote {
+    fee: number;
+    serviceFee: number;
+    insuranceFee: number;
+    expectedDeliveryTime: string;
+  }
+
+  interface OrderItem {
+    variantId: number;
+    quantity: number;
+    price: number;
+  }
+
+  interface CreateOrderRequest {
+    addressId: number;
+    codAmount: number;
+    itemsValue: number;
+    items: OrderItem[];
+    paymentMethod: string;
+    voucherId?: number | null;
+    voucherDiscount?: number | null;
+  }
+
+
+  interface OrderCreateResponse {
+    order: Order;
+    paymentUrl?: string;
+  }
+
+
+
+
+  export interface UpdateCartQuantityRequest {
+    cartDetailId: number;
+    quantity: number;
+  }
+  // ========== Voucher types ==========
+  type VoucherDiscountType = "PERCENT" | "FIXED";
+  type VoucherStatus = "ACTIVE" | "INACTIVE" | "EXPIRED";
+  type VoucherApplyScope = "ALL" | "ASSIGNED";
+
+  interface IVoucher {
+    id: number;
+    code: string;
+    imageUrl?: string | null;
+    discountType: VoucherDiscountType;
+    discountValue: number;
+    maxDiscountAmount?: number | null;
+    minOrderValue?: number | null;
+    usageLimit?: number | null;
+    usedCount?: number | null;
+    userLimit?: number | null;
+    applyScope: VoucherApplyScope;
+    startDate: string; // ISO
+    endDate: string;   // ISO
+    status: VoucherStatus;
+  }
+
+  interface ICreateVoucherReq {
+    code: string;
+    imageUrl?: string | null;
+    discountType: VoucherDiscountType;
+    discountValue: number;
+    maxDiscountAmount?: number | null;
+    minOrderValue?: number | null;
+    usageLimit?: number | null;
+    userLimit?: number | null;
+    applyScope: VoucherApplyScope;
+    startDate: string; // datetime-local string -> backend parse
+    endDate: string;
+    assignedUserEmails?: string[];
+    status: VoucherStatus;
+    // dùng khi cần gửi danh sách email (nếu backend hỗ trợ)
+  }
+
+  interface IUpdateVoucherReq extends ICreateVoucherReq {
+    id: number;
+  }
+
+  interface IUserEmailLite {
+    id: number;
+    email: string;
+    fullName: string;
+  }
+
+
+  export interface OrderUser {
+    id: number;
+    fullName: string;
+    email: string;
+    phone: string;
+  }
+
+  export interface Order {
+    id: number;
+    totalPrice: number;
+    paymentMethod: string;
+    paymentStatus: string;
+    orderStatus: string;
+    ghnExpectedDelivery: string;
+    ghnFee: number;
+    province: string;
+    district: string;
+    ward: string;
+    addressDetail: string;
+    user: OrderUser;
+    updatedAt: string;
+    ghnOrderCode?: string;
+    voucherId?: number | null;
+    voucherDiscount?: number | null;
+    voucherCode?: string | null;
+  }
+
+
+
+
+
+
+
+  interface IVariantOrder {
+    id: number;
+    name: string;
+    thumbnail: string;
+  }
+
+  interface IOrderDetailItem {
+    id: number;
+    quantity: number;
+    price: number;
+    variant: IVariantOrder;
+  }
+
+  interface OneOrder {
+    id: number;
+    totalPrice: number;
+    paymentMethod: "VN_PAY" | "CASH";
+    paymentStatus: "PAID" | "PENDING" | "FAILED" | "CANCELLED" | "REFUNDED";
+    orderStatus: "COMPLETED" | "PROCESSING" | "SHIPPING" | "DELIVERED" | "CANCELLED";
+
+    ghnExpectedDelivery: string;
+    ghnFee: number;
+
+    province: string;
+    district: string;
+    ward: string;
+    addressDetail: string;
+
+    user: OrderUser;
+    details: IOrderDetailItem[];
+    voucherId?: number | null;
+    voucherDiscount?: number | null;
+    voucherCode?: string | null;
+  }
+
+  interface VNPayResponse {
+    paymentUrl: string
+  }
+
+  interface AdminNotification {
+    id: number;
+    title: string;
+    message: string;
+    createdAt: string;
+    isRead: boolean;
+    receiver: string;
+    type: "ORDER" | "CONTACT" | "OTHER";
+    referenceId: number;
+  }
+
+  export interface AdminShippingOrderItem {
+  orderDetailId: number;
+  variantId: number;
+  productName: string;
+  sku: string;
+  quantity: number;
+  price: number;
+}
+
+export interface AdminShippingOrderDetail {
+  orderId: number;
+  uuid: string;
+  customerName: string;
+  customerPhone: string;
+
+  province: string;
+  district: string;
+  ward: string;
+  addressDetail: string;
+
+  provinceId: number;
+  districtId: number;
+  wardId: number;
+
+  shopProvinceId: number;
+  shopDistrictId: number;
+  shopWardId: number;
+  shopAddressDetail: string;
+  shopName: string;
+  shopPhone: string;
+
+  codAmount: number;
+  goodsValue: number | null;
+
+  weight: number; // gram
+  length: number; // cm
+  width: number;  // cm
+  height: number; // cm
+
+  items: AdminShippingOrderItem[];
+}
+
+interface AdminCreateGhnOrderPayload {
+  orderId: number;
+
+  // Bên nhận
+  receiverName: string;
+  receiverPhone: string;
+  addressDetail: string;
+  provinceId: number;
+  districtId: number;
+  wardId: number;
+
+  // Hàng hoá
+  weight: number; // gram
+  length: number; // cm
+  width: number;  // cm
+  height: number; // cm
+  codAmount: number;
+  goodsValue: number; // insurance_value
+
+  // Dịch vụ & ca ship
+  serviceId: number;
+  serviceTypeId: number; // 2 | 5
+  pickShiftId: number;
+
+  // Thanh toán & note
+  paymentTypeId: 1 | 2; // 1: người gửi trả, 2: người nhận trả
+  requiredNote: string;  // "KHONGCHOXEMHANG" | ...
+  note: string;
+}
+
+interface GhnService {
+  service_id: number;
+  short_name: string;
+  service_type_id: number;
+}
+
+interface GhnPickupShift {
+  id: number;
+  title: string;
+  from_time: number;
+  to_time: number;
+}
 }

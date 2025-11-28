@@ -1,7 +1,6 @@
-import { getContactStats } from "@/api/admin.contact.api";
 import { logoutApi } from "@/api/auth.api";
 import { useCurrentApp } from "@/components/context/AppContext";
-import React, { useEffect } from "react";
+import React from "react";
 import {
   Link,
   Outlet,
@@ -9,7 +8,6 @@ import {
   matchPath,
   useNavigate,
 } from "react-router-dom";
-import { toast } from "react-toastify";
 import AdminNotificationBell from "./AdminNotificationBell";
 
 /* ====== Minimal icons (SVG inline) ====== */
@@ -21,7 +19,7 @@ const Icon = ({ d }: { d: string }) => (
 const I = {
   dashboard: "M3 3h8v8H3V3zm10 0h8v5h-8V3zM3 13h5v8H3v-8zm7 0h11v8H10v-8z",
   users:
-    "M16 11a3 3 0 100-6 3 3 0 000 6zM8 11a3 3 0 100-6 3 3 0 000 6zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm8 0c-2.33 0-4.67.67-6 1.76 2.37.6 4 1.6 4 3.24V19h8v-2c0-2.66-5.33-4-6-4z",
+    "M16 11a3 3 0 100-6 3 3 0 000 6zM8 11a3 3 0 100-6 3 3 0 000 6zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm8 0c-2.33 0-4.67.67-6 1.76 2.37.6 4 1.6 4 3.24V19h8v-2H9.42a.25.25 0 01-.26-.24l.01-.05.99-1.45z",
   box: "M21 16V8a1 1 0 00-.553-.894l-8-4a1 1 0 00-.894 0l-8 4A1 1 0 003 8v8a1 1 0 00.553.894l8 4a1 1 0 00.894 0l8-4A1 1 0 0021 16zM12 5.236L18.764 8.6 12 11.964 5.236 8.6 12 5.236zM5 10.382l6 3v5.8l-6-3v-5.8zm8 8.8v-5.8l6-3V16.2l-6 3z",
   tag: "M21.41 11.58l-9-9A2 2 0 0011 2H4a2 2 0 00-2 2v7a2 2 0 00.59 1.41l9 9a2 2 0 002.82 0l7-7a2 2 0 000-2.83zM6.5 8A1.5 1.5 0 118 6.5 1.5 1.5 0 016.5 8z",
   order:
@@ -32,7 +30,6 @@ const I = {
   fold: "M3 6h18v2H3V6zm0 5h12v2H3v-2zm0 5h18v2H3v-2z",
   unfold: "M3 6h18v2H3V6zm6 5h12v2H9v-2zm-6 5h18v2H3v-2z",
   logout:
-    // Cửa ra (đăng xuất)
     "M16 13v-2H8V8l-5 4 5 4v-3h8zm3-10h-7v2h7v14h-7v2h7a2 2 0 002-2V5a2 2 0 00-2-2z",
   contact:
     "M2 4a2 2 0 012-2h16a2 2 0 012 2v12a2 2 0 01-2 2H8l-4 4v-4H4a2 2 0 01-2-2V4zm4 3h12v2H6V7zm0 4h10v2H6v-2z",
@@ -40,57 +37,23 @@ const I = {
     "M4 4h16a1 1 0 011 1v10.5a1 1 0 01-.3.7l-3.5 3.5a1 1 0 01-.7.3H4a1 1 0 01-1-1V5a1 1 0 011-1zm1 2v12h11.09L19 15.09V6H5zm5 2h2v2h2v2h-2v2h-2v-2H8v-2h2V8z",
 };
 
-/* ====== Menu config (CHỈ những mục cần thiết) ====== */
+/* ====== Menu config ====== */
 export type MenuNode = {
   key: string;
   label: string;
-  to?: string; // link có thể click
-  pattern?: string; // chỉ để match active (có thể có :id)
+  to?: string;
+  pattern?: string;
   icon?: React.ReactNode;
   children?: MenuNode[];
 };
 
 const MENU: MenuNode[] = [
-  {
-    key: "dashboard",
-    icon: <Icon d={I.dashboard} />,
-    label: "Bảng điều khiển",
-    to: "/admin",
-  },
-
-  {
-    key: "users",
-    icon: <Icon d={I.users} />,
-    label: "Người dùng",
-    to: "/admin/users",
-  },
-
-  {
-    key: "products",
-    icon: <Icon d={I.box} />,
-    label: "Sản phẩm",
-    to: "/admin/products",
-  },
-
-  {
-    key: "categories",
-    icon: <Icon d={I.tag} />,
-    label: "Danh mục",
-    to: "/admin/categories",
-  },
-
-  {
-    key: "orders",
-    icon: <Icon d={I.order} />,
-    label: "Đơn hàng",
-    to: "/admin/orders",
-  },
-  {
-    key: "vouchers",
-    icon: <Icon d={I.voucher} />,
-    label: "Voucher",
-    to: "/admin/vouchers",
-  },
+  { key: "dashboard", icon: <Icon d={I.dashboard} />, label: "Bảng điều khiển", to: "/admin" },
+  { key: "users", icon: <Icon d={I.users} />, label: "Người dùng", to: "/admin/users" },
+  { key: "products", icon: <Icon d={I.box} />, label: "Sản phẩm", to: "/admin/products" },
+  { key: "categories", icon: <Icon d={I.tag} />, label: "Danh mục", to: "/admin/categories" },
+  { key: "orders", icon: <Icon d={I.order} />, label: "Đơn hàng", to: "/admin/orders" },
+  { key: "vouchers", icon: <Icon d={I.voucher} />, label: "Voucher", to: "/admin/vouchers" },
   {
     key: "inventory",
     icon: <Icon d={I.warehouse} />,
@@ -98,31 +61,12 @@ const MENU: MenuNode[] = [
     children: [
       { key: "warehouses", label: "Kho", to: "/admin/warehouses" },
       { key: "stock", label: "Tồn kho theo biến thể", to: "/admin/inventory" },
-      {
-        key: "purchase-orders",
-        label: "Đơn mua hàng",
-        to: "/admin/purchase-orders",
-      },
-      {
-        key: "po-detail",
-        label: "Chi tiết đơn mua (đang xem)",
-        pattern: "/admin/purchase-orders/:id",
-      },
+      { key: "purchase-orders", label: "Đơn mua hàng", to: "/admin/purchase-orders" },
+      { key: "po-detail", label: "Chi tiết đơn mua (đang xem)", pattern: "/admin/purchase-orders/:id" },
     ],
   },
-
-  {
-    key: "sliders",
-    icon: <Icon d={I.images} />,
-    label: "Trình chiếu",
-    to: "/admin/sliders",
-  },
-  {
-    key: "contacts",
-    icon: <Icon d={I.contact} />,
-    label: "Liên hệ",
-    to: "/admin/contact-message",
-  },
+  { key: "sliders", icon: <Icon d={I.images} />, label: "Trình chiếu", to: "/admin/sliders" },
+  { key: "contacts", icon: <Icon d={I.contact} />, label: "Liên hệ", to: "/admin/contact-message" },
 ];
 
 /* ====== Helpers ====== */
@@ -131,12 +75,7 @@ function cx(...args: Array<string | false | null | undefined>) {
 }
 
 function useActive(pathname: string) {
-  const flat: {
-    key: string;
-    to?: string;
-    pattern?: string;
-    parent?: string;
-  }[] = [];
+  const flat: { key: string; to?: string; pattern?: string; parent?: string }[] = [];
   const walk = (nodes: MenuNode[], parent?: string) => {
     for (const n of nodes) {
       flat.push({ key: n.key, to: n.to, pattern: n.pattern, parent });
@@ -166,29 +105,15 @@ export default function LayoutAdmin() {
   const [openKeys, setOpenKeys] = React.useState<string[]>([]);
   const location = useLocation();
   const { activeKey, openKey } = useActive(location.pathname);
-  const [pendingContacts, setPendingContacts] = React.useState(0);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const stats = await getContactStats();
-        setPendingContacts(stats);
-      } catch (error) {
-        toast.error("Không thể tải thống kê liên hệ "+error);
-      }
-    })();
-  }, []);
 
   const handleLogout = async () => {
     try {
       await logoutApi?.();
       localStorage.removeItem("access_token");
-    } catch {
-      // ignore or toast error
     } finally {
       setUser(null);
       setIsAuthenticated(false);
-      navigate("/"); // optional
+      navigate("/");
     }
   };
 
@@ -226,7 +151,6 @@ export default function LayoutAdmin() {
               activeKey={activeKey}
               openKeys={openKeys}
               setOpenKeys={setOpenKeys}
-              pendingContacts={pendingContacts}
             />
           ))}
         </nav>
@@ -285,29 +209,22 @@ export default function LayoutAdmin() {
   );
 }
 
-/* ====== Menu item (headless) ====== */
+/* ====== Menu item ====== */
 function MenuItem({
   node,
   collapsed,
   activeKey,
   openKeys,
   setOpenKeys,
-  pendingContacts,
 }: {
   node: MenuNode;
   collapsed: boolean;
   activeKey?: string;
   openKeys: string[];
   setOpenKeys: React.Dispatch<React.SetStateAction<string[]>>;
-  pendingContacts?: number;
 }) {
   const isOpen = openKeys.includes(node.key);
   const isActive = activeKey === node.key;
-
-  const isContacts = node.key === "contacts";
-  const showBadge = isContacts && (pendingContacts ?? 0) > 0;
-  const badgeText =
-    pendingContacts && pendingContacts > 99 ? "99+" : pendingContacts;
 
   if (!node.children?.length) {
     const Inner = (
@@ -321,29 +238,15 @@ function MenuItem({
       >
         <span
           className={cx(
-            "relative shrink-0",
+            "shrink-0",
             isActive
               ? "text-white"
               : "text-neutral-500 group-hover:text-neutral-700"
           )}
         >
           {node.icon}
-          {/* chấm nhỏ khi collapse */}
-          {collapsed && showBadge && (
-            <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-500" />
-          )}
         </span>
-
-        {!collapsed && (
-          <span className="flex-1 truncate flex items-center justify-between">
-            <span>{node.label}</span>
-            {showBadge && (
-              <span className="ml-2 inline-flex min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-semibold text-white">
-                {badgeText}
-              </span>
-            )}
-          </span>
-        )}
+        {!collapsed && <span className="truncate">{node.label}</span>}
       </div>
     );
 
@@ -391,8 +294,6 @@ function MenuItem({
           "overflow-hidden pl-3 transition-[max-height] duration-300",
           isOpen ? "max-h-[1000px]" : "max-h-0"
         )}
-        role="region"
-        aria-hidden={!isOpen}
       >
         {node.children?.map((c) => (
           <MenuItem
@@ -402,7 +303,6 @@ function MenuItem({
             activeKey={activeKey}
             openKeys={openKeys}
             setOpenKeys={setOpenKeys}
-            pendingContacts={pendingContacts}
           />
         ))}
       </div>

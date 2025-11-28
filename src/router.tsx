@@ -38,9 +38,11 @@ import OrderSuccess from "./pages/users/OrderSuccess";
 import VoucherListPage from "pages/admin/VoucherList.tsx";
 import { CheckoutPage } from "./pages/users/CheckoutPage";
 import UserOrderPage from "./pages/users/UserOrderPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import AdminCreateGhnOrderPage from "./pages/admin/AdminCreateGhnOrderPage";
+import AdminGhnTrackingPage from "./pages/admin/AdminTrackingOrderPage";
 
 import ResetPasswordPage from "pages/auth/ResetPasswordPage.tsx";
-import ForgotPasswordPage from "pages/auth/ForgotPasswordPage.tsx";
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
@@ -121,6 +123,8 @@ export const ROUTER = createBrowserRouter([
       { path: "categories", element: <CategoryList /> },
 
       { path: "orders", element: <OrderList /> },
+      { path: "orders/create-ghn/:orderId", element: <AdminCreateGhnOrderPage /> },
+      { path: "orders/tracking/:ghnOrderCode", element: <AdminGhnTrackingPage /> },
       { path: "roles", element: <RoleManagementPage /> },
       { path: "contact-message", element: <AdminContactsPage /> },
       // active only

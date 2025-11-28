@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 import { FiltersBar } from "@/components/admin/slider/FiltersBar";
 import { SliderTable } from "@/components/admin/slider/SliderTable";
 import { SliderModal } from "@/components/admin/slider/SliderModal";
+import { confirmToast } from "@/components/ConfirmToast";
 
 export default function SliderList() {
   // filters
@@ -110,7 +111,10 @@ export default function SliderList() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Xoá slider này?")) return;
+    const ok = await confirmToast(
+        `Bạn có chắc muốn xoá liên hệ đã chọn?`
+      );
+      if (!ok) return;
     try {
       await deleteSlider(id);
       await fetchData();

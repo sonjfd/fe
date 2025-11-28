@@ -72,7 +72,7 @@ export default function UserOrderDetail({ id, onClose }: UserOrderDetailProps) {
 
     const productTotal = useMemo(() => {
         if (!order) return 0;
-        return order.totalPrice + order.ghnFee;
+        return order.totalPrice;
     }, [order]);
 
     const totalPayment = useMemo(() => {
