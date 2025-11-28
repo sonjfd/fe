@@ -51,10 +51,8 @@ const Login = () => {
     }
   };
 
-  const handleGoogleLogin = () => {
-    const handleGoogleLogin = () => {
+   const handleGoogleLogin = () => {
     window.location.href = `http://dshstore.io.vn/api/oauth2/authorization/google`;
-  };
   };
 
   return (
