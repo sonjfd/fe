@@ -47,15 +47,13 @@ jobs:
             docker rm -f fe_tmp || true
             docker create --name fe_tmp sondiec121/fe:v1
 
-            mkdir -p /var/www/fe
-            rm -rf /var/www/fe/*
+            PASS='${{ secrets.HOST_PASSWORD }}'
 
-            docker cp fe_tmp:/usr/src/app/dist/. /var/www/fe/
+            echo "$PASS" | sudo -S mkdir -p /var/www/fe
+            echo "$PASS" | sudo -S rm -rf /var/www/fe/*
+
+            echo "$PASS" | sudo -S docker cp fe_tmp:/dist_fe/. /var/www/fe/
 
             docker rm fe_tmp
 
-            if command -v systemctl >/dev/null 2>&1; then
-              systemctl reload nginx || systemctl restart nginx
-            else
-              service nginx reload || service nginx restart
-            fi
+            echo "$PASS" | sudo -S systemctl reload nginx || echo "$PASS" | sudo -S systemctl restart nginx
