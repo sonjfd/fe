@@ -47,15 +47,21 @@ jobs:
             docker rm -f fe_tmp || true
             docker create --name fe_tmp sondiec121/fe:v1
 
-            mkdir -p /var/www/fe
-            rm -rf /var/www/fe/*
+            SRC_PATH=$(docker exec fe_tmp sh -c 'if [ -d /usr/src/app/dist ]; then echo /usr/src/app/dist; elif [ -d /app/dist ]; then echo /app/dist; else echo ""; fi')
 
-            docker cp fe_tmp:/usr/src/app/dist/. /var/www/fe/
+            if [ -z "$SRC_PATH" ]; then
+              echo "dist folder not found in container"
+              docker rm fe_tmp
+              exit 1
+            fi
+
+            PASS='${{ secrets.HOST_PASSWORD }}'
+
+            echo "$PASS" | sudo -S mkdir -p /var/www/fe
+            echo "$PASS" | sudo -S rm -rf /var/www/fe/*
+
+            echo "$PASS" | sudo -S docker cp fe_tmp:$SRC_PATH/. /var/www/fe/
 
             docker rm fe_tmp
 
-            if command -v systemctl >/dev/null 2>&1; then
-              systemctl reload nginx || systemctl restart nginx
-            else
-              service nginx reload || service nginx restart
-            fi
+            echo "$PASS" | sudo -S systemctl reload nginx || echo "$PASS" | sudo -S systemctl restart nginx
