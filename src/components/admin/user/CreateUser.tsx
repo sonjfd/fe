@@ -1,10 +1,13 @@
 import { useForm } from "react-hook-form";
 import { createUser } from "@/api/admin.api";
 import { toast } from "react-toastify";
+import { useState } from "react";
 
 type Props = { onClose: () => void; onSuccess: () => void };
 
 export default function CreateUser({ onClose, onSuccess }: Props) {
+  const [isLoading, setIsLoading] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -23,17 +26,24 @@ export default function CreateUser({ onClose, onSuccess }: Props) {
   });
 
   const onSubmit = async (data: ICreateUserReq) => {
+    if (isLoading) return; // chặn spam
     try {
+      setIsLoading(true);
+
       const res = await createUser(data);
+
       if (res.data) {
         toast.success("Tạo người dùng thành công");
         reset();
         onSuccess();
+        onClose(); // nếu muốn đóng luôn modal
       } else {
         toast.error(res.message || "Tạo thất bại");
       }
     } catch (e: any) {
       toast.error(e?.message || "Tạo thất bại");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -56,7 +66,8 @@ export default function CreateUser({ onClose, onSuccess }: Props) {
               validate: (value) =>
                 value.trim().length > 0 || "Không được chỉ nhập khoảng trắng",
             })}
-            className="mt-1 w-full rounded border px-3 py-2"
+            disabled={isLoading}
+            className="mt-1 w-full rounded border px-3 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
           {errors.fullName && (
             <p className="text-xs text-red-500">{errors.fullName.message}</p>
@@ -77,7 +88,8 @@ export default function CreateUser({ onClose, onSuccess }: Props) {
               validate: (value) =>
                 value.trim().length > 0 || "Không được chỉ nhập khoảng trắng",
             })}
-            className="mt-1 w-full rounded border px-3 py-2"
+            disabled={isLoading}
+            className="mt-1 w-full rounded border px-3 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
           {errors.email && (
             <p className="text-xs text-red-500">{errors.email.message}</p>
@@ -98,7 +110,8 @@ export default function CreateUser({ onClose, onSuccess }: Props) {
                   "Mật khẩu phải có tối thiểu 6 ký tự, gồm ít nhất 1 chữ thường và 1 chữ hoa",
               },
             })}
-            className="mt-1 w-full rounded border px-3 py-2"
+            disabled={isLoading}
+            className="mt-1 w-full rounded border px-3 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
           />
           {errors.password && (
             <p className="text-xs text-red-500">{errors.password.message}</p>
@@ -117,14 +130,16 @@ export default function CreateUser({ onClose, onSuccess }: Props) {
                     "Số điện thoại phải bắt đầu bằng 0 hoặc +84 và có độ dài hợp lệ",
                 },
               })}
-              className="mt-1 w-full rounded border px-3 py-2"
+              disabled={isLoading}
+              className="mt-1 w-full rounded border px-3 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
           </div>
           <div>
             <label className="text-sm font-medium">Giới tính</label>
             <select
               {...register("gender")}
-              className="mt-1 w-full rounded border px-3 py-2"
+              disabled={isLoading}
+              className="mt-1 w-full rounded border px-3 py-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
             >
               <option value="MALE">Nam</option>
               <option value="FEMALE">Nữ</option>
@@ -136,15 +151,17 @@ export default function CreateUser({ onClose, onSuccess }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded border px-3 py-2"
+            disabled={isLoading}
+            className="rounded border px-3 py-2 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             Huỷ
           </button>
           <button
             type="submit"
-            className="rounded bg-neutral-900 px-4 py-2 text-white"
+            disabled={isLoading}
+            className="flex items-center justify-center gap-2 rounded bg-neutral-900 px-4 py-2 text-white disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Tạo
+            {isLoading ? "Đang tạo..." : "Tạo"}
           </button>
         </div>
       </form>
