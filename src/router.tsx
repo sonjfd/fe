@@ -38,6 +38,10 @@ import OrderSuccess from "./pages/users/OrderSuccess";
 import VoucherListPage from "pages/admin/VoucherList.tsx";
 import { CheckoutPage } from "./pages/users/CheckoutPage";
 import UserOrderPage from "./pages/users/UserOrderPage";
+import StockPage from "pages/admin/StockPage.tsx";
+import StockInPage from "pages/admin/StockInPage.tsx";
+import StockOut from "pages/admin/StockOut.tsx";
+import StockAdjPage from "pages/admin/StockAdjPage.tsx";
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
@@ -119,10 +123,10 @@ export const ROUTER = createBrowserRouter([
       { path: "contact-message", element: <AdminContactsPage /> },
       // active only
 
-      // { path: "warehouses", element: <WarehouseList /> },
-      // { path: "inventory", element: <InventoryByVariant /> },
-      // { path: "purchase-orders", element: <PurchaseOrderList /> },
-      // { path: "purchase-orders/:id", element: <PurchaseOrderDetail /> }, // active only
+      { path: "stock", element: <StockPage /> },
+      { path: "StockOut", element: <StockOut /> },
+      { path: "stockIn", element: <StockInPage /> },
+        { path: "StockAdj", element: <StockAdjPage /> },
 
       { path: "sliders", element: <AdminSlidersPage /> },
       // { path: "sliders/:id", element: <SliderDetail /> },     // active only
