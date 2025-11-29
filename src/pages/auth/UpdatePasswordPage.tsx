@@ -1,8 +1,8 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import axios from "axios";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import axios from "@/services/axios.customize";
 
 type FormValues = {
   password: string;
@@ -37,7 +37,7 @@ const UpdatePasswordPage = () => {
     }
 
     try {
-      await axios.post("http://localhost:8080/api/v1/auth/update-password", {
+      await axios.post("/api/v1/auth/update-password", {
         token,
         password: data.password,
       });

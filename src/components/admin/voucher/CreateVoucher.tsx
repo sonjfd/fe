@@ -86,9 +86,25 @@ const CreateVoucher: React.FC<Props> = ({ open, onClose, onCreated }) => {
 
     function validate() {
         const e: Record<string, string> = {};
+
         if (!form.code.trim()) e.code = "Vui lòng nhập mã voucher";
-        if (!form.discountValue || form.discountValue <= 0)
+
+        if (!form.discountValue || form.discountValue <= 0) {
             e.discountValue = "Giá trị giảm phải > 0";
+        } else {
+            if (form.discountType === "FIXED" && form.discountValue > 100000) {
+                e.discountValue = "Giảm tiền cố định không vượt quá 100.000đ";
+            }
+            if (form.discountType === "PERCENT") {
+                if (form.discountValue > 20) {
+                    e.discountValue = "Giảm phần trăm không vượt quá 20%";
+                }
+                if (form.maxDiscountAmount && form.maxDiscountAmount > 500000) {
+                    e.maxDiscountAmount = "Giảm tối đa không vượt quá 500.000đ";
+                }
+            }
+        }
+
         if (!form.startDate) e.startDate = "Vui lòng chọn ngày bắt đầu";
         if (!form.endDate) e.endDate = "Vui lòng chọn ngày kết thúc";
         if (form.startDate && form.endDate) {
@@ -96,9 +112,11 @@ const CreateVoucher: React.FC<Props> = ({ open, onClose, onCreated }) => {
                 e.endDate = "Ngày kết thúc phải sau ngày bắt đầu";
             }
         }
+
         setErrors(e);
         return Object.keys(e).length === 0;
     }
+
 
     async function handleSubmit() {
         if (!validate()) return;
@@ -249,6 +267,7 @@ const CreateVoucher: React.FC<Props> = ({ open, onClose, onCreated }) => {
                                 }
                                 className="h-9 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/20"
                             />
+                            {errors.maxDiscountAmount && <Err>{errors.maxDiscountAmount}</Err>}
                         </div>
                         <div>
                             <label className="mb-1 block text-sm font-medium text-slate-800">

@@ -13,6 +13,7 @@ import { ContactDetailModal } from "./ContactDetailModal";
 import { confirmToast } from "@/components/ConfirmToast";
 import { toast } from "react-toastify";
 import { useDebounce } from "@/hook/UseDebounce";
+import { useSearchParams } from "react-router-dom";
 
 export const ContactTable: React.FC = () => {
   const [page, setPage] = useState(0); // 0-based
@@ -27,6 +28,10 @@ export const ContactTable: React.FC = () => {
   const [endDate, setEndDate] = useState<string | undefined>();
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
+  const [searchParams] = useSearchParams();                    // 👈 THÊM
+  const urlId = searchParams.get("id");
+  const focusId = urlId ? Number(urlId) : undefined; 
 
 
   // === Data states ===
@@ -53,15 +58,19 @@ export const ContactTable: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      const res = await listContactMessages({
-        page,
-        size,
-        status,
-        search:debouncedSearch,
-        startDate,
-        endDate,
-        sortDir,
-      });
+      const res = await listContactMessages(
+        focusId != null
+          ? { id: focusId }
+          : {
+              page,
+              size,
+              status,
+              search: debouncedSearch,
+              startDate,
+              endDate,
+              sortDir,
+            }
+      );
 
       if (res) setData(res);
     } catch (e: any) {
@@ -74,7 +83,7 @@ export const ContactTable: React.FC = () => {
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, size, status, debouncedSearch, startDate, endDate, sortDir]);
+  }, [page, size, status, debouncedSearch, startDate, endDate, sortDir,focusId ]);
 
   const allSelected =
   data.items.length > 0 &&
@@ -142,7 +151,10 @@ async function handleBulkDelete() {
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("Bạn có chắc muốn xoá liên hệ này?")) return;
+    const ok = await confirmToast(
+    `Bạn có chắc muốn xoá liên hệ đã chọn?`
+  );
+  if (!ok) return;
     await deleteContactMessage(id);
     fetchData();
   }

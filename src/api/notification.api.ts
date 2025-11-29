@@ -10,3 +10,12 @@ export const updateNotificationOfAdmin = (id: number) => {
     const url = `/api/v1/admin/notifications/${id}`
     return axios.put(url)
 }
+
+export const getAllNotificationOfUser = (query: string,) => {
+    const url = `/api/v1/notifications?${query}`
+    return axios.get<IBackendRes<IModelPaginate<AdminNotification>>>(url)
+}
+export const updateNotificationOfUser = (id: number) => {
+    const url = `/api/v1/notifications/${id}`
+    return axios.put(url)
+}

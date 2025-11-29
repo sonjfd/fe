@@ -42,6 +42,11 @@ import StockPage from "pages/admin/StockPage.tsx";
 import StockInPage from "pages/admin/StockInPage.tsx";
 import StockOut from "pages/admin/StockOut.tsx";
 import StockAdjPage from "pages/admin/StockAdjPage.tsx";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import AdminCreateGhnOrderPage from "./pages/admin/AdminCreateGhnOrderPage";
+import AdminGhnTrackingPage from "./pages/admin/AdminTrackingOrderPage";
+
+import ResetPasswordPage from "pages/auth/ResetPasswordPage.tsx";
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
@@ -68,12 +73,15 @@ export const ROUTER = createBrowserRouter([
       { path: "/category/:id", element: <CategoryPage /> },
       { path: "/products/:id", element: <ProductDetailPage /> },
       { path: "/checkout", element: <CheckoutPage /> },
+      { path: "/forgot-password", element: <ForgotPasswordPage /> },
       { path: "/thanks", element: <OrderSuccess /> },
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
       { path: "gioi-thieu", element: <AboutPage /> },
       { path: "cart", element: <CartPage /> },
       { path: "wishlist", element: <WishlistPage /> },
+        {path: "forgot-password",element : <ForgotPasswordPage />},
+        { path:"reset-password", element:<ResetPasswordPage />}
     ],
   },
   {
@@ -119,6 +127,8 @@ export const ROUTER = createBrowserRouter([
       { path: "categories", element: <CategoryList /> },
 
       { path: "orders", element: <OrderList /> },
+      { path: "orders/create-ghn/:orderId", element: <AdminCreateGhnOrderPage /> },
+      { path: "orders/tracking/:ghnOrderCode", element: <AdminGhnTrackingPage /> },
       { path: "roles", element: <RoleManagementPage /> },
       { path: "contact-message", element: <AdminContactsPage /> },
       // active only

@@ -6,6 +6,7 @@ import { logoutApi } from "@/api/auth.api";
 import avatarDefault from "@/assets/img/avatar-default.png";
 import { toSlug } from "@/utils/slug";
 import { SearchBar } from "./SearchBar";
+import UserNotificationBell from "./UserNotificationBell";
 
 // ---------- util ----------
 type ClassValue = string | false | null | undefined;
@@ -427,6 +428,7 @@ export const AppHeader: React.FC = () => {
 
           {/* Cart menu dùng AppContext */}
           <CartMenu />
+          <UserNotificationBell />
         </div>
       </Container>
       <CategoryNavBar />

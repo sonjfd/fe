@@ -12,7 +12,7 @@ interface FormData {
 }
 
 const Login = () => {
-  const { setIsAuthenticated, setUser} = useCurrentApp();
+  const { setIsAuthenticated, setUser } = useCurrentApp();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [searchParams] = useSearchParams();
 
@@ -52,8 +52,7 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    const API_URL = import.meta.env.VITE_BACKEND_URL;
-    window.location.href = `${API_URL}/oauth2/authorization/google`;
+    window.location.href = "/oauth2/authorization/google";
   };
 
   return (
@@ -128,14 +127,11 @@ const Login = () => {
             Đăng nhập
           </button>
         </form>
-          <div className="flex justify-end text-sm" >
-              <Link
-                  to="/forgot-password"
-                  className="text-blue-600 hover:underline"
-              >
-                  Quên mật khẩu?
-              </Link>
-          </div>
+        <div className="flex justify-end text-sm">
+          <Link to="/forgot-password" className="text-blue-600 hover:underline">
+            Quên mật khẩu?
+          </Link>
+        </div>
         <div className="my-6 flex items-center gap-3">
           <div className="h-px flex-1 bg-slate-200"></div>
           <span className="text-xs uppercase tracking-wider text-slate-500">
