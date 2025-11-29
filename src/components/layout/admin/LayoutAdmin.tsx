@@ -59,10 +59,10 @@ const MENU: MenuNode[] = [
     icon: <Icon d={I.warehouse} />,
     label: "Kho hàng",
     children: [
-      { key: "warehouses", label: "Kho", to: "/admin/warehouses" },
-      { key: "stock", label: "Tồn kho theo biến thể", to: "/admin/inventory" },
-      { key: "purchase-orders", label: "Đơn mua hàng", to: "/admin/purchase-orders" },
-      { key: "po-detail", label: "Chi tiết đơn mua (đang xem)", pattern: "/admin/purchase-orders/:id" },
+      { key: "warehouses", label: "Kho", to: "/admin/stock" },
+      { key: "stock", label: "Nhập Kho", to: "/admin/stockIn" },
+      { key: "StockOut", label: "Xuất Kho", to: "/admin/StockOut"},
+        { key: "StockAdj", label: "Điều Chỉnh Kho", to: "/admin/StockAdj"},
     ],
   },
   { key: "sliders", icon: <Icon d={I.images} />, label: "Trình chiếu", to: "/admin/sliders" },
@@ -209,7 +209,7 @@ export default function LayoutAdmin() {
   );
 }
 
-/* ====== Menu item ====== */
+/* ====== Menu item (headless) ====== */
 function MenuItem({
   node,
   collapsed,
