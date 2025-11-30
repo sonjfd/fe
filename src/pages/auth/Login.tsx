@@ -31,23 +31,34 @@ const Login = () => {
     try {
       const { email, password } = values;
       const res = await loginApi(email, password);
+      const data = res.data;
 
-      if (res.data) {
-        localStorage.setItem("access_token", res.data.access_token);
-        const acc = await fetchAccountAPI();
-        setUser(acc.data?.user as any);
-        setIsAuthenticated(true);
-        const redirect = searchParams.get("redirect");
-        if (acc.data?.user?.role === "ADMIN") {
-          navigate("/admin");
-        } else {
-          navigate(redirect || "/");
-        }
+      if (!data || !data.access_token) {
+        toast.error(res.message || "Đăng nhập thất bại");
+        return;
+      }
+
+      localStorage.setItem("access_token", data.access_token);
+
+      const accRes = await fetchAccountAPI();
+      const accountData = accRes.data;
+
+      if (!accountData || !accountData.user) {
+        toast.error("Sai email hoặc mật khẩu vui lòng nhập lại");
+        return;
+      }
+
+      setUser(accountData.user as any);
+      setIsAuthenticated(true);
+
+      const redirect = searchParams.get("redirect");
+      if (accountData.user.role === "ADMIN") {
+        navigate("/admin");
       } else {
-        toast.error(res.message);
+        navigate(redirect || "/");
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Đăng nhập thất bại");
+      toast.error(error?.message || "Đăng nhập thất bại");
     }
   };
 
