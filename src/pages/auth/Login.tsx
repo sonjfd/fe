@@ -34,7 +34,7 @@ const Login = () => {
       const data = res.data;
 
       if (!data || !data.access_token) {
-        toast.error(res.message || "Đăng nhập thất bại");
+        toast.error("Sai thông email hoặc mật khẩu vui lòng thử lại");
         return;
       }
 
