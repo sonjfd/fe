@@ -22,7 +22,7 @@ const ForgotPasswordPage = () => {
       });
 
       toast.success(
-        "Nếu email tồn tại trong hệ thống, liên kết đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư."
+        "Gửi thành công,vui lòng kiểm tra email của bạn"
       );
     } catch (err: any) {
       const msg =

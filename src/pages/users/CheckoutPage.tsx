@@ -269,13 +269,14 @@ export const CheckoutPage: React.FC = () => {
               <span className="text-orange-500 font-semibold text-sm">
                 ĐỊA CHỈ NHẬN HÀNG
               </span>
-                                <button
-                                    type="button"
-                                    onClick={() => toast.info("Demo: chức năng thay đổi địa chỉ")}
-                                    className="text-sm text-blue-500 hover:underline"
-                                >
-                                    Thay đổi
-                                </button>
+                                <Link to={"/tai-khoan/dia-chi"}>
+                                    <button
+                                        type="button"
+                                        className="text-blue-500 hover:underline"
+                                    >
+                                        Thay đổi
+                                    </button>
+                                </Link>
                             </div>
                             {loadingAddress ? (
                                 <p className="text-sm text-slate-500">Đang tải địa chỉ...</p>
