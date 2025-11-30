@@ -69,10 +69,9 @@ const UpdatePasswordPage = () => {
       setResendLoading(true);
       setResendMsg(null);
 
-      const res = await axios.post(
-        "http://localhost:8080/api/v1/auth/resend-update-password",
-        { token }
-      );
+      const res = await axios.post("/api/v1/auth/resend-update-password", {
+        token,
+      });
 
       setResendMsg(res.data?.message || "Đã gửi email chứa liên kết mới.");
     } catch (err: any) {
