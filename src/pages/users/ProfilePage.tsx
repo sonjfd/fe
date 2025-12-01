@@ -40,10 +40,10 @@ export default function ProfilePage() {
     React.useEffect(() => {
         if (user) {
             setForm({
-                fullName: user.fullName,
-                phone: user.phone,
-                gender: user.gender,
-                avatar: user.avatar,
+                fullName: user.fullName ?? "",
+                phone: user.phone ?? "",
+                gender: user.gender ?? "FEMALE",
+                avatar: user.avatar ?? undefined,
             });
         }
     }, [user]);
@@ -141,7 +141,7 @@ export default function ProfilePage() {
                     <input
                         type="text"
                         placeholder="Nguyễn Văn A"
-                        value={form.fullName}
+                        value={form.fullName ?? ""}
                         onChange={(e) =>
                             setForm((s) => ({...s, fullName: e.target.value}))
                         }
@@ -161,7 +161,7 @@ export default function ProfilePage() {
                     <input
                         type="text"
                         placeholder="0912345678"
-                        value={form.phone}
+                        value={form.phone ?? ""}
                         onChange={(e) =>
                             setForm((s) => ({...s, phone: e.target.value}))
                         }
