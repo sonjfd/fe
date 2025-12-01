@@ -11,11 +11,11 @@ export const connectAdminWs = ({
 }) => {
   if (adminStompClient && adminStompClient.active) return;
 
-  const socket = new SockJS(`${import.meta.env.VITE_BACKEND_URL}/ws`);
+  const socket = new SockJS(`${import.meta.env.VITE_BACKEND_URL}ws`);
 
   const client = new Client({
     webSocketFactory: () => socket as any,
-    debug: () => {},
+    debug: () => { },
     reconnectDelay: 5000,
     heartbeatIncoming: 10000,
     heartbeatOutgoing: 10000,
