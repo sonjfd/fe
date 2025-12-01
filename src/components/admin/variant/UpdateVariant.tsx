@@ -29,7 +29,6 @@ export default function UpdateVariantModal({
 }) {
   const [name, setName] = useState<string>(value.name);
   const [price, setPrice] = useState<number | string>(value.price);
-  const [stock, setStock] = useState<number | string>(value.stock);
   const [saving, setSaving] = useState(false);
 
   const combination = value.attributes.map((a) => a.value).join(" / ");
@@ -41,7 +40,6 @@ export default function UpdateVariantModal({
       await axios.put(`/api/v1/admin/variants/${value.id}`, {
         name: name,
         price: Number(price) || 0,
-        stock: Number(stock) || 0,
       });
 
       toast.success("Đã cập nhật biến thể");
@@ -80,7 +78,7 @@ export default function UpdateVariantModal({
           />
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2">
+        <div>
           <div>
             <label className="block text-sm font-medium">Giá</label>
             <input
@@ -89,17 +87,6 @@ export default function UpdateVariantModal({
               className="mt-1 w-full rounded border border-neutral-300 px-3 py-2"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium">Tồn kho</label>
-            <input
-              type="number"
-              min={0}
-              className="mt-1 w-full rounded border border-neutral-300 px-3 py-2"
-              value={stock}
-              onChange={(e) => setStock(e.target.value)}
             />
           </div>
         </div>

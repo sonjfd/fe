@@ -234,7 +234,6 @@ export default function CreateVariants() {
                 <th className="px-4 py-2 text-left">Combination</th>
                 <th className="px-4 py-2 text-left">Tên biến thể</th>
                 <th className="px-4 py-2 text-left">Giá</th>
-                <th className="px-4 py-2 text-left">Tồn kho</th>
                 <th className="px-4 py-2 text-left">Ảnh</th>
                 <th className="px-4 py-2 text-left">Chọn</th>
                 <th className="px-4 py-2 text-left">Xoá</th>
@@ -268,17 +267,7 @@ export default function CreateVariants() {
                       }
                     />
                   </td>
-                  <td className="px-4 py-3">
-                    <input
-                      type="number"
-                      min={0}
-                      className="w-full rounded border border-neutral-300 px-3 py-1.5"
-                      value={r.stock}
-                      onChange={(e) =>
-                        updateRow(r.id, { stock: e.target.value })
-                      }
-                    />
-                  </td>
+
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <input
