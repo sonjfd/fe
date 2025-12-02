@@ -262,8 +262,14 @@ export const DSHStoreHome: React.FC = () => {
   const [page, setPage] = useState(1);
   const size = 50;
   const [wishlistIds, setWishlistIds] = useState<Set<number>>(new Set());
+
   const [ratings, setRatings] = useState<IRating[]>([]);
   const [ratingsLoading, setRatingsLoading] = useState(false);
+
+  // slide cho rating
+  const [ratingSlide, setRatingSlide] = useState(0);
+  const RATING_GROUP_SIZE = 3;
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -280,6 +286,7 @@ export const DSHStoreHome: React.FC = () => {
     };
     load();
   }, [page]);
+
   useEffect(() => {
     if (!isAuthenticated) {
       setWishlistIds(new Set());
@@ -302,7 +309,8 @@ export const DSHStoreHome: React.FC = () => {
 
     loadWishlist();
   }, [isAuthenticated, wishlistCount]);
-  //Rating
+
+  // Rating
   useEffect(() => {
     const loadRatings = async () => {
       try {
@@ -319,6 +327,32 @@ export const DSHStoreHome: React.FC = () => {
 
     loadRatings();
   }, []);
+
+  // reset slide nếu số lượng rating thay đổi
+  useEffect(() => {
+    const totalSlides = Math.ceil(ratings.length / RATING_GROUP_SIZE);
+    if (totalSlides > 0 && ratingSlide >= totalSlides) {
+      setRatingSlide(0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ratings.length]);
+
+  // auto slide 5s
+  useEffect(() => {
+    if (ratings.length === 0) return;
+
+    const totalSlides = Math.ceil(ratings.length / RATING_GROUP_SIZE);
+    if (totalSlides <= 1) return;
+
+    const t = setInterval(() => {
+      setRatingSlide((prev) => {
+        const next = prev + 1;
+        return next >= totalSlides ? 0 : next;
+      });
+    }, 5000);
+
+    return () => clearInterval(t);
+  }, [ratings.length]);
 
   return (
     <>
@@ -479,6 +513,7 @@ export const DSHStoreHome: React.FC = () => {
           </>
         )}
       </Container>
+
       {/* === KHÁCH HÀNG NÓI VỀ CHÚNG TÔI === */}
       <Container className="py-12">
         {/* Tiêu đề giống ảnh */}
@@ -501,65 +536,80 @@ export const DSHStoreHome: React.FC = () => {
           </div>
         )}
 
-        {!ratingsLoading && ratings.length > 0 && (
-          <>
-            {/* 3 card / hàng giống layout ảnh */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              {ratings.map((r) => (
-                <div
-                  key={r.id}
-                  className="flex flex-col items-center text-center bg-white rounded-2xl border border-slate-200 shadow-sm px-6 py-8"
-                >
-                  {/* Avatar tròn */}
-                  <div className="h-24 w-24 rounded-full overflow-hidden border-4 border-indigo-500 mb-4">
-                    <img
-                      src={r.userAvatarUrl}
-                      alt={r.userFullName}
-                      className="h-full w-full object-cover"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src =
-                          "https://via.placeholder.com/200x200?text=User";
-                      }}
-                    />
-                  </div>
+        {!ratingsLoading &&
+          ratings.length > 0 &&
+          (() => {
+            const totalSlides = Math.ceil(ratings.length / RATING_GROUP_SIZE);
+            const start = ratingSlide * RATING_GROUP_SIZE;
+            const end = start + RATING_GROUP_SIZE;
+            const visibleRatings = ratings.slice(start, end);
 
-                  {/* Sao */}
-                  <div className="flex items-center justify-center gap-1 text-yellow-400 text-lg mb-2">
-                    {Array.from({ length: 5 }).map((_, idx) => (
-                      <span key={idx}>{idx < r.score ? "★" : "☆"}</span>
-                    ))}
-                  </div>
+            return (
+              <>
+                {/* 3 card / hàng giống layout ảnh */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                  {visibleRatings.map((r) => (
+                    <div
+                      key={r.id}
+                      className="flex flex-col items-center text-center bg-white rounded-2xl border border-slate-200 shadow-sm px-6 py-8"
+                    >
+                      {/* Avatar tròn */}
+                      <div className="h-24 w-24 rounded-full overflow-hidden border-4 border-indigo-500 mb-4">
+                        <img
+                          src={r.userAvatarUrl}
+                          alt={r.userFullName}
+                          className="h-full w-full object-cover"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src =
+                              "https://via.placeholder.com/200x200?text=User";
+                          }}
+                        />
+                      </div>
 
-                  {/* Tên + “thông tin phụ” */}
-                  <div className="mb-3">
-                    <p className="font-semibold text-slate-900 text-base">
-                      {r.userFullName}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      Đánh giá ngày{" "}
-                      {new Date(r.createdAt).toLocaleDateString("vi-VN")}
-                    </p>
-                  </div>
+                      {/* Sao */}
+                      <div className="flex items-center justify-center gap-1 text-yellow-400 text-lg mb-2">
+                        {Array.from({ length: 5 }).map((_, idx) => (
+                          <span key={idx}>{idx < r.score ? "★" : "☆"}</span>
+                        ))}
+                      </div>
 
-                  {/* Nội dung đánh giá */}
-                  <p className="text-sm text-slate-700 leading-relaxed max-w-xs">
-                    {r.content}
-                  </p>
+                      {/* Tên + “thông tin phụ” */}
+                      <div className="mb-3">
+                        <p className="font-semibold text-slate-900 text-base">
+                          {r.userFullName}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          Đánh giá ngày{" "}
+                          {new Date(r.createdAt).toLocaleDateString("vi-VN")}
+                        </p>
+                      </div>
+
+                      {/* Nội dung đánh giá */}
+                      <p className="text-sm text-slate-700 leading-relaxed max-w-xs">
+                        {r.content}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            {/* Dots dưới giống slider (tạm thời chỉ là hiển thị trang / số đánh giá) */}
-            <div className="mt-8 flex justify-center gap-2">
-              {ratings.map((_, idx) => (
-                <span
-                  key={idx}
-                  className="h-2.5 w-2.5 rounded-full bg-slate-300"
-                />
-              ))}
-            </div>
-          </>
-        )}
+                {/* Dots dưới: mỗi dot = 1 slide (3 đánh giá) */}
+                <div className="mt-8 flex justify-center gap-2">
+                  {Array.from({ length: totalSlides }).map((_, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setRatingSlide(idx)}
+                      className={`h-2.5 w-2.5 rounded-full transition ${
+                        idx === ratingSlide
+                          ? "bg-indigo-500"
+                          : "bg-slate-300 hover:bg-slate-400"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            );
+          })()}
       </Container>
 
       {/* === ĐỐI TÁC === */}

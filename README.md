@@ -1,73 +1,87 @@
-# React + TypeScript + Vite
+# DSH Store Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Dự án frontend của hệ thống bán hàng DSH Store, xây dựng bằng React, TypeScript, Vite và TailwindCSS. Mục tiêu của dự án là cung cấp giao diện người dùng cho các chức năng bán hàng, xem sản phẩm và thao tác giỏ hàng.
 
-Currently, two official plugins are available:
+## Công nghệ sử dụng
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React
+- TypeScript
+- Vite
+- TailwindCSS
+- Axios
+- ESLint
+- Docker
 
-## React Compiler
+## Các tính năng chính
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Trang chủ
 
-## Expanding the ESLint configuration
+Hiển thị banner, danh mục ngành hàng và danh sách sản phẩm nổi bật hoặc mới nhất.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Danh sách sản phẩm
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Hiển thị danh sách sản phẩm theo danh mục. Có thể bao gồm lọc, tìm kiếm hoặc sắp xếp tùy theo phần đã triển khai.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Chi tiết sản phẩm
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Hiển thị thông tin sản phẩm, mô tả, giá và các dữ liệu liên quan. Hỗ trợ thêm sản phẩm vào giỏ hàng.
+
+### Giỏ hàng
+
+Quản lý các sản phẩm đã thêm, chỉnh số lượng, tính tổng giá trị và xóa sản phẩm.
+
+### Xác thực người dùng
+
+Nếu backend hỗ trợ: đăng ký, đăng nhập, quản lý tài khoản, xem đơn hàng.
+
+### Các trang tĩnh
+
+Giới thiệu, liên hệ, chính sách và các trang thông tin khác nếu có.
+
+## Cách chạy dự án
+
+### Cài đặt dependencies
+
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Chạy chế độ phát triển
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+### Build sản phẩm
+
+```bash
+npm run build
+```
+
+### Xem thử bản build
+
+```bash
+npm run preview
+```
+
+## Cấu hình môi trường (.env)
+
+Tạo file `.env` ở thư mục gốc dự án và khai báo các biến sau (giá trị chỉ là ví dụ):
+
+```env
+VITE_BACKEND_URL=http://localhost:8080/api
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+VITE_GOOGLE_REDIRECT_URI=http://localhost:5173/auth/google/callback
+```
+
+Giải thích:
+
+- `VITE_BACKEND_URL`: URL backend cung cấp API cho frontend.
+- `VITE_GOOGLE_CLIENT_ID`: Client ID dùng cho đăng nhập Google.
+- `VITE_GOOGLE_REDIRECT_URI`: Đường dẫn callback sau khi đăng nhập Google thành công.
+
+## Thông tin liên hệ
+
+- Tác giả: Đinh Ngọc Sơn
+- Email: sonjfddev@gmail.com
+- Liên hệ hợp tác: Nếu bạn muốn trao đổi hoặc cộng tác phát triển dự án, vui lòng liên hệ qua email.
