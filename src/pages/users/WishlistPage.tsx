@@ -8,7 +8,7 @@ import { useCurrentApp } from "@/components/context/AppContext";
 export const WishlistPage: React.FC = () => {
   const { isAuthenticated } = useCurrentApp();
   const navigate = useNavigate();
-  const location = useLocation()
+  const location = useLocation();
 
   const [pageData, setPageData] =
     useState<IModelPaginate<IWishlistProductVariant> | null>(null);
@@ -18,10 +18,10 @@ export const WishlistPage: React.FC = () => {
   const size = 10;
 
   useEffect(() => {
-      if (!isAuthenticated) {
-        navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`);
-      }
-    }, [isAuthenticated, navigate, location.pathname]);
+    if (!isAuthenticated) {
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`);
+    }
+  }, [isAuthenticated, navigate, location.pathname]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -40,8 +40,8 @@ export const WishlistPage: React.FC = () => {
   }, [page, size, isAuthenticated]);
 
   if (!isAuthenticated) {
-      return null;
-    }
+    return null;
+  }
   const total = pageData?.total ?? 0;
   const totalPages =
     pageData && pageData.size > 0
@@ -86,8 +86,8 @@ export const WishlistPage: React.FC = () => {
                     item.thumbnailUrl ||
                     "https://via.placeholder.com/400x400?text=No+Image"
                   }
-                  sku=""
-                  productId={1}
+                  sku={item.sku}
+                  productId={item.productId}
                   discountPercent={0}
                   rating={5}
                   reviewCount={item.sold}

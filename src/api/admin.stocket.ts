@@ -11,8 +11,8 @@ export const connectAdminWs = ({
 }) => {
   if (adminStompClient && adminStompClient.active) return;
 
-  // const socket = new SockJS(`${import.meta.env.VITE_BACKEND_URL}ws`);
-  const socket = new SockJS(`${import.meta.env.VITE_BACKEND_URL}/ws`);
+  const socket = new SockJS(`${import.meta.env.VITE_BACKEND_URL}ws`);
+  // const socket = new SockJS(`${import.meta.env.VITE_BACKEND_URL}/ws`);
   //local chay dong 15 deploy chay dong 14
 
   const client = new Client({
