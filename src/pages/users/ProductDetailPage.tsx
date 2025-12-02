@@ -36,7 +36,7 @@ const renderStars = (rating: number) => {
 };
 
 const ProductDetailPage: React.FC = () => {
-  const { reloadCart } = useCurrentApp();
+  const { reloadCart, user, isAuthenticated } = useCurrentApp();
   const { id } = useParams();
   const productId = Number(id);
 
@@ -203,12 +203,24 @@ const ProductDetailPage: React.FC = () => {
       return true;
     });
   };
+  const isCanRate = isAuthenticated && user?.role === "USER";
 
   // ---- SUBMIT / DELETE RATING ----
   const handleSubmitRating = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!productId) return;
 
+    if (!isAuthenticated) {
+      navigate(
+        `/login?redirect=${encodeURIComponent(
+          location.pathname + location.search
+        )}`
+      );
+      return;
+    }
+
+    // Kiểm tra hợp lệ
     if (!myRatingScore || myRatingScore < 1 || myRatingScore > 5) {
       toast.error("Vui lòng chọn số sao hợp lệ");
       return;
@@ -228,6 +240,7 @@ const ProductDetailPage: React.FC = () => {
       toast.success(
         myRatingId ? "Cập nhật đánh giá thành công" : "Gửi đánh giá thành công"
       );
+
       await loadReviews();
     } catch (error: any) {
       console.error(error);
@@ -262,6 +275,12 @@ const ProductDetailPage: React.FC = () => {
     quantityNumber < (currentVariant?.stock ?? 0);
 
   const handleAddToCard = async (id: number, quantity: number) => {
+    if (!isAuthenticated) {
+      toast.info("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname)}`);
+      return;
+    }
+
     const payload = {
       variantId: id,
       quantity: Number(quantity),
@@ -575,26 +594,39 @@ const ProductDetailPage: React.FC = () => {
                   <span className="text-sm font-medium text-gray-800">
                     Đánh giá của bạn
                   </span>
-                  {myRatingId && (
+                  {!isCanRate && (
+                    <span className="text-[11px] text-red-500">
+                      Bạn cần đăng nhập để đánh giá
+                    </span>
+                  )}
+                  {isCanRate && myRatingId && (
                     <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
                       Bạn đã đánh giá sản phẩm này
                     </span>
                   )}
                 </div>
+
                 <textarea
                   rows={3}
-                  placeholder="Chia sẻ cảm nhận về sản phẩm..."
+                  placeholder={
+                    isCanRate
+                      ? "Chia sẻ cảm nhận về sản phẩm..."
+                      : "Vui lòng đăng nhập để đánh giá"
+                  }
                   value={myRatingContent}
                   onChange={(e) => setMyRatingContent(e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  disabled={!isCanRate || reviewLoading}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 disabled:bg-gray-100"
                 />
+
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1 text-sm">
                     {[1, 2, 3, 4, 5].map((v) => (
                       <button
                         key={v}
                         type="button"
-                        onClick={() => setMyRatingScore(v)}
+                        onClick={() => isCanRate && setMyRatingScore(v)}
+                        disabled={!isCanRate}
                       >
                         <span
                           className={
@@ -609,7 +641,7 @@ const ProductDetailPage: React.FC = () => {
                     ))}
                   </div>
                   <div className="flex items-center gap-2">
-                    {myRatingId && (
+                    {isCanRate && myRatingId && (
                       <button
                         type="button"
                         onClick={handleDeleteRating}
@@ -620,7 +652,7 @@ const ProductDetailPage: React.FC = () => {
                     )}
                     <button
                       type="submit"
-                      disabled={reviewLoading}
+                      disabled={!isCanRate || reviewLoading}
                       className="px-2.5 py-1 rounded-md bg-gray-800 text-white text-[11px] font-medium hover:bg-gray-900 disabled:opacity-60 transition"
                     >
                       {myRatingId ? "Cập nhật" : "Gửi đánh giá"}

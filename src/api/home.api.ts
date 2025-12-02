@@ -54,8 +54,8 @@ export const removeFromWishlistApi = async (
   return res;
 };
 
-export const toggleWishlistApi = async (productVariantId: number )
-: Promise<IBackendRes<boolean>> => {
+export const toggleWishlistApi = async (productVariantId: number)
+  : Promise<IBackendRes<boolean>> => {
   return await axios.post<IBackendRes<boolean>>(`${BASE_URL}/wishlists/toggle`,
     { productVariantId }
   )
@@ -98,7 +98,7 @@ export const fetchSearchProducts = async (
   const res = await axios.get<
     IBackendRes<IModelPaginate<IHomeProductVariant>>
   >("/api/v1/home/search/products", {
-    params: { q,page, size },
+    params: { q, page, size },
   });
 
   return (
@@ -122,4 +122,36 @@ export const fetchProductDetail = (id: number, sku: string) => {
     `/api/v1/products/${id}?sku=${sku}`
   );
 }
+export interface IRating {
+  id: number;
+  score: number;
+  content: string;
+  userFullName: string;
+  userId: number;
+  userAvatarUrl: string;
+  createdAt: string;
+}
+
+
+export const fetchRatings = async (
+  page = 1,
+  size = 10
+): Promise<IModelPaginate<IRating>> => {
+  const res = await axios.get<
+    IBackendRes<IModelPaginate<IRating>>
+  >("/api/v1/ratings", {
+    params: { page, size },
+  });
+
+  // backend trả về: { message, data: { page, size, total, items: [...] } }
+  // axios.customize đã trả về .data, nên res.data chính là phần data trong ApiResponse
+  return (
+    res.data ?? {
+      page,
+      size,
+      total: 0,
+      items: [],
+    }
+  );
+};
 

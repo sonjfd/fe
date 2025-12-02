@@ -3,11 +3,12 @@ import {
   fetchHomeProducts,
   fetchMyWishlist,
   fetchSliders,
+  fetchRatings,
+  type IRating,
 } from "@/api/home.api";
 import { Container } from "@/components/client/AppHeader";
 import { PartnersSection } from "@/components/client/PartnersSection";
 import { ProductCard } from "@/components/client/ProductCard";
-import { TestimonialsSection } from "@/components/client/TestimonialsSection";
 import { useCurrentApp } from "@/components/context/AppContext";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -261,6 +262,8 @@ export const DSHStoreHome: React.FC = () => {
   const [page, setPage] = useState(1);
   const size = 50;
   const [wishlistIds, setWishlistIds] = useState<Set<number>>(new Set());
+  const [ratings, setRatings] = useState<IRating[]>([]);
+  const [ratingsLoading, setRatingsLoading] = useState(false);
   useEffect(() => {
     const load = async () => {
       try {
@@ -299,6 +302,23 @@ export const DSHStoreHome: React.FC = () => {
 
     loadWishlist();
   }, [isAuthenticated, wishlistCount]);
+  //Rating
+  useEffect(() => {
+    const loadRatings = async () => {
+      try {
+        setRatingsLoading(true);
+        const pagination = await fetchRatings(1, 10); // lấy 10 đánh giá mới nhất
+        setRatings(pagination.items);
+      } catch (e) {
+        console.error("Load ratings error", e);
+        setRatings([]);
+      } finally {
+        setRatingsLoading(false);
+      }
+    };
+
+    loadRatings();
+  }, []);
 
   return (
     <>
@@ -459,8 +479,88 @@ export const DSHStoreHome: React.FC = () => {
           </>
         )}
       </Container>
-      {/* === ĐÁNH GIÁ KHÁCH HÀNG === */}
-      <TestimonialsSection />
+      {/* === KHÁCH HÀNG NÓI VỀ CHÚNG TÔI === */}
+      <Container className="py-12">
+        {/* Tiêu đề giống ảnh */}
+        <div className="text-center mb-10">
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            KHÁCH HÀNG NÓI VỀ CHÚNG TÔI
+          </h2>
+          <div className="mt-3 h-1 w-24 bg-indigo-500 mx-auto rounded-full" />
+        </div>
+
+        {ratingsLoading && (
+          <div className="text-sm text-slate-500 text-center">
+            Đang tải đánh giá...
+          </div>
+        )}
+
+        {!ratingsLoading && ratings.length === 0 && (
+          <div className="text-sm text-slate-500 text-center">
+            Chưa có đánh giá nào.
+          </div>
+        )}
+
+        {!ratingsLoading && ratings.length > 0 && (
+          <>
+            {/* 3 card / hàng giống layout ảnh */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              {ratings.map((r) => (
+                <div
+                  key={r.id}
+                  className="flex flex-col items-center text-center bg-white rounded-2xl border border-slate-200 shadow-sm px-6 py-8"
+                >
+                  {/* Avatar tròn */}
+                  <div className="h-24 w-24 rounded-full overflow-hidden border-4 border-indigo-500 mb-4">
+                    <img
+                      src={r.userAvatarUrl}
+                      alt={r.userFullName}
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src =
+                          "https://via.placeholder.com/200x200?text=User";
+                      }}
+                    />
+                  </div>
+
+                  {/* Sao */}
+                  <div className="flex items-center justify-center gap-1 text-yellow-400 text-lg mb-2">
+                    {Array.from({ length: 5 }).map((_, idx) => (
+                      <span key={idx}>{idx < r.score ? "★" : "☆"}</span>
+                    ))}
+                  </div>
+
+                  {/* Tên + “thông tin phụ” */}
+                  <div className="mb-3">
+                    <p className="font-semibold text-slate-900 text-base">
+                      {r.userFullName}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Đánh giá ngày{" "}
+                      {new Date(r.createdAt).toLocaleDateString("vi-VN")}
+                    </p>
+                  </div>
+
+                  {/* Nội dung đánh giá */}
+                  <p className="text-sm text-slate-700 leading-relaxed max-w-xs">
+                    {r.content}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Dots dưới giống slider (tạm thời chỉ là hiển thị trang / số đánh giá) */}
+            <div className="mt-8 flex justify-center gap-2">
+              {ratings.map((_, idx) => (
+                <span
+                  key={idx}
+                  className="h-2.5 w-2.5 rounded-full bg-slate-300"
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </Container>
 
       {/* === ĐỐI TÁC === */}
       <PartnersSection />
