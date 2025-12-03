@@ -42,7 +42,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onAddToCart,
   onClick,
   onToggleWishlist,
-  isWishlisted
+  isWishlisted,
 }) => {
   const { isAuthenticated, reloadWishlistCount, reloadCart } = useCurrentApp();
   const navigate = useNavigate();
@@ -50,11 +50,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const [wish, setWish] = useState(isWishlisted ?? false);
 
   useEffect(() => {
-  setWish(isWishlisted ?? false);
+    setWish(isWishlisted ?? false);
   }, [isWishlisted]);
 
   const goDetail = (productId: number, sku: string) => {
-    navigate(`/products/${productId}?sku=${encodeURIComponent(sku)}`);
+    console.log(sku);
+    navigate(`/products/${productId}`);
   };
 
   const handleAddWishlist = async (e: React.MouseEvent<HTMLButtonElement>) => {

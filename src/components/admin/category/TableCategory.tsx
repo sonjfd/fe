@@ -13,6 +13,7 @@ export default function TableCategory() {
   const [rows, setRows] = useState<ICategoryRow[]>([]);
   const [meta, setMeta] = useState({ page: 1, size: 10, total: 0 });
   const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const [openCreate, setOpenCreate] = useState(false);
   const [editing, setEditing] = useState<ICategoryRow | null>(null);
@@ -72,6 +73,9 @@ export default function TableCategory() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, parentFilter]);
   const handleDelete = (id: number) => {
+    if (deletingId === id) return;
+
+    setDeletingId(id);
     toast(
       ({ closeToast }) => (
         <div className="space-y-2">
@@ -98,6 +102,7 @@ export default function TableCategory() {
         autoClose: false,
         closeOnClick: false,
         draggable: false,
+        closeButton: false,
       }
     );
   };
@@ -218,6 +223,7 @@ export default function TableCategory() {
                       <button
                         className="rounded-md border border-red-300 bg-red-50 px-3 py-1.5 text-red-600"
                         onClick={() => handleDelete(c.id)}
+                        disabled={deletingId === c.id}
                       >
                         Xoá
                       </button>

@@ -35,6 +35,7 @@ export default function TableProduct() {
 
   const searchRef = useRef<number | null>(null);
   const [searchValue, setSearchValue] = useState("");
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const query = useMemo(() => {
     let q = `page=${page}&size=${size}&sortField=${encodeURIComponent(
@@ -80,6 +81,9 @@ export default function TableProduct() {
   }, [query]);
 
   const handleDelete = (id: number) => {
+    if (deletingId === id) return;
+
+    setDeletingId(id);
     toast(
       ({ closeToast }) => (
         <div className="space-y-2">
@@ -106,6 +110,7 @@ export default function TableProduct() {
         autoClose: false,
         closeOnClick: false,
         draggable: false,
+        closeButton: false,
       }
     );
   };
@@ -273,6 +278,7 @@ export default function TableProduct() {
                       <button
                         className="rounded-md border border-red-300 bg-red-50 px-3 py-1.5 text-red-600"
                         onClick={() => handleDelete(p.id)}
+                        disabled={deletingId === p.id}
                       >
                         Xóa
                       </button>

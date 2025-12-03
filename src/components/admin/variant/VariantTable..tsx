@@ -33,6 +33,8 @@ export default function VariantTable({
 
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
   const [meta, setMeta] = useState<{
     page: number;
     size: number;
@@ -77,6 +79,9 @@ export default function VariantTable({
   }, [productId, query, refreshKey]);
 
   const askDelete = async (id: number) => {
+    if (deletingId === id) return;
+
+    setDeletingId(id);
     toast(
       ({ closeToast }) => (
         <div className="space-y-2">
@@ -103,6 +108,7 @@ export default function VariantTable({
         autoClose: false,
         closeOnClick: false,
         draggable: false,
+        closeButton: false,
       }
     );
   };
@@ -183,6 +189,7 @@ export default function VariantTable({
                       <button
                         className="rounded-md border border-red-300 bg-red-50 px-3 py-1.5 text-red-600"
                         onClick={() => askDelete(v.id)}
+                        disabled={deletingId === v.id}
                       >
                         Xoá
                       </button>

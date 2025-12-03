@@ -36,6 +36,7 @@ export default function AttributePanel() {
   );
   const [editName, setEditName] = useState("");
   const [editCode, setEditCode] = useState("");
+
   useEffect(() => {
     if (current) {
       setEditName(current.name || "");
@@ -46,6 +47,10 @@ export default function AttributePanel() {
   // Thêm value
   const [newValue, setNewValue] = useState("");
 
+  // State chặn spam xoá
+  const [deletingAttr, setDeletingAttr] = useState(false);
+  const [deletingValueId, setDeletingValueId] = useState<number | null>(null);
+
   // Load data
   const load = async () => {
     try {
@@ -53,14 +58,16 @@ export default function AttributePanel() {
       const res = await fetchProductAttribute(pid);
       if (res.data) {
         const list = Array.isArray(res.data) ? res.data : [res.data];
-        // đảm bảo mỗi item có values là array
         const safe = list.map((a) => ({
           ...a,
           values: Array.isArray(a.values) ? a.values : [],
         }));
         setAttributes(safe);
-        // set active nếu chưa có
-        if (!activeId && safe.length) setActiveId(safe[0].id);
+
+        // Nếu chưa có activeId thì set cái đầu tiên
+        if (!activeId && safe.length) {
+          setActiveId(safe[0].id);
+        }
       } else {
         setAttributes([]);
         toast.error(res.message || "Không lấy được thuộc tính");
@@ -114,6 +121,7 @@ export default function AttributePanel() {
     if (!current) return;
     const name = editName.trim();
     if (!name) return toast.error("Tên thuộc tính không được trống");
+
     try {
       const res = await updateProductAttributeName(current.id, editCode, name);
       if (res.data) {
@@ -128,46 +136,74 @@ export default function AttributePanel() {
     }
   };
 
-  const handleDeleteAttribute = async () => {
-    if (!current) return;
-    try {
-      toast(
-        ({ closeToast }) => (
+  const handleDeleteAttribute = () => {
+    if (!current || deletingAttr) return;
+
+    setDeletingAttr(true);
+
+    toast(
+      ({ closeToast }) => {
+        // chặn double-click nút Xoá trong toast
+        let clicked = false;
+
+        const handleConfirm = async () => {
+          if (clicked) return;
+          clicked = true;
+
+          try {
+            await deletedProductAttributeName(current.id);
+            await load();
+            toast.success("Đã xóa thuộc tính!");
+            // sau khi xoá, bỏ chọn thuộc tính hiện tại
+            setActiveId(null);
+          } catch (e: any) {
+            toast.error(e?.message || "Xoá thuộc tính thất bại");
+          } finally {
+            setDeletingAttr(false);
+            closeToast();
+          }
+        };
+
+        const handleCancel = () => {
+          setDeletingAttr(false);
+          closeToast();
+        };
+
+        return (
           <div className="space-y-2">
             <p>Bạn có chắc muốn xóa không?</p>
             <div className="flex gap-2">
               <button
-                className="px-3 py-1 rounded bg-red-600 text-white"
-                onClick={async () => {
-                  await deletedProductAttributeName(current.id);
-                  await load();
-                  toast.success("Đã xóa!");
-                  closeToast();
-                }}
+                className="px-3 py-1 rounded bg-red-600 text-white disabled:opacity-50"
+                onClick={handleConfirm}
+                disabled={deletingAttr}
               >
                 Xóa
               </button>
-              <button className="px-3 py-1 rounded border" onClick={closeToast}>
+              <button
+                className="px-3 py-1 rounded border"
+                onClick={handleCancel}
+              >
                 Hủy
               </button>
             </div>
           </div>
-        ),
-        {
-          autoClose: false,
-          closeOnClick: false,
-          draggable: false,
-        }
-      );
-    } catch (e: any) {
-      toast.error(e?.message || "Xoá thất bại");
-    }
+        );
+      },
+      {
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+        closeButton: false,
+      }
+    );
   };
 
   const handleAddValue = async () => {
     if (!current) return;
     const v = newValue.trim();
     if (!v) return;
+
     try {
       const res = await addAttributeValue(v, { id: current.id });
       if (res.data) {
@@ -186,6 +222,7 @@ export default function AttributePanel() {
   const handleUpdateValue = async (vid: number, label: string) => {
     const t = label.trim();
     if (!t || !current) return;
+
     try {
       const res = await updateAttributeValue(vid, t);
       if (res.data) {
@@ -200,40 +237,66 @@ export default function AttributePanel() {
     }
   };
 
-  const handleDeleteValue = async (vid: number) => {
+  const handleDeleteValue = (vid: number) => {
     if (!current) return;
-    try {
-      toast(
-        ({ closeToast }) => (
+    if (deletingValueId === vid) return; // đang xoá value này rồi
+
+    setDeletingValueId(vid);
+
+    toast(
+      ({ closeToast }) => {
+        let clicked = false;
+
+        const handleConfirm = async () => {
+          if (clicked) return;
+          clicked = true;
+
+          try {
+            await deleteAttributeValue(vid);
+            await load();
+            toast.success("Đã xóa value!");
+            setActiveId(current.id);
+          } catch (e: any) {
+            toast.error(e?.message || "Xoá value thất bại");
+          } finally {
+            setDeletingValueId(null);
+            closeToast();
+          }
+        };
+
+        const handleCancel = () => {
+          setDeletingValueId(null);
+          closeToast();
+        };
+
+        return (
           <div className="space-y-2">
             <p>Bạn có chắc muốn xóa không?</p>
             <div className="flex gap-2">
               <button
-                className="px-3 py-1 rounded bg-red-600 text-white"
-                onClick={async () => {
-                  await deleteAttributeValue(vid);
-                  await load();
-                  toast.success("Đã xóa!");
-                  closeToast();
-                }}
+                className="px-3 py-1 rounded bg-red-600 text-white disabled:opacity-50"
+                onClick={handleConfirm}
+                disabled={deletingValueId === vid}
               >
                 Xóa
               </button>
-              <button className="px-3 py-1 rounded border" onClick={closeToast}>
+              <button
+                className="px-3 py-1 rounded border"
+                onClick={handleCancel}
+              >
                 Hủy
               </button>
             </div>
           </div>
-        ),
-        {
-          autoClose: false,
-          closeOnClick: false,
-          draggable: false,
-        }
-      );
-    } catch (e: any) {
-      toast.error(e?.message || "Xoá value thất bại");
-    }
+        );
+      },
+      {
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+        closeButton: false,
+      }
+    );
   };
 
   return (
@@ -252,6 +315,7 @@ export default function AttributePanel() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-[280px_1fr]">
+        {/* LEFT: list + create */}
         <div className="rounded-lg border border-neutral-200 bg-white p-4 flex flex-col gap-3">
           <input
             placeholder="Tìm theo code hoặc tên…"
@@ -354,8 +418,9 @@ export default function AttributePanel() {
 
               <div className="mt-4 flex gap-2">
                 <button
-                  className="rounded border border-red-300 px-3 py-2 text-red-600 hover:bg-red-50"
+                  className="rounded border border-red-300 px-3 py-2 text-red-600 hover:bg-red-50 disabled:opacity-50"
                   onClick={handleDeleteAttribute}
+                  disabled={deletingAttr}
                 >
                   Xoá
                 </button>
@@ -412,6 +477,8 @@ export default function AttributePanel() {
                         valueItem={v}
                         onSave={(label) => handleUpdateValue(v.id, label)}
                         onDelete={() => handleDeleteValue(v.id)}
+                        // Nếu bạn sửa ValueRow để nhận prop disabled thì truyền thêm:
+                        // disabled={deletingValueId === v.id}
                       />
                     ))}
                 </div>

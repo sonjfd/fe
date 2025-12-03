@@ -1,8 +1,8 @@
 import axios from "@/services/axios.customize";
 
-export const getShippingFree = (addressId: number,service_id: number = 53320,service_type_id: number = 2) => {
+export const getShippingFree = (addressId: number, service_id: number = 53320, service_type_id: number = 2) => {
     const backEnd = `/shipping/quote`
-    return axios.post<ShippingQuote>(backEnd, { addressId,service_id,service_type_id })
+    return axios.post<ShippingQuote>(backEnd, { addressId, service_id, service_type_id })
 }
 
 
@@ -33,11 +33,14 @@ export const getOrderDetail = (id: number) => {
 
 }
 
-export const vnPayPayment = (orderId: number, totalAmount: number) => {
-    const backendUrl = `/api/v1/payment/vn-pay`
-    return axios.post<IBackendRes<VNPayResponse>>(backendUrl, { orderId, totalAmount })
+export const vnPayPayment = (totalAmount: number, order: any) => {
+    const backendUrl = `/api/v1/payment/vn-pay`;
+    return axios.post<IBackendRes<VNPayResponse>>(backendUrl, {
+        totalAmount,
+        order
+    });
+};
 
-}
 
 export const cancelUrl = (id: number) => {
     const backendUrl = `/api/v1/orders/${id}`
@@ -45,7 +48,7 @@ export const cancelUrl = (id: number) => {
 }
 
 export const cancelOrderRequest = (payload: { orderId: number; reason: string }) => {
-  return axios.post<IBackendRes<string>>("/api/v1/orders/cancel", payload);
+    return axios.post<IBackendRes<string>>("/api/v1/orders/cancel", payload);
 };
 
 export interface ApplicableVoucher {

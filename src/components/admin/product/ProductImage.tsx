@@ -17,6 +17,7 @@ export default function ProductImage() {
 
   const [images, setImages] = useState<IProductImage[]>([]);
   const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   // Map lưu ref của từng input file ẩn
   const fileRefMap = useRef<Record<number, HTMLInputElement | null>>({});
@@ -74,6 +75,9 @@ export default function ProductImage() {
   };
 
   const onDelete = async (id: number) => {
+    if (deletingId === id) return;
+
+    setDeletingId(id);
     toast(
       ({ closeToast }) => (
         <div className="space-y-2">
@@ -100,6 +104,7 @@ export default function ProductImage() {
         autoClose: false,
         closeOnClick: false,
         draggable: false,
+        closeButton: false,
       }
     );
   };
@@ -162,6 +167,7 @@ export default function ProductImage() {
 
                   <button
                     onClick={() => onDelete(img.id)}
+                    disabled={deletingId === img.id}
                     className="rounded-md border border-red-300 bg-red-50 px-3 py-1.5 text-sm text-red-600"
                   >
                     Xoá

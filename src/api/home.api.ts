@@ -117,9 +117,9 @@ export const fetchCategoryAttributes = (id: number) => {
 };
 
 
-export const fetchProductDetail = (id: number, sku: string) => {
+export const fetchProductDetail = (id: number) => {
   return axios.get<IBackendRes<ProductDetailDTO>>(
-    `/api/v1/products/${id}?sku=${sku}`
+    `/api/v1/products/${id}`
   );
 }
 export interface IRating {

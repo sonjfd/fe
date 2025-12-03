@@ -8,12 +8,7 @@ import {
 } from "@/api/rating.api";
 import { useCurrentApp } from "@/components/context/AppContext";
 import React, { useEffect, useState } from "react";
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const formatCurrency = (value: number) =>
@@ -39,9 +34,6 @@ const ProductDetailPage: React.FC = () => {
   const { reloadCart, user, isAuthenticated } = useCurrentApp();
   const { id } = useParams();
   const productId = Number(id);
-
-  const [searchParams] = useSearchParams();
-  const skuFromUrl = searchParams.get("sku") ?? "";
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -73,10 +65,10 @@ const ProductDetailPage: React.FC = () => {
     (async () => {
       try {
         setLoading(true);
-        const res = await fetchProductDetail(productId, skuFromUrl);
-        if (!res.data) return;
+        const res = await fetchProductDetail(productId);
+        const product = res.data;
+        if (!product) return;
 
-        const product = res.data as ProductDetailDTO;
         setData(product);
 
         const variants = product.variants || [];
@@ -101,7 +93,7 @@ const ProductDetailPage: React.FC = () => {
         setLoading(false);
       }
     })();
-  }, [productId, skuFromUrl]);
+  }, [productId]);
 
   // ----- LOAD RATING LIST -----
   const loadReviews = React.useCallback(async () => {
@@ -148,9 +140,11 @@ const ProductDetailPage: React.FC = () => {
     const attrValueIds = attr.values.map((v) => v.id);
 
     setSelectedValueIds((prev) => {
+      // bỏ value cũ của attribute đó, thêm value mới
       const filtered = prev.filter((id) => !attrValueIds.includes(id));
       const next = [...filtered, valueId];
 
+      // tìm variant khớp với tất cả valueIds đã chọn
       const sorted = [...next].sort((a, b) => a - b);
       const matched = variants.find((v) => {
         const vs = [...v.valueIds].sort((x, y) => x - y);
@@ -159,23 +153,11 @@ const ProductDetailPage: React.FC = () => {
       });
 
       if (matched) {
-        // Bắt đầu loading khi đổi variant
         setVariantLoading(true);
 
-        setTimeout(() => {
-          setCurrentVariant(matched);
-          setMainImage(matched.thumbnail || data.images[0] || null);
-
-          if (matched.sku) {
-            const params = new URLSearchParams(location.search);
-            params.set("sku", matched.sku);
-            navigate(`${location.pathname}?${params.toString()}`, {
-              replace: true,
-            });
-          }
-
-          setVariantLoading(false);
-        }, 1000);
+        setCurrentVariant(matched);
+        setMainImage(matched.thumbnail || data.images[0] || null);
+        setVariantLoading(false);
       }
 
       return next;
@@ -203,6 +185,7 @@ const ProductDetailPage: React.FC = () => {
       return true;
     });
   };
+
   const isCanRate = isAuthenticated && user?.role === "USER";
 
   // ---- SUBMIT / DELETE RATING ----
@@ -220,7 +203,6 @@ const ProductDetailPage: React.FC = () => {
       return;
     }
 
-    // Kiểm tra hợp lệ
     if (!myRatingScore || myRatingScore < 1 || myRatingScore > 5) {
       toast.error("Vui lòng chọn số sao hợp lệ");
       return;
@@ -272,7 +254,7 @@ const ProductDetailPage: React.FC = () => {
     quantity.trim() !== "" &&
     !Number.isNaN(quantityNumber) &&
     quantityNumber >= 1 &&
-    quantityNumber < (currentVariant?.stock ?? 0);
+    quantityNumber <= (currentVariant?.stock ?? 0); // cho phép mua max stock
 
   const handleAddToCard = async (id: number, quantity: number) => {
     if (!isAuthenticated) {
@@ -520,7 +502,7 @@ const ProductDetailPage: React.FC = () => {
                   type="number"
                   inputMode="numeric"
                   min={1}
-                  max={currentVariant.stock - 1}
+                  max={currentVariant.stock}
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
                   disabled={variantLoading}

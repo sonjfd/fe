@@ -37,12 +37,16 @@ const UpdatePasswordPage = () => {
     }
 
     try {
-      await axios.post("/api/v1/auth/update-password", {
+      const res = await axios.post("/api/v1/auth/update-password", {
         token,
         password: data.password,
       });
-      toast.success("Cập nhật mật khẩu thành công");
-      navigate("/login");
+      if (res.data) {
+        toast.success("Cập nhật mật khẩu thành công");
+        navigate("/login");
+      } else {
+        toast.error(res.message);
+      }
     } catch (err: any) {
       const msg =
         err?.response?.data?.message ||

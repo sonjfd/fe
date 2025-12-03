@@ -26,6 +26,7 @@ export default function TableUser() {
 
   const searchRef = useRef<number | null>(null);
   const [searchValue, setSearchValue] = useState("");
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const toIsoStart = (d: string) =>
     d ? new Date(`${d}T00:00:00Z`).toISOString() : "";
@@ -65,6 +66,9 @@ export default function TableUser() {
   const filtered = rows.filter((r) => +r.role.id !== 1);
 
   const handleDelete = (id: number) => {
+    if (deletingId === id) return;
+
+    setDeletingId(id);
     toast(
       ({ closeToast }) => (
         <div className="space-y-2">
@@ -91,6 +95,7 @@ export default function TableUser() {
         autoClose: false,
         closeOnClick: false,
         draggable: false,
+        closeButton: false,
       }
     );
   };
@@ -231,6 +236,7 @@ export default function TableUser() {
                       <button
                         className="rounded-md border border-red-300 bg-red-50 px-3 py-1.5 text-red-600"
                         onClick={() => handleDelete(u.id)}
+                        disabled={deletingId === u.id}
                       >
                         Xoá
                       </button>
