@@ -5,13 +5,12 @@ import UserOrderDetail from "./UserOrderDetail";
 import { CancelOrderPopup } from "@/components/client/PopupCancel";
 
 export default function UserOrderPage() {
-  const [rows, setRows] = useState<Order[]>([]);
-  const [meta, setMeta] = useState({ page: 1, size: 10, total: 0 });
+  const [allOrders, setAllOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
+  const [orderStatus, setOrderStatus] = useState("");
 
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
-  const [orderStatus, setOrderStatus] = useState("");
 
   const [openDetail, setOpenDetail] = useState(false);
   const [detailId, setDetailId] = useState<number | null>(null);
@@ -19,26 +18,31 @@ export default function UserOrderPage() {
   const [inputValue, setInputValue] = useState<number | "">("");
   const inputRef = useRef<number | null>(null);
 
-  const query = useMemo(() => {
-    let s = `page=${page}&size=${size}`;
-    if (orderStatus) s += `&orderStatus=${orderStatus}`;
-    return s;
-  }, [page, size, orderStatus]);
+  // Filter orders ở frontend
+  const filteredOrders = useMemo(() => {
+    if (!orderStatus) return allOrders;
+    return allOrders.filter((order) => order.orderStatus === orderStatus);
+  }, [allOrders, orderStatus]);
 
-  const totalPages = meta.size > 0 ? Math.ceil(meta.total / meta.size) || 1 : 1;
+  // Pagination cho filtered orders
+  const paginatedOrders = useMemo(() => {
+    const start = (page - 1) * size;
+    const end = start + size;
+    return filteredOrders.slice(start, end);
+  }, [filteredOrders, page, size]);
+
+  const totalPages = size > 0 ? Math.ceil(filteredOrders.length / size) || 1 : 1;
+  const totalFiltered = filteredOrders.length;
 
   const load = async () => {
     try {
       setLoading(true);
-      const res = await getUserOrder(query);
+      // Lấy tất cả đơn hàng với size lớn (ví dụ 1000)
+      const res = await getUserOrder(`page=1&size=1000`);
       const data = res.data;
 
-      setRows(data?.items ?? []);
-      setMeta({
-        page: data?.page ?? 1,
-        size: data?.size ?? size,
-        total: data?.total ?? 0,
-      });
+      setAllOrders(data?.items ?? []);
+      setPage(1); // Reset về trang 1 khi load lại
     } catch (e: any) {
       toast.error(e?.message || "Không tải được lịch sử đơn hàng");
     } finally {
@@ -49,7 +53,12 @@ export default function UserOrderPage() {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
+  }, []);
+
+  // Reset page khi filter thay đổi
+  useEffect(() => {
+    setPage(1);
+  }, [orderStatus]);
 
   useEffect(() => {
     setInputValue(page);
@@ -96,22 +105,26 @@ export default function UserOrderPage() {
 
   const mapOrderStatus = (s: string) => {
     switch (s) {
-      case "COMPLETED":
-        return "Đã hoàn thành";
-      case "RETURNED":
-        return "Hoàn trả hàng";
-      case "SHIPPING":
-        return "Đang giao";
-      case "FAILED":
-        return "Hư hỏng";
-      case "CANCELLED":
-        return "Đã hủy";
       case "PENDING":
         return "Đơn hàng mới tạo";
       case "CONFIRMED":
         return "Chuẩn bị giao";
+      case "PROCESSING":
+        return "Đang xử lý";
+      case "SHIPPING":
+        return "Đang giao";
+      case "DELIVERED":
+        return "Đã giao";
+      case "COMPLETED":
+        return "Đã hoàn thành";
+      case "CANCELLED":
+        return "Đã hủy";
       case "CANCEL_REQUESTED":
-        return "Chờ duyệt huỷ";
+        return "Chờ duyệt hủy";
+      case "RETURNED":
+        return "Hoàn trả hàng";
+      case "FAILED":
+        return "Hư hỏng";
       default:
         return s;
     }
@@ -143,36 +156,48 @@ export default function UserOrderPage() {
           <h2 className="text-lg font-semibold">Lịch sử mua hàng</h2>
         </div>
 
-        <div className="grid gap-3 border-b p-4 md:grid-cols-3">
-          <div>
-            <label className="mb-1 block text-xs font-medium text-neutral-600">
-              Trạng thái đơn hàng
-            </label>
-            <select
-              value={orderStatus}
-              onChange={(e) => {
-                setOrderStatus(e.target.value);
-                setPage(1);
-              }}
-              className="w-full rounded border px-3 py-2 text-sm outline-none focus:border-blue-500"
-            >
-              <option value="">Tất cả</option>
-              <option value="COMPLETED">Đã hoàn thành</option>
-              <option value="PROCESSING">Đang xử lý</option>
-              <option value="SHIPPING">Đang giao</option>
-              <option value="DELIVERED">Đã giao</option>
-              <option value="CANCELLED">Đã hủy</option>
-            </select>
-          </div>
+        <div className="border-b p-4">
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="flex-1 min-w-[200px]">
+              <label className="mb-1 block text-xs font-medium text-neutral-600">
+                Trạng thái đơn hàng
+              </label>
+              <select
+                value={orderStatus}
+                onChange={(e) => {
+                  setOrderStatus(e.target.value);
+                  setPage(1);
+                }}
+                className="w-full rounded border px-3 py-2 text-sm outline-none focus:border-blue-500"
+              >
+                <option value="">Tất cả đơn hàng</option>
+                <option value="PENDING">Đơn hàng mới tạo</option>
+                <option value="CONFIRMED">Chuẩn bị giao</option>
+                <option value="PROCESSING">Đang xử lý</option>
+                <option value="SHIPPING">Đang giao</option>
+                <option value="DELIVERED">Đã giao</option>
+                <option value="CANCELLED">Đã hủy</option>
+                <option value="CANCEL_REQUESTED">Chờ duyệt hủy</option>
+              </select>
+            </div>
 
-          <div className="flex items-end">
-            <button
-              onClick={resetFilter}
-              className="h-[38px] rounded border px-3 text-xs hover:bg-neutral-50"
-            >
-              Đặt lại
-            </button>
+            <div className="flex items-end gap-2">
+              {orderStatus && (
+                <button
+                  onClick={resetFilter}
+                  className="h-[38px] rounded border border-neutral-300 bg-white px-4 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+                >
+                  Xóa bộ lọc
+                </button>
+              )}
+            </div>
           </div>
+          
+          {orderStatus && (
+            <div className="mt-2 text-xs text-neutral-500">
+              Đang lọc theo: <span className="font-medium text-blue-600">{mapOrderStatus(orderStatus)}</span>
+            </div>
+          )}
         </div>
 
         <div className="space-y-4 p-4">
@@ -182,14 +207,16 @@ export default function UserOrderPage() {
             </div>
           )}
 
-          {!loading && rows.length === 0 && (
+          {!loading && paginatedOrders.length === 0 && (
             <div className="py-4 text-center text-sm text-neutral-500">
-              Bạn chưa có đơn hàng nào.
+              {orderStatus
+                ? `Không có đơn hàng nào với trạng thái "${mapOrderStatus(orderStatus)}"`
+                : "Bạn chưa có đơn hàng nào."}
             </div>
           )}
 
           {!loading &&
-            rows.map((o) => {
+            paginatedOrders.map((o) => {
               const voucherCode: string | null = o.voucherCode || null;
               return (
                 <div
@@ -307,10 +334,17 @@ export default function UserOrderPage() {
         <div className="flex flex-col gap-3 border-t p-4 text-xs md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-2">
             <span>
-              Trang <b>{meta.page}</b>/<b>{totalPages}</b>
+              Trang <b>{page}</b>/<b>{totalPages}</b>
             </span>
             <span className="text-neutral-500">
-              (Tổng: {meta.total} đơn hàng)
+              {orderStatus ? (
+                <>
+                  (Hiển thị {paginatedOrders.length} / {totalFiltered} đơn hàng{" "}
+                  <span className="text-blue-600">{mapOrderStatus(orderStatus)}</span>)
+                </>
+              ) : (
+                `(Tổng: ${allOrders.length} đơn hàng)`
+              )}
             </span>
           </div>
 
@@ -359,7 +393,7 @@ export default function UserOrderPage() {
                     }
                   }, 500);
                 }}
-                className="w-16 rounded border px-2 py-1.5 text-center"
+                className="w-10 rounded border px-2 py-1.5 text-center"
               />
 
               <button

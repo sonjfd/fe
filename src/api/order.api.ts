@@ -70,3 +70,64 @@ export const getAvailableVouchers = (orderAmount: number) => {
         params: { orderAmount },
     });
 };
+
+// ================= TRACKING =================
+export interface GhnTrackingOrderInfo {
+  order_code: string;
+  status_name: string;
+  picktime?: string | null;
+  leadtime?: string | null;
+  from_name?: string | null;
+  from_phone?: string | null;
+  from_address?: string | null;
+  to_name?: string | null;
+  to_phone?: string | null;
+  to_address?: string | null;
+}
+
+export interface GhnTrackingLocation {
+  address?: string | null;
+  district?: string | null;
+  ward?: string | null;
+  province?: string | null;
+}
+
+export interface GhnTrackingExecutor {
+  name?: string | null;
+  phone?: string | null;
+}
+
+export type GhnTrackingLogType = "TRACKING" | "CALL" | "SMS";
+
+export interface GhnTrackingLog {
+  type?: GhnTrackingLogType;
+  status?: string | null;
+  status_name?: string | null;
+  action_at?: string | null;
+  location?: GhnTrackingLocation;
+  executor?: GhnTrackingExecutor;
+  employee_name?: string | null;
+  employee_phone?: string | null;
+  reason?: string | null;
+  phone_receive?: string | null;
+  user_type?: string | null;
+  ring_duration?: number | null;
+  duration?: number | null;
+  sms_content?: string | null;
+}
+
+export interface GhnTrackingLogsData {
+  order_info: GhnTrackingOrderInfo;
+  tracking_logs: GhnTrackingLog[];
+  timeline: GhnTrackingLog[];
+}
+
+export const getOrderTracking = async (orderId: number): Promise<GhnTrackingLogsData> => {
+  const res = await axios.get<IBackendRes<GhnTrackingLogsData>>(
+    `/api/v1/orders/${orderId}/tracking`
+  );
+  if (res.data) {
+    return res.data;
+  }
+  throw new Error("Không lấy được tracking");
+};

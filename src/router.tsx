@@ -47,6 +47,7 @@ import AdminCreateGhnOrderPage from "./pages/admin/AdminCreateGhnOrderPage";
 import AdminGhnTrackingPage from "./pages/admin/AdminTrackingOrderPage";
 
 import ResetPasswordPage from "pages/auth/ResetPasswordPage.tsx";
+import OrderTrackingPage from "./pages/users/OrderTrackingPage";
 export const ROUTER = createBrowserRouter([
   {
     path: "/",
@@ -101,6 +102,7 @@ export const ROUTER = createBrowserRouter([
           { path: "dia-chi", element: <AddressPage /> },
           { path: "doi-mat-khau", element: <ChangePasswordPage /> },
           { path: "don-mua", element: <UserOrderPage /> },
+          { path: "don-mua/:orderId/tracking", element: <OrderTrackingPage /> },
         ],
       },
     ],

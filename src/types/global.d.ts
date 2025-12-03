@@ -484,6 +484,7 @@ declare global {
     voucherId?: number | null;
     voucherDiscount?: number | null;
     voucherCode?: string | null;
+    ghnOrderCode?: string;
   }
 
   interface VNPayResponse {

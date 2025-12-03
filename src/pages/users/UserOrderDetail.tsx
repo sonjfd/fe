@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { getOrderDetail } from "@/api/order.api";
+import { useNavigate } from "react-router-dom";
 
 interface UserOrderDetailProps {
   id: number;
@@ -155,6 +156,7 @@ const mapPaymentMethod = (m: string) => {
 export default function UserOrderDetail({ id, onClose }: UserOrderDetailProps) {
   const [order, setOrder] = useState<OneOrder | null>(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const expectedDeliveryStr = useMemo(() => {
     if (!order?.ghnExpectedDelivery) return "-";
@@ -235,14 +237,27 @@ export default function UserOrderDetail({ id, onClose }: UserOrderDetailProps) {
             )}
           </div>
 
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="rounded border px-3 py-1.5 text-xs hover:bg-neutral-50"
-            >
-              Đóng
-            </button>
-          )}
+          <div className="flex gap-2">
+                        {order?.ghnOrderCode && (
+                            <button
+                                onClick={() => {
+                                    if (onClose) onClose();
+                                    navigate(`/tai-khoan/don-mua/${id}/tracking`);
+                                }}
+                                className="rounded border border-blue-600 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100"
+                            >
+                                Theo dõi đơn hàng
+                            </button>
+                        )}
+                        {onClose && (
+                            <button
+                                onClick={onClose}
+                                className="rounded border px-3 py-1.5 text-xs hover:bg-neutral-50"
+                            >
+                                Đóng
+                            </button>
+                        )}
+                    </div>
         </div>
 
         {/* Loading / Empty */}
