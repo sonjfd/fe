@@ -80,12 +80,20 @@ export default function TableUser() {
                 await deleteUser(id);
                 setRows((s) => s.filter((x) => x.id !== id));
                 toast.success("Đã xóa!");
+                setDeletingId(null); // <-- reset state
                 closeToast();
               }}
             >
               Xóa
             </button>
-            <button className="px-3 py-1 rounded border" onClick={closeToast}>
+
+            <button
+              className="px-3 py-1 rounded border"
+              onClick={() => {
+                setDeletingId(null); // <-- reset khi hủy
+                closeToast();
+              }}
+            >
               Hủy
             </button>
           </div>
@@ -99,6 +107,7 @@ export default function TableUser() {
       }
     );
   };
+
   const resetFilter = () => {
     setName("");
     setFrom("");

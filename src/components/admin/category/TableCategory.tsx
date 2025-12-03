@@ -87,12 +87,19 @@ export default function TableCategory() {
                 await deleteCategory(id);
                 setRows((s) => s.filter((x) => x.id !== id));
                 toast.success("Đã xóa!");
+                setDeletingId(null);
                 closeToast();
               }}
             >
               Xóa
             </button>
-            <button className="px-3 py-1 rounded border" onClick={closeToast}>
+            <button
+              className="px-3 py-1 rounded border"
+              onClick={() => {
+                setDeletingId(null);
+                closeToast();
+              }}
+            >
               Hủy
             </button>
           </div>

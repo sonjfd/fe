@@ -139,6 +139,7 @@ export default function AttributePanel() {
   const handleDeleteAttribute = () => {
     if (!current || deletingAttr) return;
 
+    const id = current.id; // lưu lại id tại thời điểm mở toast
     setDeletingAttr(true);
 
     toast(
@@ -151,7 +152,7 @@ export default function AttributePanel() {
           clicked = true;
 
           try {
-            await deletedProductAttributeName(current.id);
+            await deletedProductAttributeName(id);
             await load();
             toast.success("Đã xóa thuộc tính!");
             // sau khi xoá, bỏ chọn thuộc tính hiện tại
@@ -176,7 +177,6 @@ export default function AttributePanel() {
               <button
                 className="px-3 py-1 rounded bg-red-600 text-white disabled:opacity-50"
                 onClick={handleConfirm}
-                disabled={deletingAttr}
               >
                 Xóa
               </button>
@@ -239,8 +239,9 @@ export default function AttributePanel() {
 
   const handleDeleteValue = (vid: number) => {
     if (!current) return;
-    if (deletingValueId === vid) return; // đang xoá value này rồi
+    if (deletingValueId === vid) return;
 
+    const attrId = current.id;
     setDeletingValueId(vid);
 
     toast(
@@ -255,7 +256,7 @@ export default function AttributePanel() {
             await deleteAttributeValue(vid);
             await load();
             toast.success("Đã xóa value!");
-            setActiveId(current.id);
+            setActiveId(attrId); // dùng attrId đã lưu, tránh lệch current
           } catch (e: any) {
             toast.error(e?.message || "Xoá value thất bại");
           } finally {
@@ -276,7 +277,6 @@ export default function AttributePanel() {
               <button
                 className="px-3 py-1 rounded bg-red-600 text-white disabled:opacity-50"
                 onClick={handleConfirm}
-                disabled={deletingValueId === vid}
               >
                 Xóa
               </button>

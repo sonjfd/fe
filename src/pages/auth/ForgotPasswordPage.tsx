@@ -17,22 +17,25 @@ const ForgotPasswordPage = () => {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      await axios.post("/api/v1/auth/password/forgot", {
+      const res: any = await axios.post("/api/v1/auth/password/forgot", {
         email: data.email,
       });
-
-      toast.success(
-        "Gửi thành công,vui lòng kiểm tra email của bạn"
-      );
+      const msg =
+        res?.message || "Gửi thành công, vui lòng kiểm tra email của bạn";
+      if (res?.message == "Email không tồn tại trong hệ thống") {
+        toast.error(msg);
+        return;
+      } else {
+        toast.success(msg);
+      }
     } catch (err: any) {
       const msg =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
+        err?.message ||
+        err?.error ||
         "Gửi email đặt lại mật khẩu thất bại. Vui lòng thử lại.";
       toast.error(msg);
     }
   };
-
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-8">

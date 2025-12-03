@@ -32,29 +32,23 @@ const ResetPasswordPage = () => {
   const passwordValue = watch("password");
 
   const onSubmit = async (data: FormValues) => {
-    if (!token) {
-      toast.error("Token không hợp lệ hoặc đã hết hạn.");
-      return;
-    }
-
-    if (data.password !== data.confirmPassword) {
-      toast.error("Mật khẩu nhập lại không khớp.");
-      return;
-    }
-
+    // --- onSubmit ---
     try {
-      await axios.post("/api/v1/auth/password/reset", {
+      const res: any = await axios.post("/api/v1/auth/password/reset", {
         token,
         password: data.password,
       });
 
-      toast.success("Cập nhật mật khẩu thành công, vui lòng đăng nhập lại.");
-      navigate("/login");
+      const msg = res?.message || "Cập nhật mật khẩu thành công.";
+      if (res?.message == "Token không hợp lệ") {
+        toast.error(msg);
+        return;
+      } else {
+        toast.success(msg);
+        navigate("/login");
+      }
     } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        "Cập nhật mật khẩu thất bại. Vui lòng thử lại.";
+      const msg = err?.message || err?.error || "Có lỗi xảy ra.";
       toast.error(msg);
     }
   };
@@ -69,19 +63,15 @@ const ResetPasswordPage = () => {
       setResendLoading(true);
       setResendMsg(null);
 
-      const res = await axios.post(
-        "http://localhost:8080/api/v1/auth/password/reset/resend",
-        { token }
-      );
+      const res: any = await axios.post("/api/v1/auth/password/reset/resend", {
+        token,
+      });
 
-      const msg = res.data?.message || "Đã gửi email đặt lại mật khẩu mới.";
+      const msg = res?.message || "Đã gửi email đặt lại mật khẩu.";
       setResendMsg(msg);
       toast.success(msg);
     } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        "Gửi lại email thất bại. Vui lòng thử lại.";
+      const msg = err?.message || err?.error || "Gửi lại email thất bại.";
       toast.error(msg);
     } finally {
       setResendLoading(false);
