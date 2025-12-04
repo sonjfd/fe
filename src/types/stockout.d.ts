@@ -3,13 +3,15 @@ export interface StockOutItemResDTO {
     sku: string;
     productName: string;
     quantity: number;
+    price: number;
 }
 
-export interface StockOutSimpleResDTO{
+export interface StockOutSimpleResDTO {
     id:number;
     orderId:number;
-    type: string;
     createdAt: string;
+    totalCost?: number;
+    quantity?: number;
 }
 
 export interface StockOutResDTO{
@@ -18,6 +20,7 @@ export interface StockOutResDTO{
     type: string;
     createdAt: string;
     items: StockOutItemResDTO[]
+    totalCost?: number;
 }
 
 export interface PaginationDTO<T>{
