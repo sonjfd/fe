@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { getStockOuts, getStockOutDetail } from "@/api/admin.stockout.api.ts";
-import type { StockOutSimpleResDTO, StockOutResDTO } from "@/types/stockout";
+import type {StockOutResDTO } from "@/types/stockout";
 import StockOutDetailModal from "components/admin/Stock/StockOutDetailModal.tsx";
 import { toast } from "react-toastify";
 
 const StockOut: React.FC = () => {
     // --- STATE ---
-    const [stockOuts, setStockOuts] = useState<StockOutSimpleResDTO[]>([]);
+    const [stockOuts, setStockOuts] = useState<any[]>([]); // Dùng any tạm thời để chứa thêm trường totalQuantity, totalCost
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const [currentPage, setCurrentPage] = useState<number>(1);
@@ -17,15 +17,58 @@ const StockOut: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [selectedDetail, setSelectedDetail] = useState<StockOutResDTO | null>(null);
 
+    // FORMAT: VNĐ
+    const formatCurrency = (amount: number | undefined) => {
+        if (amount === undefined || amount === null) return "0 ₫";
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    };
+
     // --- API ---
     const fetchStockOuts = async (page: number) => {
         setIsLoading(true);
         try {
             const res = await getStockOuts(page, pageSize);
             if (res && res.data) {
-                const { items, total } = res.data;
+                const { items, total } = res.data as any;
 
-                setStockOuts(items || []);
+                // --- ĐOẠN SỬA: TÍNH CẢ TIỀN VÀ SỐ LƯỢNG ---
+                const itemsWithData = await Promise.all(
+                    (items || []).map(async (item: any) => {
+                        try {
+                            const detailRes = await getStockOutDetail(item.id);
+                            
+                            let totalCost = 0;
+                            let totalQuantity = 0;
+
+                            // Tính toán tổng tiền và tổng số lượng từ danh sách items chi tiết
+                            if (detailRes?.data?.items) {
+                                const stats = detailRes.data.items.reduce((acc: any, p: any) => {
+                                    const qty = p.quantity || 0;
+                                    const price = p.price || 0;
+                                    
+                                    acc.cost += (qty * price);
+                                    acc.qty += qty;
+                                    return acc;
+                                }, { cost: 0, qty: 0 });
+
+                                totalCost = stats.cost;
+                                totalQuantity = stats.qty;
+                            }
+
+                            // Trả về item kèm 2 thông tin mới tính được
+                            return { 
+                                ...item, 
+                                totalCost: totalCost,
+                                totalQuantity: totalQuantity 
+                            };
+                        } catch (e) {
+                            return { ...item, totalCost: 0, totalQuantity: 0 };
+                        }
+                    })
+                );
+                // --- KẾT THÚC ĐOẠN SỬA ---
+
+                setStockOuts(itemsWithData);
                 setTotalElements(total || 0);
 
                 const calculatedTotalPages = Math.ceil((total || 0) / pageSize);
@@ -62,11 +105,6 @@ const StockOut: React.FC = () => {
         fetchStockOuts(currentPage);
     }, [currentPage]);
 
-    const STATUS_MAPPING: Record<string, string> = {
-        'SALE': 'ĐÃ BÁN',
-        'ADJUST': 'CẦN SỬA',
-        'DAMAGE': 'HỎNG HÓC',
-    };
 
     // --- RENDER ---
     return (
@@ -86,15 +124,16 @@ const StockOut: React.FC = () => {
                         <tr>
                             <th className="px-4 py-3 font-semibold text-gray-700">STT</th>
                             <th className="px-4 py-3 font-semibold text-gray-700">Mã Đơn Hàng</th>
-                            <th className="px-4 py-3 font-semibold text-gray-700">Trạng Thái</th>
                             <th className="px-4 py-3 font-semibold text-gray-700">Ngày tạo</th>
+                            <th className="px-4 py-3 font-semibold text-gray-700 text-center">Số lượng</th>
+                            <th className="px-4 py-3 font-semibold text-gray-700 text-right">Tổng tiền</th>
                             <th className="px-4 py-3 font-semibold text-gray-700 text-center">Hành động</th>
                         </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                         {isLoading ? (
                             <tr>
-                                <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                                     Đang tải dữ liệu...
                                 </td>
                             </tr>
@@ -111,17 +150,20 @@ const StockOut: React.FC = () => {
                                             <span className="text-gray-400">N/A</span>
                                         )}
                                     </td>
-                                    <td className="px-4 py-2 whitespace-nowrap text-sm">
-                                            <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                                item.type === 'ORDER' ? 'bg-green-100 text-green-800' :
-                                                    item.type === 'DESTROY' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-                                            }`}>
-                                                {STATUS_MAPPING[item.type]}
-                                            </span>
-                                    </td>
                                     <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                                         {new Date(item.createdAt).toLocaleString('vi-VN')}
                                     </td>
+                                    
+                                    {/* CỘT SỐ LƯỢNG (Đã tính toán) */}
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 text-center font-medium">
+                                        {item.totalQuantity}
+                                    </td>
+
+                                    {/* CỘT TỔNG TIỀN (Đã tính toán) */}
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-bold text-right">
+                                        {formatCurrency(item.totalCost)}
+                                    </td>
+
                                     <td className="px-4 py-2 text-center">
                                         <button
                                             onClick={() => handleViewDetail(item.id)}
@@ -134,7 +176,7 @@ const StockOut: React.FC = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                                     Không tìm thấy dữ liệu xuất kho.
                                 </td>
                             </tr>
@@ -163,7 +205,7 @@ const StockOut: React.FC = () => {
                                 Trước
                             </button>
 
-                            {/* Pagination Logic: Giống hệt StockInPage */}
+                            {/* Pagination Logic */}
                             {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
                                 if (totalPages > 7 && pageNum !== 1 && pageNum !== totalPages && (pageNum < currentPage - 1 || pageNum > currentPage + 1)) {
                                     if (pageNum === 2 || pageNum === totalPages - 1) return <span key={pageNum} className="px-2 py-1 text-gray-400">...</span>;

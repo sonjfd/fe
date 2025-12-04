@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type {StockOutResDTO} from "@/types/stockout";
 
 interface Props {
@@ -10,6 +10,19 @@ interface Props {
 const StockOutDetailModal: React.FC<Props> = ({isOpen, onClose,data}) =>{
     if (!isOpen || !data) return null;
 
+
+    const formatCurrency = (cost: number) => {
+        return new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(cost);
+    };
+
+const totalAmount = useMemo(() => {
+        if (!data.items) return 0;
+        return data.items.reduce((sum, item) => {
+            const qty = item.quantity || 0;
+            const price = item.price || 0;
+            return sum + (qty * price);
+        }, 0);
+    }, [data]);
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4 overflow-y-auto">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden">
@@ -27,11 +40,13 @@ const StockOutDetailModal: React.FC<Props> = ({isOpen, onClose,data}) =>{
                     <div className="grid grid-cols-2 gap-6 bg-gray-50 p-4 rounded-lg">
                         <div>
                             <p className="text-xs text-gray-500 uppercase">Mã Đơn hàng</p>
-                            <p className="font-bold text-blue-600">{data.orderId ? `#${data.orderId}` : 'N/A'}</p>
+                            <p className="font-bold text-black">{data.orderId ? `#${data.orderId}` : 'N/A'}</p>
                         </div>
                         <div>
-                            <p className="text-xs text-gray-500 uppercase">Loại phiếu</p>
-                            <span className="font-medium text-gray-800">{data.type}</span>
+                            <p className="text-xs text-gray-500 uppercase">TỔNG TIỀN</p>
+                            <span className="font-bold text-black text-2xl">
+                                {formatCurrency(totalAmount)}
+                            </span>
                         </div>
                         <div>
                             <p className="text-xs text-gray-500 uppercase">Ngày tạo</p>
@@ -47,6 +62,7 @@ const StockOutDetailModal: React.FC<Props> = ({isOpen, onClose,data}) =>{
                                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
                                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tên sản phẩm</th>
                                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Số lượng</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Giá tiền</th>
                                 </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
@@ -54,7 +70,8 @@ const StockOutDetailModal: React.FC<Props> = ({isOpen, onClose,data}) =>{
                                     <tr key={index}>
                                         <td className="px-4 py-2 text-sm text-gray-900 font-mono">{item.sku}</td>
                                         <td className="px-4 py-2 text-sm text-gray-900">{item.productName}</td>
-                                        <td className="px-4 py-2 text-sm text-gray-900 text-right font-bold">{item.quantity}</td>
+                                        <td className="px-4 py-2 text-sm text-gray-900 font-bold">{item.quantity}</td>
+                                        <td className="px-4 py-2 text-sm text-gray-900">{formatCurrency(item.price * item.quantity)}</td>
                                     </tr>
                                 ))}
                                 </tbody>
