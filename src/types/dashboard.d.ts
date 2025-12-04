@@ -7,7 +7,7 @@ export interface IRecentOrder {
 }
 
 export interface IMonthlyRevenue{
-    month: string;
+    date: string;
     revenue: number;
 }
 
