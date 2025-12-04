@@ -18,6 +18,7 @@ interface StockInItemState {
     productName: string; 
     quantity: number;
     importPrice: number;
+    currentPrice?: number;
 }
 
 // Interface kết quả tìm kiếm
@@ -25,6 +26,7 @@ interface VariantOption {
     variantId: number;
     productName: string;
     sku: string;
+    price: number;
 }
 
 // --- SUB-COMPONENT: Dòng nhập hàng (Xử lý tìm kiếm riêng biệt) ---
@@ -104,7 +106,8 @@ const StockItemRow: React.FC<StockItemRowProps> = ({ item, index, onUpdate, onRe
         onUpdate(index, 'productVariantId', variant.variantId);
         onUpdate(index, 'sku', variant.sku);
         onUpdate(index, 'productName', variant.productName);
-        
+        onUpdate(index, 'currentPrice', variant.price);
+
         // Cập nhật hiển thị và đóng gợi ý
         setSearchTerm(variant.productName);
         setShowSuggestions(false);
@@ -178,7 +181,19 @@ const StockItemRow: React.FC<StockItemRowProps> = ({ item, index, onUpdate, onRe
                     type="number" min="1"
                     className="w-full border border-gray-300 rounded p-2 text-sm text-right focus:border-black outline-none"
                     value={item.quantity}
-                    onChange={(e) => onUpdate(index, 'quantity', e.target.value)}
+                    onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        if (val < 1){
+                            onUpdate(index, 'quantity', 1);
+                        } else {
+                            onUpdate(index, 'quantity', e.target.value);
+                        }
+                    }}
+                    onKeyDown={(e) => {
+                        if (e.key === '-' || e.key === 'e'){
+                            e.preventDefault();
+                        }
+                    }}
                 />
             </div>
 
@@ -189,7 +204,20 @@ const StockItemRow: React.FC<StockItemRowProps> = ({ item, index, onUpdate, onRe
                     type="number" min="0"
                     className="w-full border border-gray-300 rounded p-2 text-sm text-right focus:border-black outline-none"
                     value={item.importPrice}
-                    onChange={(e) => onUpdate(index, 'importPrice', e.target.value)}
+                    onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        if (val < 0){
+                            onUpdate(index, 'importPrice', 0);
+                        } else {
+                            onUpdate(index, 'importPrice', e.target.value);
+                        }
+                    }}
+
+                    onKeyDown={(e) => {
+                        if (e.key === '-' || e.key === 'e'){
+                            e.preventDefault();
+                        }
+                    }}
                 />
             </div>
 
@@ -263,11 +291,10 @@ const CreateStockInModal: React.FC<CreateStockInModalProps> = ({ isOpen, onClose
         const newItems = [...items];
         
         if (field === 'quantity' || field === 'importPrice' || field === 'productVariantId') {
-             // @ts-ignore
-            newItems[index][field] = Number(value);
+
+            (newItems[index] as any)[field] = value === '' ? 0 : Number(value);
         } else {
-             // @ts-ignore
-            newItems[index][field] = value;
+            (newItems[index] as any)[field] = value;
         }
         setItems(newItems);
     };
@@ -278,10 +305,10 @@ const CreateStockInModal: React.FC<CreateStockInModalProps> = ({ isOpen, onClose
             return false;
         }
 
-        // Kiểm tra xem dòng nào chưa chọn sản phẩm
+        
         const invalidIndex = items.findIndex(i => !i.productVariantId || i.productVariantId === 0);
         if (invalidIndex !== -1) {
-            toast.error(`Dòng thứ ${invalidIndex + 1}: Vui lòng tìm và chọn sản phẩm từ danh sách gợi ý!`);
+            toast.error(`Vui lòng tìm và chọn sản phẩm từ danh sách gợi ý!`);
             return false;
         }
 
@@ -289,6 +316,27 @@ const CreateStockInModal: React.FC<CreateStockInModalProps> = ({ isOpen, onClose
             toast.error("Số lượng phải > 0 và Giá nhập không được âm");
             return false;
         }
+
+        if (items.some (i => i.quantity < 0)){
+            toast.error("Số lượng phải > 0");
+            return false;
+        }
+        
+        const invalidPriceIndex = items.findIndex(i => {
+            const price = i.currentPrice || 0;
+            return i.importPrice > price;
+        });
+
+       if (invalidPriceIndex !== -1) {
+            const itemError = items[invalidPriceIndex];
+            const formatMoney = (val: number) => new Intl.NumberFormat('vi-VN').format(val);
+            
+            toast.error(
+                `Giá nhập (${formatMoney(itemError.importPrice)} đ) đang CAO HƠN giá bán hiện tại (${formatMoney(itemError.currentPrice || 0)} đ)!`
+            );
+            return false;
+        }
+
 
         // Kiểm tra trùng lặp
         const variantIds = items.map(i => i.productVariantId);
